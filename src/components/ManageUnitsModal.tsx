@@ -354,18 +354,18 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
 
   const handleSelectAllLevels = () => {
     const allLevels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    const maxCount = 49;
+    const defaultCount = 1;
     if (selectedLevels.length === 10) {
       setSelectedLevels([]);
       setLevelCounts({});
     } else {
       setSelectedLevels(allLevels);
-      // Set all levels to max count (49)
-      const maxCounts = allLevels.reduce((acc, level) => {
-        acc[level] = maxCount;
+      // Set all levels to default count (1)
+      const defaultCounts = allLevels.reduce((acc, level) => {
+        acc[level] = defaultCount;
         return acc;
       }, {} as Record<number, number>);
-      setLevelCounts(maxCounts);
+      setLevelCounts(defaultCounts);
     }
   };
 
@@ -662,10 +662,13 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                       className="text-xs bg-gray-600 hover:bg-gray-500 text-white"
                       sx={{ fontSize: '0.7rem', padding: '4px 12px', height: '40px' }}
                     >
-                      {selectedLevels.length === 10 ? 'Deselect All' : 'Select All with Max Count'}
+                      {selectedLevels.length === 10 ? 'Deselect All' : 'Select All'}
                     </Button>
                     <Typography variant="caption" className="text-gray-400 text-xs">
                       Max: 49 per level
+                    </Typography>
+                    <Typography variant="caption" className="text-gray-400 text-xs">
+                      Roster: {units.length} / 1000
                     </Typography>
                   </Box>
                 </Box>
@@ -677,6 +680,15 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => {
                       const isSelected = selectedLevels.includes(level);
                       const levelCount = levelCounts[level] || 1;
+                      
+                      // Check if this level has reached the maximum count (49) for the selected unit
+                      const maxUnitsPerLevel = 49;
+                      const normalizedName = normalizeUnitName(formData.name.trim());
+                      const existingCount = normalizedName ? units.filter(
+                        (u) => normalizeUnitName(u.name) === normalizedName && u.level === level
+                      ).length : 0;
+                      const isMaxReached = existingCount >= maxUnitsPerLevel;
+                      
                       return (
                         <Box 
                           key={level} 
@@ -689,6 +701,7 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                             borderRadius: '4px',
                             padding: '2px 4px',
                             alignItems: 'center',
+                            opacity: isMaxReached && !isSelected ? 0.5 : 1,
                             '&:hover': {
                               borderColor: 'rgba(255, 255, 255, 0.4)',
                             },
@@ -699,6 +712,7 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                               <Checkbox
                                 checked={isSelected}
                                 onChange={() => handleLevelToggle(level)}
+                                disabled={isMaxReached && !isSelected}
                                 size="small"
                                 sx={{
                                   color: 'rgba(255, 255, 255, 0.7)',
@@ -706,6 +720,9 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                                   margin: '0px',
                                   '&.Mui-checked': {
                                     color: '#3b82f6',
+                                  },
+                                  '&.Mui-disabled': {
+                                    color: 'rgba(255, 255, 255, 0.3)',
                                   },
                                 }}
                               />
