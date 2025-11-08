@@ -39,26 +39,27 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
   const [imageError, setImageError] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  const clickFromCardRef = useRef(false);
   const imageUrl = unit.imageUrl || getUnitImagePath(unit.name);
   const showPlaceholder = imageError || !imageUrl;
 
-  // Close tooltip on any click anywhere
+  // Close tooltip on any click outside the card
   useEffect(() => {
-    const handleClickAnywhere = () => {
-      if (tooltipOpen) {
-        // If click was from the card itself, it was already handled by handleCardClick
-        if (!clickFromCardRef.current) {
+    const handleClickAnywhere = (event: MouseEvent) => {
+      if (tooltipOpen && cardRef.current) {
+        // Check if the click target is within the card element
+        const target = event.target as Node;
+        if (!cardRef.current.contains(target)) {
           setTooltipOpen(false);
         }
-        clickFromCardRef.current = false;
       }
     };
 
     if (tooltipOpen) {
-      document.addEventListener('mousedown', handleClickAnywhere, true);
+      // Use 'click' event instead of 'mousedown' to fire after React's onClick
+      // This ensures handleCardClick executes first and can toggle the tooltip
+      document.addEventListener('click', handleClickAnywhere, true);
       return () => {
-        document.removeEventListener('mousedown', handleClickAnywhere, true);
+        document.removeEventListener('click', handleClickAnywhere, true);
       };
     }
   }, [tooltipOpen]);
@@ -90,10 +91,8 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
     e.stopPropagation();
     if (isDragging) return;
     
-    // Mark that click came from card
-    clickFromCardRef.current = true;
-    
     // Toggle tooltip on single click
+    // The document click listener will check if click is outside the card
     setTooltipOpen((prev) => !prev);
   };
 
