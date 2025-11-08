@@ -93,6 +93,12 @@ const unitSlice = createSlice({
       );
     },
     addUnit: (state, action: PayloadAction<Unit>) => {
+      // Check maximum roster size (1000)
+      const maxRosterSize = 1000;
+      if (state.units.length >= maxRosterSize) {
+        return; // Don't add if roster is at capacity
+      }
+      
       // Normalize unit name and ensure power is calculated
       const normalizedUnit = {
         ...action.payload,

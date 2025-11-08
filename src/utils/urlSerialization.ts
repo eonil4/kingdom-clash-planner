@@ -28,6 +28,7 @@ export function serializeUnits(units: Unit[]): string {
 
 /**
  * Deserialize units from URL format: id,level,count;id,level,count
+ * Maximum roster size is 1000 units total
  * Maximum count per unit per level is 49
  * Uses ";" as separator instead of "#" to avoid URL fragment issues
  */
@@ -36,9 +37,15 @@ export function deserializeUnits(unitsString: string): Unit[] {
   
   const units: Unit[] = [];
   const entries = unitsString.split(';');
-  const maxUnitsPerLevel = 49;
+  const maxRosterSize = 1000; // Maximum total roster size
+  const maxUnitsPerLevel = 49; // Maximum count per unit per level
   
   for (const entry of entries) {
+    // Check total roster size limit
+    if (units.length >= maxRosterSize) {
+      break; // Stop adding if roster is at capacity
+    }
+    
     const parts = entry.split(',');
     if (parts.length !== 3) continue;
     
@@ -61,10 +68,11 @@ export function deserializeUnits(unitsString: string): Unit[] {
     ).length;
     
     // Calculate how many units we can still add for this unit+level combination
-    const available = maxUnitsPerLevel - existingCount;
-    const unitsToAdd = Math.min(count, available);
+    const availablePerLevel = maxUnitsPerLevel - existingCount;
+    const availableRosterSpace = maxRosterSize - units.length;
+    const unitsToAdd = Math.min(count, availablePerLevel, availableRosterSpace);
     
-    // Create units based on count (limited by max per unit per level)
+    // Create units based on count (limited by max per unit per level and total roster size)
     for (let i = 0; i < unitsToAdd; i++) {
       const unit: Unit = {
         id: `${unitData.index}-${level}-${existingCount + i}-${Date.now()}-${Math.random()}`,
@@ -82,9 +90,9 @@ export function deserializeUnits(unitsString: string): Unit[] {
 }
 
 /**
- * Serialize formation to URL format: formationName;id,level;;id,level
+ * Serialize formation to URL format: formationName;id,level;_id,level
  * Format: formation name, then ; separator, then grid data
- * Empty cells are represented as ;;
+ * Empty cells are represented as _ (underscore)
  * Grid is serialized row by row, left to right
  * Count is not stored since it's always 1
  * Uses ";" as separator instead of "#" to avoid URL fragment issues
@@ -101,14 +109,14 @@ export function serializeFormation(formation: Formation | null): string {
       const unit = formation.tiles[row]?.[col];
       
       if (!unit) {
-        parts.push(';;');
+        parts.push('_'); // Use underscore for empty cells
       } else {
         const unitData = getUnitDataByName(unit.name);
         if (unitData) {
           // Format: id,level (count removed since it's always 1)
           parts.push(`${unitData.index},${unit.level}`);
         } else {
-          parts.push(';;');
+          parts.push('_'); // Use underscore for empty cells
         }
       }
     }
@@ -118,9 +126,9 @@ export function serializeFormation(formation: Formation | null): string {
 }
 
 /**
- * Deserialize formation from URL format: formationName;id,level;;id,level
+ * Deserialize formation from URL format: formationName;id,level;_id,level
  * Format: formation name, then ; separator, then grid data
- * Empty cells are represented as ;;
+ * Empty cells are represented as _ (underscore)
  * Count is not stored since it's always 1
  * Returns an object with name and tiles
  * Uses ";" as separator instead of "#" to avoid URL fragment issues
@@ -152,8 +160,8 @@ export function deserializeFormation(formationString: string): { name: string; t
     
     const part = parts[i];
     
-    // Empty cell
-    if (part === ';;' || !part) {
+    // Empty cell (represented as _ or empty string, or old format ;;)
+    if (part === '_' || part === ';;' || !part) {
       tiles[row][col] = null;
       continue;
     }

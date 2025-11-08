@@ -156,17 +156,31 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
     // If count is more than current, add new units
     if (count > matchingUnits.length) {
       const toAdd = count - matchingUnits.length;
+      const maxRosterSize = 1000; // Maximum total roster size
       const maxUnitsPerLevel = 49; // Maximum count per unit per level
-      const available = maxUnitsPerLevel - matchingUnits.length;
       
+      // Check total roster size
+      const rosterSpace = maxRosterSize - units.length;
+      if (rosterSpace <= 0) {
+        alert(`Cannot add more units. Maximum roster size is ${maxRosterSize}.`);
+        return;
+      }
+      
+      // Check per-unit-per-level limit
+      const available = maxUnitsPerLevel - matchingUnits.length;
       if (available <= 0) {
         alert(`Cannot add more units. Maximum count for ${normalizedName} level ${editData.level} is ${maxUnitsPerLevel}.`);
         return;
       }
       
-      const unitsToAdd = Math.min(toAdd, available);
+      // Limit by both roster size and per-unit-per-level
+      const unitsToAdd = Math.min(toAdd, available, rosterSpace);
       if (unitsToAdd < toAdd) {
-        alert(`Cannot add ${toAdd} units. Maximum count for ${normalizedName} level ${editData.level} is ${maxUnitsPerLevel}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
+        if (rosterSpace < toAdd) {
+          alert(`Cannot add ${toAdd} units. Maximum roster size is ${maxRosterSize}. You can add ${rosterSpace} more unit${rosterSpace !== 1 ? 's' : ''}.`);
+        } else {
+          alert(`Cannot add ${toAdd} units. Maximum count for ${normalizedName} level ${editData.level} is ${maxUnitsPerLevel}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
+        }
       }
       
       for (let i = 0; i < unitsToAdd; i++) {
@@ -244,8 +258,28 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
         return; // Require at least one level to be selected
       }
       
-      // Check maximum count per unit per level (49)
+      // Check maximum roster size (1000) and per unit per level (49)
+      const maxRosterSize = 1000;
       const maxUnitsPerLevel = 49;
+      
+      // Calculate total units to add
+      let totalToAdd = 0;
+      for (const level of selectedLevels) {
+        const levelCount = levelCounts[level] || 1;
+        totalToAdd += levelCount;
+      }
+      
+      // Check total roster size
+      const rosterSpace = maxRosterSize - units.length;
+      if (rosterSpace <= 0) {
+        alert(`Cannot add more units. Maximum roster size is ${maxRosterSize}.`);
+        return;
+      }
+      
+      if (totalToAdd > rosterSpace) {
+        alert(`Cannot add ${totalToAdd} units. Maximum roster size is ${maxRosterSize}. You can add ${rosterSpace} more unit${rosterSpace !== 1 ? 's' : ''}.`);
+        return;
+      }
       
       // Validate each level separately
       for (const level of selectedLevels) {
