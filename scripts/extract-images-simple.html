@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Image Extractor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 { margin-bottom: 20px; }
+        .upload-area {
+            border: 2px dashed #666;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .upload-area:hover { border-color: #4a90e2; }
+        .upload-area.dragover { border-color: #4a90e2; background: #2a2a2a; }
+        #imageInput { display: none; }
+        .preview-area {
+            display: none;
+            margin-top: 20px;
+        }
+        .grid-controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 8px;
+        }
+        .control-group {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 150px;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #357abd; }
+        #canvasContainer {
+            position: relative;
+            margin: 20px 0;
+            border: 2px solid #555;
+            display: inline-block;
+        }
+        canvas {
+            display: block;
+            max-width: 100%;
+        }
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        .extracted-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .card-preview {
+            border: 2px solid #555;
+            border-radius: 4px;
+            padding: 5px;
+            background: #2a2a2a;
+        }
+        .card-preview img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .card-preview input {
+            width: 100%;
+            margin-top: 5px;
+            padding: 5px;
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .download-all {
+            margin-top: 20px;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Unit Image Extractor</h1>
+        <p>Upload a screenshot and extract unit cards manually</p>
+        
+        <div class="upload-area" id="uploadArea">
+            <p>📸 Click or drag screenshot here</p>
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+        
+        <div class="preview-area" id="previewArea">
+            <div class="grid-controls">
+                <div class="control-group">
+                    <label>Grid Columns:</label>
+                    <input type="number" id="cols" value="3" min="1" max="10">
+                </div>
+                <div class="control-group">
+                    <label>Grid Rows:</label>
+                    <input type="number" id="rows" value="4" min="1" max="10">
+                </div>
+                <div class="control-group">
+                    <label>Card Size:</label>
+                    <input type="number" id="cardSize" value="128" min="64" max="512">
+                </div>
+                <button onclick="drawGrid()">Draw Grid</button>
+                <button onclick="extractCards()">Extract All Cards</button>
+                <button onclick="clearExtracted()">Clear</button>
+            </div>
+            
+            <div id="canvasContainer">
+                <canvas id="mainCanvas"></canvas>
+            </div>
+            
+            <div class="extracted-cards" id="extractedCards"></div>
+            
+            <div class="download-all">
+                <button onclick="downloadAll()">💾 Download All as ZIP</button>
+                <p style="margin-top: 10px; font-size: 12px; color: #999;">
+                    After downloading, place images in: <code>public/assets/units/</code>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        let originalImage = null;
+        let extractedCards = [];
+
+        document.getElementById('uploadArea').addEventListener('click', () => {
+            document.getElementById('imageInput').click();
+        });
+
+        document.getElementById('uploadArea').addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        });
+
+        document.getElementById('uploadArea').addEventListener('dragleave', (e) => {
+            e.currentTarget.classList.remove('dragover');
+        });
+
+        document.getElementById('uploadArea').addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        document.getElementById('imageInput').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    originalImage = img;
+                    const canvas = document.getElementById('mainCanvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    document.getElementById('previewArea').style.display = 'block';
+                    drawGrid();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function drawGrid() {
+            if (!originalImage) return;
+            
+            const canvas = document.getElementById('mainCanvas');
+            const ctx = canvas.getContext('2d');
+            const cols = parseInt(document.getElementById('cols').value);
+            const rows = parseInt(document.getElementById('rows').value);
+            
+            // Redraw original image
+            ctx.drawImage(originalImage, 0, 0);
+            
+            // Draw grid
+            ctx.strokeStyle = '#ff0000';
+            ctx.lineWidth = 2;
+            
+            const cardWidth = canvas.width / cols;
+            const cardHeight = canvas.height / rows;
+            
+            for (let i = 0; i <= cols; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * cardWidth, 0);
+                ctx.lineTo(i * cardWidth, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let i = 0; i <= rows; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, i * cardHeight);
+                ctx.lineTo(canvas.width, i * cardHeight);
+                ctx.stroke();
+            }
+        }
+
+        function extractCards() {
+            if (!originalImage) return;
+            
+            const canvas = document.getElementById('mainCanvas');
+            const cols = parseInt(document.getElementById('cols').value);
+            const rows = parseInt(document.getElementById('rows').value);
+            const cardSize = parseInt(document.getElementById('cardSize').value);
+            
+            const cardWidth = canvas.width / cols;
+            const cardHeight = canvas.height / rows;
+            
+            extractedCards = [];
+            const container = document.getElementById('extractedCards');
+            container.innerHTML = '';
+            
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const x = col * cardWidth;
+                    const y = row * cardHeight;
+                    
+                    // Create card canvas
+                    const cardCanvas = document.createElement('canvas');
+                    cardCanvas.width = cardSize;
+                    cardCanvas.height = cardSize;
+                    const cardCtx = cardCanvas.getContext('2d');
+                    
+                    // Draw and scale
+                    cardCtx.drawImage(
+                        originalImage,
+                        x, y, cardWidth, cardHeight,
+                        0, 0, cardSize, cardSize
+                    );
+                    
+                    const dataUrl = cardCanvas.toDataURL('image/png');
+                    const index = row * cols + col;
+                    
+                    // Create preview
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'card-preview';
+                    cardDiv.innerHTML = `
+                        <img src="${dataUrl}" alt="Card ${index + 1}">
+                        <input type="text" 
+                               placeholder="unit-name.png" 
+                               value="unit-${index + 1}.png"
+                               data-index="${index}">
+                    `;
+                    container.appendChild(cardDiv);
+                    
+                    extractedCards.push({
+                        dataUrl,
+                        filename: `unit-${index + 1}.png`
+                    });
+                }
+            }
+            
+            // Update filenames when user types
+            container.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    extractedCards[index].filename = e.target.value || `unit-${index + 1}.png`;
+                });
+            });
+        }
+
+        function clearExtracted() {
+            extractedCards = [];
+            document.getElementById('extractedCards').innerHTML = '';
+        }
+
+        async function downloadAll() {
+            if (extractedCards.length === 0) {
+                alert('No cards extracted yet!');
+                return;
+            }
+            
+            const zip = new JSZip();
+            
+            extractedCards.forEach((card, index) => {
+                const filename = card.filename.endsWith('.png') 
+                    ? card.filename 
+                    : card.filename + '.png';
+                // Convert data URL to blob
+                const base64 = card.dataUrl.split(',')[1];
+                zip.file(filename, base64, { base64: true });
+            });
+            
+            const blob = await zip.generateAsync({ type: 'blob' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'extracted-units.zip';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Auto-update grid when values change
+        ['cols', 'rows'].forEach(id => {
+            document.getElementById(id).addEventListener('input', drawGrid);
+        });
+    </script>
+</body>
+</html>
+
