@@ -2,15 +2,46 @@
  * Utility functions for handling unit images
  */
 
+import { getUnitDataByName } from '../types/unitNames';
+
+// Preload all unit images from src/assets/units using Vite's glob import
+// This allows dynamic access to images at runtime
+const unitImages = import.meta.glob<string>('../assets/units/*.png', { 
+  eager: true,
+  import: 'default'
+});
+
 /**
  * Generates the expected image path for a unit
+ * Loads images from src/assets/units using Vite's asset import system
+ * Uses imageName from UnitData if available, otherwise converts unit name
  */
 export function getUnitImagePath(unitName: string): string {
-  const imageName = unitName
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/'/g, '')
-    .replace(/[^a-z0-9-]/g, '');
+  // Try to get unit data first to use the explicit imageName
+  const unitData = getUnitDataByName(unitName);
+  let imageName: string;
+  
+  if (unitData?.imageName) {
+    // Use the explicit imageName from UnitData
+    imageName = unitData.imageName;
+  } else {
+    // Fallback: Convert unit name to match image filename format (lowercase with underscores)
+    imageName = unitName
+      .toLowerCase()
+      .replace(/\s+/g, '_')  // Replace spaces with underscores to match image filenames
+      .replace(/'/g, '')     // Remove apostrophes
+      .replace(/[^a-z0-9_]/g, '');  // Remove any other non-alphanumeric characters except underscores
+  }
+  
+  // Try to find the image in the preloaded glob
+  const imagePath = `../assets/units/${imageName}.png`;
+  const image = unitImages[imagePath];
+  
+  if (image) {
+    return image;
+  }
+  
+  // Fallback to public assets if not found in src/assets/units
   return `/assets/units/${imageName}.png`;
 }
 

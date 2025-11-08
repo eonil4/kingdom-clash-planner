@@ -131,7 +131,7 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
       onDoubleClick={(e) => {
         e.stopPropagation();
         setTooltipOpen(false);
-        if (!isInFormation && onDoubleClick) {
+        if (onDoubleClick) {
           onDoubleClick();
         }
       }}

@@ -502,9 +502,9 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
       }}
     >
       <DialogTitle className="flex items-center justify-between bg-gray-900">
-        <Typography variant="h6" className="text-white font-bold">
+        <span className="text-white font-bold">
           Manage Units
-        </Typography>
+        </span>
         <IconButton
           onClick={onClose}
           className="text-white hover:bg-gray-700"

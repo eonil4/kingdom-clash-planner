@@ -77,16 +77,16 @@ const generateMoreUnits = (): Unit[] => {
   const units: Unit[] = [];
   const baseUnits = [
     // More variations of existing units
-    { name: UnitName.ARCHER, rarity: UnitRarity.Rare },
-    { name: UnitName.WARRIOR, rarity: UnitRarity.Rare },
-    { name: UnitName.KNIGHT, rarity: UnitRarity.Rare },
-    { name: UnitName.MAGE, rarity: UnitRarity.Epic },
-    { name: UnitName.GOLEM, rarity: UnitRarity.Epic },
-    { name: UnitName.ELEMENTAL, rarity: UnitRarity.Epic },
-    { name: UnitName.DEMON, rarity: UnitRarity.Epic },
-    { name: UnitName.SKELETON, rarity: UnitRarity.Common },
-    { name: UnitName.GUARD, rarity: UnitRarity.Common },
-    { name: UnitName.SOLDIER, rarity: UnitRarity.Common },
+    { name: UnitName.ARCHERS, rarity: UnitRarity.Rare },
+    { name: UnitName.INFANTRY, rarity: UnitRarity.Rare },
+    { name: UnitName.LANCER, rarity: UnitRarity.Rare },
+    { name: UnitName.NECROMANCER, rarity: UnitRarity.Epic },
+    { name: UnitName.BATTLE_GOLEM, rarity: UnitRarity.Rare },
+    { name: UnitName.AIR_ELEMENTAL, rarity: UnitRarity.Epic },
+    { name: UnitName.IMP, rarity: UnitRarity.Epic },
+    { name: UnitName.BONE_WARRIOR, rarity: UnitRarity.Common },
+    { name: UnitName.IRON_GUARDS, rarity: UnitRarity.Rare },
+    { name: UnitName.ROYAL_GUARD, rarity: UnitRarity.Epic },
   ];
 
   let id = 37;

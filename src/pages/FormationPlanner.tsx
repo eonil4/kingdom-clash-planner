@@ -1,5 +1,6 @@
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { useDrop } from 'react-dnd';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { placeUnit, removeUnit } from '../store/reducers/formationSlice';
 import FormationHeader from '../components/FormationHeader';
@@ -9,12 +10,11 @@ import { useInitializeData } from '../hooks/useInitializeData';
 import { useUrlSync } from '../hooks/useUrlSync';
 import type { Unit } from '../types';
 
-export default function FormationPlanner() {
+// Component that wraps the content and provides the drop zone
+// This must be inside DndProvider to use useDrop hook
+function FormationPlannerContent() {
   const dispatch = useAppDispatch();
   const currentFormation = useAppSelector((state) => state.formation.currentFormation);
-  
-  useInitializeData();
-  useUrlSync();
 
   const handlePlaceUnit = (row: number, col: number, unit: Unit) => {
     dispatch(placeUnit({ row, col, unit }));
@@ -26,6 +26,18 @@ export default function FormationPlanner() {
     dispatch(removeUnit({ row, col, unit }));
   };
 
+  // Drop zone for removing units from formation when dropped outside the grid
+  const [, dropOutside] = useDrop({
+    accept: 'unit',
+    drop: (item: { unit: Unit; isInFormation?: boolean; sourceRow?: number; sourceCol?: number }) => {
+      // Only handle units that are being dragged from the formation
+      if (item.isInFormation && item.sourceRow !== undefined && item.sourceCol !== undefined) {
+        // Remove unit from formation and add it back to roster
+        dispatch(removeUnit({ row: item.sourceRow, col: item.sourceCol, unit: item.unit }));
+      }
+    },
+  });
+
   if (!currentFormation) {
     return (
       <div className="min-h-screen bg-gray-800 flex items-center justify-center">
@@ -35,27 +47,37 @@ export default function FormationPlanner() {
   }
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div
-        className="min-h-screen bg-gray-800 flex flex-col text-white"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle at 10% 20%, rgba(120, 120, 120, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 90% 80%, rgba(120, 120, 120, 0.1) 0%, transparent 50%),
-            url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
-          `,
-        }}
-      >
-        <FormationHeader />
-        <div className="overflow-auto">
-          <FormationGrid
-            tiles={currentFormation.tiles}
-            onPlaceUnit={handlePlaceUnit}
-            onRemoveUnit={handleRemoveUnit}
-          />
-        </div>
-        <UnitList />
+    <div
+      ref={dropOutside as unknown as React.Ref<HTMLDivElement>}
+      className="min-h-screen bg-gray-800 flex flex-col text-white"
+      style={{
+        backgroundImage: `
+          radial-gradient(circle at 10% 20%, rgba(120, 120, 120, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at 90% 80%, rgba(120, 120, 120, 0.1) 0%, transparent 50%),
+          url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+        `,
+      }}
+    >
+      <FormationHeader />
+      <div className="overflow-auto">
+        <FormationGrid
+          tiles={currentFormation.tiles}
+          onPlaceUnit={handlePlaceUnit}
+          onRemoveUnit={handleRemoveUnit}
+        />
       </div>
+      <UnitList />
+    </div>
+  );
+}
+
+export default function FormationPlanner() {
+  useInitializeData();
+  useUrlSync();
+
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <FormationPlannerContent />
     </DndProvider>
   );
 }

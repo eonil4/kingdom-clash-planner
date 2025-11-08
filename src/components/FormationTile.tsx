@@ -36,6 +36,13 @@ export default function FormationTile({
     }),
   });
 
+  const handleDoubleClick = () => {
+    if (unit) {
+      // Remove unit from formation and add it back to roster
+      onRemoveUnit(row, col);
+    }
+  };
+
   return (
     <div
       ref={drop as unknown as React.Ref<HTMLDivElement>}
@@ -50,7 +57,13 @@ export default function FormationTile({
       aria-label={`Formation tile row ${row + 1} column ${col + 1}`}
     >
       {unit ? (
-        <UnitCard unit={unit} isInFormation sourceRow={row} sourceCol={col} />
+        <UnitCard 
+          unit={unit} 
+          isInFormation 
+          sourceRow={row} 
+          sourceCol={col}
+          onDoubleClick={handleDoubleClick}
+        />
       ) : (
         <div className="w-full h-full" />
       )}
