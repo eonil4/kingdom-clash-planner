@@ -46,9 +46,9 @@ export const UnitDataMap: Record<string, UnitData> = {
   ARCHERS: {
     name: 'ARCHERS',
     index: 2,
-    rarity: UnitRarityEnum.Rare,
+    rarity: UnitRarityEnum.Common,
     imageName: 'archers',
-    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Rare, level),
+    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Common, level),
   },
   ASSASSINS: {
     name: 'ASSASSINS',
@@ -60,9 +60,9 @@ export const UnitDataMap: Record<string, UnitData> = {
   BATTLE_GOLEM: {
     name: 'BATTLE GOLEM',
     index: 4,
-    rarity: UnitRarityEnum.Rare,
+    rarity: UnitRarityEnum.Common,
     imageName: 'battle_golem',
-    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Rare, level),
+    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Common, level),
   },
   BOMBERS: {
     name: 'BOMBERS',
@@ -95,30 +95,30 @@ export const UnitDataMap: Record<string, UnitData> = {
   BUTCHER: {
     name: 'BUTCHER',
     index: 9,
-    rarity: UnitRarityEnum.Epic,
+    rarity: UnitRarityEnum.Rare,
     imageName: 'butcher',
-    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Epic, level),
+    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Rare, level),
   },
   CATAPULT: {
     name: 'CATAPULT',
     index: 10,
-    rarity: UnitRarityEnum.Rare,
+    rarity: UnitRarityEnum.Common,
     imageName: 'catapult',
-    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Rare, level),
+    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Common, level),
   },
   CURSED_CATAPULT: {
     name: 'CURSED CATAPULT',
     index: 11,
-    rarity: UnitRarityEnum.Common,
+    rarity: UnitRarityEnum.Rare,
     imageName: 'cursed_catapult',
-    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Common, level),
+    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Rare, level),
   },
   EXPLOSIVE_SPIDER: {
     name: 'EXPLOSIVE SPIDER',
     index: 12,
-    rarity: UnitRarityEnum.Common,
+    rarity: UnitRarityEnum.Rare,
     imageName: 'explosive_spider',
-    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Common, level),
+    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Rare, level),
   },
   GIANT_TOAD: {
     name: 'GIANT TOAD',
@@ -151,9 +151,9 @@ export const UnitDataMap: Record<string, UnitData> = {
   IMP: {
     name: 'IMP',
     index: 17,
-    rarity: UnitRarityEnum.Epic,
+    rarity: UnitRarityEnum.Rare,
     imageName: 'imp',
-    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Epic, level),
+    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Rare, level),
   },
   IMMORTAL: {
     name: 'IMMORTAL',
@@ -165,9 +165,9 @@ export const UnitDataMap: Record<string, UnitData> = {
   INFANTRY: {
     name: 'INFANTRY',
     index: 19,
-    rarity: UnitRarityEnum.Rare,
+    rarity: UnitRarityEnum.Common,
     imageName: 'infantry',
-    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Rare, level),
+    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Common, level),
   },
   IRON_GUARDS: {
     name: 'IRON GUARDS',
@@ -179,9 +179,9 @@ export const UnitDataMap: Record<string, UnitData> = {
   LANCER: {
     name: 'LANCER',
     index: 21,
-    rarity: UnitRarityEnum.Rare,
+    rarity: UnitRarityEnum.Epic,
     imageName: 'lancer',
-    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Rare, level),
+    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Epic, level),
   },
   LAVA_GOLEM: {
     name: 'LAVA GOLEM',
@@ -223,7 +223,7 @@ export const UnitDataMap: Record<string, UnitData> = {
     index: 27,
     rarity: UnitRarityEnum.Epic,
     imageName: 'paladin',
-    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Legendary, level),
+    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Epic, level),
   },
   PHOENIX: {
     name: 'PHOENIX',
@@ -256,9 +256,9 @@ export const UnitDataMap: Record<string, UnitData> = {
   SORCERERS_APPRENTICES: {
     name: 'SORCERER\'S APPRENTICES',
     index: 32,
-    rarity: UnitRarityEnum.Epic,
+    rarity: UnitRarityEnum.Common,
     imageName: 'sorcerers_apprentices',
-    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Epic, level),
+    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Common, level),
   },
   STONE_GOLEM: {
     name: 'STONE GOLEM',
@@ -277,9 +277,9 @@ export const UnitDataMap: Record<string, UnitData> = {
   UNDEAD_MAGE: {
     name: 'UNDEAD MAGE',
     index: 35,
-    rarity: UnitRarityEnum.Epic,
+    rarity: UnitRarityEnum.Rare,
     imageName: 'undead_mage',
-    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Epic, level),
+    getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Rare, level),
   },
 };
 
