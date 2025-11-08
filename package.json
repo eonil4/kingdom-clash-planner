@@ -15,10 +15,7 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:integration:watch": "vitest --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
-    "test:e2e:watch": "playwright test --ui",
-    "generate:image-list": "node scripts/generate-image-list.js",
-    "validate:images": "node scripts/validate-images.js",
-    "rename:images": "node scripts/batch-rename-images.js"
+    "test:e2e:watch": "playwright test --ui"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
