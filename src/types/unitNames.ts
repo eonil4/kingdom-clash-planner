@@ -221,7 +221,7 @@ export const UnitDataMap: Record<string, UnitData> = {
   PALADIN: {
     name: 'PALADIN',
     index: 27,
-    rarity: UnitRarityEnum.Legendary,
+    rarity: UnitRarityEnum.Epic,
     imageName: 'paladin',
     getPower: (level: number) => calculateUnitPower(UnitRarityEnum.Legendary, level),
   },
