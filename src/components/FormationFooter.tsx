@@ -3,9 +3,7 @@ import { useAppDispatch } from '../store/hooks';
 import { removeUnit } from '../store/reducers/formationSlice';
 import { useAppSelector } from '../store/hooks';
 
-interface FormationFooterProps {}
-
-export default function FormationFooter({}: FormationFooterProps) {
+export default function FormationFooter() {
   const dispatch = useAppDispatch();
   const currentFormation = useAppSelector((state) => state.formation.currentFormation);
 
