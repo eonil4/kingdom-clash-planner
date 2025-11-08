@@ -1,5 +1,6 @@
 import type { Unit, Formation } from '../types';
 import { UnitRarity } from '../types';
+import { UnitName } from '../types/unitNames';
 import { calculateUnitPower } from './powerUtils';
 
 // Helper function to generate image URL path
@@ -27,48 +28,48 @@ const createUnit = (id: string, name: string, level: number, rarity: UnitRarity)
 
 export const mockUnits: Unit[] = [
   // Legendary units (Gold/Yellow borders)
-  createUnit('1', 'PALADIN', 10, UnitRarity.Legendary),
-  createUnit('2', 'HUNTRESS', 10, UnitRarity.Legendary),
-  createUnit('3', 'BONEBREAKER', 10, UnitRarity.Legendary),
-  createUnit('4', 'SHAMAN', 9, UnitRarity.Legendary),
-  createUnit('5', 'HEADLESS', 10, UnitRarity.Legendary),
-  createUnit('6', 'NIGHT HUNTER', 9, UnitRarity.Legendary),
-  createUnit('7', 'STONE GOLEM', 10, UnitRarity.Legendary),
-  createUnit('8', 'GIANT TOAD', 8, UnitRarity.Legendary),
-  createUnit('9', 'PHOENIX', 10, UnitRarity.Legendary),
+  createUnit('1', UnitName.PALADIN, 10, UnitRarity.Legendary),
+  createUnit('2', UnitName.HUNTRESS, 10, UnitRarity.Legendary),
+  createUnit('3', UnitName.BONEBREAKER, 10, UnitRarity.Legendary),
+  createUnit('4', UnitName.SHAMAN, 9, UnitRarity.Legendary),
+  createUnit('5', UnitName.HEADLESS, 10, UnitRarity.Legendary),
+  createUnit('6', UnitName.NIGHT_HUNTER, 9, UnitRarity.Legendary),
+  createUnit('7', UnitName.STONE_GOLEM, 10, UnitRarity.Legendary),
+  createUnit('8', UnitName.GIANT_TOAD, 8, UnitRarity.Legendary),
+  createUnit('9', UnitName.PHOENIX, 10, UnitRarity.Legendary),
   
   // Epic units (Purple borders)
-  createUnit('10', 'NECROMANCER', 10, UnitRarity.Epic),
-  createUnit('11', 'BUTCHER', 10, UnitRarity.Epic),
-  createUnit('12', 'UNDEAD MAGE', 9, UnitRarity.Epic),
-  createUnit('13', 'ALCHEMIST', 10, UnitRarity.Epic),
-  createUnit('14', 'IMP', 8, UnitRarity.Epic),
-  createUnit('15', 'MONK', 9, UnitRarity.Epic),
-  createUnit('16', 'MAGIC ARCHER', 10, UnitRarity.Epic),
-  createUnit('17', 'PYROTECHNICIAN', 8, UnitRarity.Epic),
-  createUnit('18', 'STORM MISTRESSES', 9, UnitRarity.Epic),
-  createUnit('19', 'SORCERER\'S APPRENTICES', 10, UnitRarity.Epic),
-  createUnit('20', 'LAVA GOLEM', 8, UnitRarity.Epic),
-  createUnit('21', 'ROYAL GUARD', 10, UnitRarity.Epic),
-  createUnit('22', 'IMMORTAL', 9, UnitRarity.Epic),
-  createUnit('23', 'AIR ELEMENTAL', 8, UnitRarity.Epic),
+  createUnit('10', UnitName.NECROMANCER, 10, UnitRarity.Epic),
+  createUnit('11', UnitName.BUTCHER, 10, UnitRarity.Epic),
+  createUnit('12', UnitName.UNDEAD_MAGE, 9, UnitRarity.Epic),
+  createUnit('13', UnitName.ALCHEMIST, 10, UnitRarity.Epic),
+  createUnit('14', UnitName.IMP, 8, UnitRarity.Epic),
+  createUnit('15', UnitName.MONK, 9, UnitRarity.Epic),
+  createUnit('16', UnitName.MAGIC_ARCHER, 10, UnitRarity.Epic),
+  createUnit('17', UnitName.PYROTECHNICIAN, 8, UnitRarity.Epic),
+  createUnit('18', UnitName.STORM_MISTRESSES, 9, UnitRarity.Epic),
+  createUnit('19', UnitName.SORCERERS_APPRENTICES, 10, UnitRarity.Epic),
+  createUnit('20', UnitName.LAVA_GOLEM, 8, UnitRarity.Epic),
+  createUnit('21', UnitName.ROYAL_GUARD, 10, UnitRarity.Epic),
+  createUnit('22', UnitName.IMMORTAL, 9, UnitRarity.Epic),
+  createUnit('23', UnitName.AIR_ELEMENTAL, 8, UnitRarity.Epic),
   
   // Rare units (Blue borders)
-  createUnit('24', 'ARCHERS', 10, UnitRarity.Rare),
-  createUnit('25', 'INFANTRY', 10, UnitRarity.Rare),
-  createUnit('26', 'IRON GUARDS', 9, UnitRarity.Rare),
-  createUnit('27', 'BOMBERS', 8, UnitRarity.Rare),
-  createUnit('28', 'CATAPULT', 10, UnitRarity.Rare),
-  createUnit('29', 'ASSASSINS', 9, UnitRarity.Rare),
-  createUnit('30', 'LANCER', 8, UnitRarity.Rare),
-  createUnit('31', 'BATTLE GOLEM', 7, UnitRarity.Rare),
-  createUnit('32', 'GRAVEDIGGER', 9, UnitRarity.Rare),
+  createUnit('24', UnitName.ARCHERS, 10, UnitRarity.Rare),
+  createUnit('25', UnitName.INFANTRY, 10, UnitRarity.Rare),
+  createUnit('26', UnitName.IRON_GUARDS, 9, UnitRarity.Rare),
+  createUnit('27', UnitName.BOMBERS, 8, UnitRarity.Rare),
+  createUnit('28', UnitName.CATAPULT, 10, UnitRarity.Rare),
+  createUnit('29', UnitName.ASSASSINS, 9, UnitRarity.Rare),
+  createUnit('30', UnitName.LANCER, 8, UnitRarity.Rare),
+  createUnit('31', UnitName.BATTLE_GOLEM, 7, UnitRarity.Rare),
+  createUnit('32', UnitName.GRAVEDIGGER, 9, UnitRarity.Rare),
   
   // Common units (Gray borders)
-  createUnit('33', 'BONE WARRIOR', 10, UnitRarity.Common),
-  createUnit('34', 'BONE SPEARTHROWER', 9, UnitRarity.Common),
-  createUnit('35', 'CURSED CATAPULT', 8, UnitRarity.Common),
-  createUnit('36', 'EXPLOSIVE SPIDER', 7, UnitRarity.Common),
+  createUnit('33', UnitName.BONE_WARRIOR, 10, UnitRarity.Common),
+  createUnit('34', UnitName.BONE_SPEARTHROWER, 9, UnitRarity.Common),
+  createUnit('35', UnitName.CURSED_CATAPULT, 8, UnitRarity.Common),
+  createUnit('36', UnitName.EXPLOSIVE_SPIDER, 7, UnitRarity.Common),
 ];
 
 // Generate more units with variations to reach ~270 total
@@ -76,16 +77,16 @@ const generateMoreUnits = (): Unit[] => {
   const units: Unit[] = [];
   const baseUnits = [
     // More variations of existing units
-    { name: 'ARCHER', rarity: UnitRarity.Rare },
-    { name: 'WARRIOR', rarity: UnitRarity.Rare },
-    { name: 'KNIGHT', rarity: UnitRarity.Rare },
-    { name: 'MAGE', rarity: UnitRarity.Epic },
-    { name: 'GOLEM', rarity: UnitRarity.Epic },
-    { name: 'ELEMENTAL', rarity: UnitRarity.Epic },
-    { name: 'DEMON', rarity: UnitRarity.Epic },
-    { name: 'SKELETON', rarity: UnitRarity.Common },
-    { name: 'GUARD', rarity: UnitRarity.Common },
-    { name: 'SOLDIER', rarity: UnitRarity.Common },
+    { name: UnitName.ARCHER, rarity: UnitRarity.Rare },
+    { name: UnitName.WARRIOR, rarity: UnitRarity.Rare },
+    { name: UnitName.KNIGHT, rarity: UnitRarity.Rare },
+    { name: UnitName.MAGE, rarity: UnitRarity.Epic },
+    { name: UnitName.GOLEM, rarity: UnitRarity.Epic },
+    { name: UnitName.ELEMENTAL, rarity: UnitRarity.Epic },
+    { name: UnitName.DEMON, rarity: UnitRarity.Epic },
+    { name: UnitName.SKELETON, rarity: UnitRarity.Common },
+    { name: UnitName.GUARD, rarity: UnitRarity.Common },
+    { name: UnitName.SOLDIER, rarity: UnitRarity.Common },
   ];
 
   let id = 37;

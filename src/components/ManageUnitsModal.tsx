@@ -21,11 +21,14 @@ import {
   TableRow,
   Paper,
   InputAdornment,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -37,6 +40,7 @@ import { UnitRarity } from '../types';
 import { getUnitImagePath } from '../utils/imageUtils';
 import { normalizeUnitName } from '../utils/unitNameUtils';
 import { calculateUnitPower } from '../utils/powerUtils';
+import { UNIT_NAMES_ARRAY, getUnitDataByName } from '../types/unitNames';
 import UnitCard from './UnitCard';
 
 interface ManageUnitsModalProps {
@@ -50,12 +54,16 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
   
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingRowId, setEditingRowId] = useState<string | null>(null);
+  const [rowEditData, setRowEditData] = useState<Record<string, { name: string; level: number; rarity: UnitRarity; count: number }>>({});
   const [formData, setFormData] = useState({
     name: '',
     level: 10,
     rarity: UnitRarity.Common as UnitRarity,
     count: 1,
   });
+  const [selectedLevels, setSelectedLevels] = useState<number[]>([]);
+  const [levelCounts, setLevelCounts] = useState<Record<number, number>>({});
 
   // Sorting state
   type SortColumn = 'name' | 'level' | 'rarity' | 'count' | null;
@@ -77,18 +85,106 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
   const handleAddNew = () => {
     setIsAdding(true);
     setFormData({ name: '', level: 10, rarity: UnitRarity.Common, count: 1 });
+    setSelectedLevels([]);
+    setLevelCounts({});
   };
 
-  const handleEdit = (unit: Unit) => {
-    setEditingId(unit.id);
-    // Get count of this unit in the roster
+  const handleRowEdit = (unit: Unit) => {
     const unitCount = units.filter((u) => u.name === unit.name && u.level === unit.level && u.rarity === unit.rarity).length;
-    setFormData({
-      name: unit.name,
-      level: unit.level,
-      rarity: unit.rarity,
-      count: unitCount || 1,
+    setEditingRowId(unit.id);
+    setRowEditData({
+      [unit.id]: {
+        name: unit.name,
+        level: unit.level,
+        rarity: unit.rarity,
+        count: unitCount || 1,
+      },
     });
+  };
+
+  const handleRowEditChange = (unitId: string, field: string, value: string | number) => {
+    setRowEditData((prev) => ({
+      ...prev,
+      [unitId]: {
+        ...prev[unitId],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleRowSave = (unit: Unit) => {
+    if (!editingRowId || !rowEditData[editingRowId]) return;
+
+    const editData = rowEditData[editingRowId];
+    const normalizedName = normalizeUnitName(editData.name.trim());
+    const count = Math.max(1, Math.min(100, editData.count || 1));
+    
+    // Get unit data to ensure correct rarity and power calculation
+    const unitData = getUnitDataByName(normalizedName);
+    const finalRarity = unitData ? unitData.rarity : editData.rarity;
+    const getPower = unitData ? unitData.getPower : (level: number) => calculateUnitPower(finalRarity, level);
+
+    // Find all matching units
+    const matchingUnits = units.filter(
+      (u) =>
+        u.name === unit.name &&
+        u.level === unit.level &&
+        u.rarity === unit.rarity
+    );
+
+    // If count is less than current, remove excess units
+    if (count < matchingUnits.length) {
+      const toRemove = matchingUnits.slice(count);
+      toRemove.forEach((u) => {
+        dispatch(removeUnit(u.id));
+      });
+    }
+
+    // Update the first unit (or all if they should be the same)
+    matchingUnits.slice(0, count).forEach((u) => {
+      dispatch(
+        updateUnit({
+          ...u,
+          name: normalizedName,
+          level: editData.level,
+          rarity: finalRarity,
+          power: getPower(editData.level),
+        })
+      );
+    });
+
+    // If count is more than current, add new units
+    if (count > matchingUnits.length) {
+      const toAdd = count - matchingUnits.length;
+      for (let i = 0; i < toAdd; i++) {
+        const newUnit: Unit = {
+          id: `unit-${Date.now()}-${i}`,
+          name: normalizedName,
+          level: editData.level,
+          rarity: finalRarity,
+          power: getPower(editData.level),
+          imageUrl: getUnitImagePath(normalizedName),
+        };
+        dispatch(addUnit(newUnit));
+      }
+    }
+
+    setEditingRowId(null);
+    setRowEditData({});
+  };
+
+  const handleRowCancel = () => {
+    setEditingRowId(null);
+    setRowEditData({});
+  };
+
+  const handleClearRoster = () => {
+    if (window.confirm('Are you sure you want to clear all units from the roster? This action cannot be undone.')) {
+      // Remove all units
+      units.forEach((unit) => {
+        dispatch(removeUnit(unit.id));
+      });
+    }
   };
 
   const handleSave = () => {
@@ -98,10 +194,14 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
 
     // Normalize the name (remove any trailing numbers)
     const normalizedName = normalizeUnitName(formData.name.trim());
-    const count = Math.max(1, Math.min(100, formData.count || 1)); // Limit between 1 and 100
+    
+    // Get unit data to ensure correct rarity and power calculation
+    const unitData = getUnitDataByName(normalizedName);
+    const finalRarity = unitData ? unitData.rarity : formData.rarity;
+    const getPower = unitData ? unitData.getPower : (level: number) => calculateUnitPower(finalRarity, level);
 
     if (editingId) {
-      // Update existing units - find all matching units and update/remove as needed
+      // Update existing units - update all matching units
       const unitToUpdate = units.find((u) => u.id === editingId);
       if (unitToUpdate) {
         const matchingUnits = units.filter(
@@ -111,67 +211,93 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
             u.rarity === unitToUpdate.rarity
         );
 
-        // If count is less than current, remove excess units
-        if (count < matchingUnits.length) {
-          const toRemove = matchingUnits.slice(count);
-          toRemove.forEach((unit) => {
-            dispatch(removeUnit(unit.id));
-          });
-        }
-
-        // Update the first unit (or all if they should be the same)
-        matchingUnits.slice(0, count).forEach((unit) => {
+        // Update all matching units
+        matchingUnits.forEach((unit) => {
           dispatch(
             updateUnit({
               ...unit,
               name: normalizedName,
               level: formData.level,
-              rarity: formData.rarity,
-              power: calculateUnitPower(formData.rarity, formData.level),
+              rarity: finalRarity,
+              power: getPower(formData.level),
             })
           );
         });
-
-        // If count is more than current, add new units
-        if (count > matchingUnits.length) {
-          const toAdd = count - matchingUnits.length;
-          for (let i = 0; i < toAdd; i++) {
-            const newUnit: Unit = {
-              id: `unit-${Date.now()}-${i}`,
-              name: normalizedName,
-              level: formData.level,
-              rarity: formData.rarity,
-              power: calculateUnitPower(formData.rarity, formData.level),
-              imageUrl: getUnitImagePath(normalizedName),
-            };
-            dispatch(addUnit(newUnit));
-          }
-        }
       }
       setEditingId(null);
     } else {
-      // Add new units based on count
-      for (let i = 0; i < count; i++) {
-        const newUnit: Unit = {
-          id: `unit-${Date.now()}-${i}`,
-          name: normalizedName,
-          level: formData.level,
-          rarity: formData.rarity,
-          power: calculateUnitPower(formData.rarity, formData.level),
-          imageUrl: getUnitImagePath(normalizedName),
-        };
-        dispatch(addUnit(newUnit));
+      // Add new units based on selected levels and their individual counts
+      if (selectedLevels.length === 0) {
+        return; // Require at least one level to be selected
       }
+      
+      selectedLevels.forEach((level) => {
+        const levelCount = levelCounts[level] || 1;
+        for (let i = 0; i < levelCount; i++) {
+          const newUnit: Unit = {
+            id: `unit-${Date.now()}-${level}-${i}`,
+            name: normalizedName,
+            level: level,
+            rarity: finalRarity,
+            power: getPower(level),
+            imageUrl: getUnitImagePath(normalizedName),
+          };
+          dispatch(addUnit(newUnit));
+        }
+      });
       setIsAdding(false);
     }
     
     setFormData({ name: '', level: 10, rarity: UnitRarity.Common, count: 1 });
+    setSelectedLevels([]);
+    setLevelCounts({});
   };
 
   const handleCancel = () => {
     setIsAdding(false);
     setEditingId(null);
     setFormData({ name: '', level: 10, rarity: UnitRarity.Common, count: 1 });
+    setSelectedLevels([]);
+    setLevelCounts({});
+  };
+
+  const handleLevelToggle = (level: number) => {
+    setSelectedLevels((prev) => {
+      if (prev.includes(level)) {
+        // Remove level and its count
+        const newCounts = { ...levelCounts };
+        delete newCounts[level];
+        setLevelCounts(newCounts);
+        return prev.filter((l) => l !== level);
+      } else {
+        // Add level with default count of 1
+        setLevelCounts((prev) => ({ ...prev, [level]: 1 }));
+        return [...prev, level].sort((a, b) => a - b);
+      }
+    });
+  };
+
+  const handleLevelCountChange = (level: number, count: number) => {
+    setLevelCounts((prev) => ({
+      ...prev,
+      [level]: Math.max(1, Math.min(100, count || 1)),
+    }));
+  };
+
+  const handleSelectAllLevels = () => {
+    if (selectedLevels.length === 10) {
+      setSelectedLevels([]);
+      setLevelCounts({});
+    } else {
+      const allLevels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+      setSelectedLevels(allLevels);
+      // Set default count of 1 for all levels that don't have a count yet
+      const defaultCounts = allLevels.reduce((acc, level) => {
+        acc[level] = levelCounts[level] || 1;
+        return acc;
+      }, {} as Record<number, number>);
+      setLevelCounts(defaultCounts);
+    }
   };
 
   const handleDelete = (unitId: string) => {
@@ -180,36 +306,21 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
     }
   };
 
-  const handleInputChange = (field: string, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
   const handleNameChange = (event: SelectChangeEvent<string>) => {
-    setFormData((prev) => ({ ...prev, name: event.target.value }));
+    const selectedName = event.target.value;
+    // Auto-set rarity based on unit data
+    const unitData = getUnitDataByName(selectedName);
+    setFormData((prev) => ({
+      ...prev,
+      name: selectedName,
+      rarity: unitData ? unitData.rarity : prev.rarity,
+    }));
   };
 
-  const handleRarityChange = (event: SelectChangeEvent<UnitRarity>) => {
-    setFormData((prev) => ({ ...prev, rarity: event.target.value as UnitRarity }));
-  };
 
   // Get all unique unit names from existing units and predefined list
-  const predefinedUnitNames = [
-    // Legendary
-    'PALADIN', 'HUNTRESS', 'BONEBREAKER', 'SHAMAN', 'HEADLESS', 'NIGHT HUNTER',
-    'STONE GOLEM', 'GIANT TOAD', 'PHOENIX',
-    // Epic
-    'NECROMANCER', 'BUTCHER', 'UNDEAD MAGE', 'ALCHEMIST', 'IMP', 'MONK',
-    'MAGIC ARCHER', 'PYROTECHNICIAN', 'STORM MISTRESSES', 'SORCERER\'S APPRENTICES',
-    'LAVA GOLEM', 'ROYAL GUARD', 'IMMORTAL', 'AIR ELEMENTAL',
-    // Rare
-    'ARCHERS', 'INFANTRY', 'IRON GUARDS', 'BOMBERS', 'CATAPULT', 'ASSASSINS',
-    'LANCER', 'BATTLE GOLEM', 'GRAVEDIGGER',
-    // Common
-    'BONE WARRIOR', 'BONE SPEARTHROWER', 'CURSED CATAPULT', 'EXPLOSIVE SPIDER',
-    // Additional common units
-    'ARCHER', 'WARRIOR', 'KNIGHT', 'MAGE', 'GOLEM', 'ELEMENTAL', 'DEMON',
-    'SKELETON', 'GUARD', 'SOLDIER',
-  ];
+  // Use UNIT_NAMES_ARRAY from enum (already sorted alphabetically)
+  const predefinedUnitNames = UNIT_NAMES_ARRAY;
 
   // Get existing unit names and normalize them (remove numbers)
   const existingUnitNames = Array.from(
@@ -383,97 +494,41 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
             <Typography variant="h6" className="text-white">
               Unit Roster ({units.length} total units)
             </Typography>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleAddNew}
-              className="bg-green-600 hover:bg-green-700"
-              disabled={isAdding || editingId !== null}
-            >
-              Add New Unit
-            </Button>
+            <Box className="flex gap-2">
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddNew}
+                className="bg-green-600 hover:bg-green-700"
+                disabled={isAdding || editingId !== null}
+              >
+                Add New Unit
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleClearRoster}
+                className="bg-red-600 hover:bg-red-700"
+                disabled={units.length === 0 || isAdding || editingId !== null || editingRowId !== null}
+              >
+                Clear Roster
+              </Button>
+            </Box>
           </Box>
 
           {(isAdding || editingId) && (
-            <Box className="bg-gray-700 p-4 rounded-lg mb-4">
-              <Typography variant="subtitle1" className="text-white mb-3">
-                {editingId ? 'Edit Unit' : 'Add New Unit'}
-              </Typography>
-              <Box className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <FormControl fullWidth className="bg-gray-600">
-                  <InputLabel className="text-gray-300">Unit Name</InputLabel>
-                  <Select
-                    value={formData.name}
-                    onChange={handleNameChange}
-                    className="text-white"
-                    label="Unit Name"
-                    MenuProps={{
-                      PaperProps: {
-                        className: 'bg-gray-700 max-h-60',
-                      },
-                    }}
-                  >
-                    {allUnitNames.map((name) => (
-                      <MenuItem key={name} value={name} className="text-white hover:bg-gray-600">
-                        {name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <TextField
-                  label="Level"
-                  type="number"
-                  value={formData.level}
-                  onChange={(e) => handleInputChange('level', parseInt(e.target.value) || 1)}
-                  inputProps={{ min: 1, max: 10 }}
-                  fullWidth
-                  className="bg-gray-600"
-                  InputProps={{
-                    className: 'text-white',
-                  }}
-                  InputLabelProps={{
-                    className: 'text-gray-300',
-                  }}
-                />
-                <TextField
-                  label="Count"
-                  type="number"
-                  value={formData.count}
-                  onChange={(e) => handleInputChange('count', parseInt(e.target.value) || 1)}
-                  inputProps={{ min: 1, max: 100 }}
-                  fullWidth
-                  className="bg-gray-600"
-                  InputProps={{
-                    className: 'text-white',
-                  }}
-                  InputLabelProps={{
-                    className: 'text-gray-300',
-                  }}
-                  helperText={editingId ? 'Update count of matching units' : 'Number of units to add'}
-                  FormHelperTextProps={{
-                    className: 'text-gray-400',
-                  }}
-                />
-                <FormControl fullWidth className="bg-gray-600">
-                  <InputLabel className="text-gray-300">Rarity</InputLabel>
-                  <Select
-                    value={formData.rarity}
-                    onChange={handleRarityChange}
-                    className="text-white"
-                    label="Rarity"
-                  >
-                    <MenuItem value={UnitRarity.Common}>Common</MenuItem>
-                    <MenuItem value={UnitRarity.Rare}>Rare</MenuItem>
-                    <MenuItem value={UnitRarity.Epic}>Epic</MenuItem>
-                    <MenuItem value={UnitRarity.Legendary}>Legendary</MenuItem>
-                  </Select>
-                </FormControl>
+            <Box className="bg-gray-700 p-3 rounded-lg mb-3">
+              <Box className="flex items-center justify-between mb-2">
+                <Typography variant="subtitle2" className="text-white text-sm">
+                  {editingId ? 'Edit Unit' : 'Add New Unit'}
+                </Typography>
                 <Box className="flex gap-2">
                   <Button
                     variant="contained"
                     onClick={handleSave}
                     className="bg-blue-600 hover:bg-blue-700"
-                    disabled={!formData.name.trim()}
+                    disabled={!formData.name.trim() || selectedLevels.length === 0}
+                    size="small"
+                    sx={{ fontSize: '0.875rem', minWidth: '80px' }}
                   >
                     Save
                   </Button>
@@ -481,9 +536,156 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                     variant="outlined"
                     onClick={handleCancel}
                     className="text-white border-gray-500"
+                    size="small"
+                    sx={{ fontSize: '0.875rem', minWidth: '80px' }}
                   >
                     Cancel
                   </Button>
+                </Box>
+              </Box>
+              <Box className="space-y-2">
+                <Box className="flex items-start gap-3">
+                  <FormControl className="bg-gray-600 flex-1" sx={{ minWidth: '200px' }}>
+                    <InputLabel className="text-gray-300">Unit Name</InputLabel>
+                    <Select
+                      value={formData.name}
+                      onChange={handleNameChange}
+                      className="text-white"
+                      label="Unit Name"
+                      size="small"
+                      MenuProps={{
+                        PaperProps: {
+                          className: 'bg-gray-700 max-h-60',
+                        },
+                      }}
+                    >
+                      {allUnitNames.map((name) => (
+                        <MenuItem key={name} value={name} className="text-white hover:bg-gray-600">
+                          {name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {formData.name && (
+                      <Typography
+                        variant="caption"
+                        className={`mt-0.5 text-xs font-bold ${
+                          formData.rarity === UnitRarity.Legendary
+                            ? 'text-yellow-400'
+                            : formData.rarity === UnitRarity.Epic
+                            ? 'text-purple-400'
+                            : formData.rarity === UnitRarity.Rare
+                            ? 'text-blue-400'
+                            : 'text-gray-400'
+                        }`}
+                      >
+                        {formData.rarity}
+                      </Typography>
+                    )}
+                  </FormControl>
+                  <Button
+                    size="small"
+                    onClick={handleSelectAllLevels}
+                    className="text-xs bg-gray-600 hover:bg-gray-500 text-white"
+                    sx={{ fontSize: '0.7rem', padding: '4px 12px', height: '40px', alignSelf: 'flex-end' }}
+                  >
+                    {selectedLevels.length === 10 ? 'Deselect All' : 'Select All'}
+                  </Button>
+                </Box>
+                <Box>
+                  <Typography variant="caption" className="text-gray-300 text-xs mb-1 block">
+                    Levels
+                  </Typography>
+                  <Box className="flex flex-wrap" sx={{ gap: '16px' }}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => {
+                      const isSelected = selectedLevels.includes(level);
+                      const levelCount = levelCounts[level] || 1;
+                      return (
+                        <Box 
+                          key={level} 
+                          className="flex items-center"
+                          sx={{ 
+                            gap: '4px',
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0,
+                            border: '1px solid rgba(255, 255, 255, 0.23)',
+                            borderRadius: '4px',
+                            padding: '2px 4px',
+                            alignItems: 'center',
+                            '&:hover': {
+                              borderColor: 'rgba(255, 255, 255, 0.4)',
+                            },
+                          }}
+                        >
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={isSelected}
+                                onChange={() => handleLevelToggle(level)}
+                                size="small"
+                                sx={{
+                                  color: 'rgba(255, 255, 255, 0.7)',
+                                  padding: '0px',
+                                  margin: '0px',
+                                  '&.Mui-checked': {
+                                    color: '#3b82f6',
+                                  },
+                                }}
+                              />
+                            }
+                            label={level.toString()}
+                            className="text-white m-0"
+                            sx={{
+                              margin: 0,
+                              marginRight: 0,
+                              marginLeft: 0,
+                              '&.MuiFormControlLabel-root': {
+                                margin: 0,
+                                marginRight: 0,
+                              },
+                              '& .MuiFormControlLabel-label': {
+                                color: 'white',
+                                fontSize: '0.75rem',
+                                marginLeft: '2px',
+                                minWidth: '16px',
+                                padding: 0,
+                              },
+                            }}
+                          />
+                          <TextField
+                            type="number"
+                            value={levelCount}
+                            onChange={(e) => handleLevelCountChange(level, parseInt(e.target.value) || 1)}
+                            inputProps={{ min: 1, max: 100 }}
+                            size="small"
+                            disabled={!isSelected}
+                            className="w-14"
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                height: '28px',
+                                '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.23)' },
+                                '&:hover fieldset': { borderColor: isSelected ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.1)' },
+                                '&.Mui-focused fieldset': { borderColor: 'rgba(255, 255, 255, 0.6)' },
+                                '&.Mui-disabled': {
+                                  opacity: 0.5,
+                                },
+                              },
+                              '& .MuiInputBase-input': { 
+                                color: 'white', 
+                                padding: '2px 4px',
+                                fontSize: '0.75rem',
+                                textAlign: 'center',
+                              },
+                            }}
+                          />
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                  {selectedLevels.length === 0 && (
+                    <Typography variant="caption" className="text-yellow-400 text-xs mt-1 block">
+                      Please select at least one level
+                    </Typography>
+                  )}
                 </Box>
               </Box>
             </Box>
@@ -734,59 +936,172 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                 </TableRow>
               </TableHead>
               <TableBody>
-                {uniqueUnits.map((unit) => (
-                  <TableRow key={unit.id} className="hover:bg-gray-600">
-                    <TableCell>
-                      <div className="w-12 h-12">
-                        <UnitCard unit={unit} />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-white font-semibold">
-                      {unit.name}
-                    </TableCell>
-                    <TableCell className="text-white">
-                      {unit.level}
-                    </TableCell>
-                    <TableCell className="text-white">
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-bold ${
-                          unit.rarity === UnitRarity.Legendary
-                            ? 'bg-yellow-600 text-yellow-100'
-                            : unit.rarity === UnitRarity.Epic
-                            ? 'bg-purple-600 text-purple-100'
-                            : unit.rarity === UnitRarity.Rare
-                            ? 'bg-blue-600 text-blue-100'
-                            : 'bg-gray-600 text-gray-100'
-                        }`}
-                      >
-                        {unit.rarity}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-white">
-                      {unitCounts[unit.name] || 1}
-                    </TableCell>
-                    <TableCell>
-                      <Box className="flex gap-2">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEdit(unit)}
-                          className="text-blue-400 hover:bg-blue-900"
-                          aria-label={`Edit ${unit.name}`}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDelete(unit.id)}
-                          className="text-red-400 hover:bg-red-900"
-                          aria-label={`Delete ${unit.name}`}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {uniqueUnits.map((unit) => {
+                  const isEditing = editingRowId === unit.id;
+                  const editData = rowEditData[unit.id] || { name: unit.name, level: unit.level, rarity: unit.rarity, count: unitCounts[unit.name] || 1 };
+                  
+                  return (
+                    <TableRow key={unit.id} className="hover:bg-gray-600">
+                      <TableCell>
+                        <div className="w-12 h-12">
+                          <UnitCard unit={unit} />
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-white font-semibold">
+                        {isEditing ? (
+                          <Select
+                            value={editData.name}
+                            onChange={(e) => {
+                              const selectedName = e.target.value;
+                              const unitData = getUnitDataByName(selectedName);
+                              handleRowEditChange(unit.id, 'name', selectedName);
+                              if (unitData) {
+                                handleRowEditChange(unit.id, 'rarity', unitData.rarity);
+                              }
+                            }}
+                            size="small"
+                            className="text-white min-w-[150px]"
+                            MenuProps={{
+                              PaperProps: {
+                                className: 'bg-gray-700 max-h-60',
+                              },
+                            }}
+                          >
+                            {allUnitNames.map((name) => (
+                              <MenuItem key={name} value={name} className="text-white hover:bg-gray-600">
+                                {name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        ) : (
+                          unit.name
+                        )}
+                      </TableCell>
+                      <TableCell className="text-white">
+                        {isEditing ? (
+                          <TextField
+                            type="number"
+                            value={editData.level}
+                            onChange={(e) => handleRowEditChange(unit.id, 'level', parseInt(e.target.value) || 1)}
+                            inputProps={{ min: 1, max: 10 }}
+                            size="small"
+                            className="w-20"
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.23)' },
+                                '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.4)' },
+                                '&.Mui-focused fieldset': { borderColor: 'rgba(255, 255, 255, 0.6)' },
+                              },
+                              '& .MuiInputBase-input': { color: 'white', padding: '8px' },
+                            }}
+                          />
+                        ) : (
+                          unit.level
+                        )}
+                      </TableCell>
+                      <TableCell className="text-white">
+                        {isEditing ? (
+                          <Select
+                            value={editData.rarity}
+                            onChange={(e) => handleRowEditChange(unit.id, 'rarity', e.target.value as UnitRarity)}
+                            size="small"
+                            className="text-white min-w-[120px]"
+                            MenuProps={{
+                              PaperProps: {
+                                className: 'bg-gray-700',
+                              },
+                            }}
+                          >
+                            {Object.values(UnitRarity).map((rarity) => (
+                              <MenuItem key={rarity} value={rarity} className="text-white hover:bg-gray-600">
+                                {rarity}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        ) : (
+                          <span
+                            className={`px-2 py-1 rounded text-xs font-bold ${
+                              unit.rarity === UnitRarity.Legendary
+                                ? 'bg-yellow-600 text-yellow-100'
+                                : unit.rarity === UnitRarity.Epic
+                                ? 'bg-purple-600 text-purple-100'
+                                : unit.rarity === UnitRarity.Rare
+                                ? 'bg-blue-600 text-blue-100'
+                                : 'bg-gray-600 text-gray-100'
+                            }`}
+                          >
+                            {unit.rarity}
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-white">
+                        {isEditing ? (
+                          <TextField
+                            type="number"
+                            value={editData.count}
+                            onChange={(e) => handleRowEditChange(unit.id, 'count', parseInt(e.target.value) || 1)}
+                            inputProps={{ min: 1, max: 100 }}
+                            size="small"
+                            className="w-20"
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.23)' },
+                                '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.4)' },
+                                '&.Mui-focused fieldset': { borderColor: 'rgba(255, 255, 255, 0.6)' },
+                              },
+                              '& .MuiInputBase-input': { color: 'white', padding: '8px' },
+                            }}
+                          />
+                        ) : (
+                          unitCounts[unit.name] || 1
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Box className="flex gap-2">
+                          {isEditing ? (
+                            <>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleRowSave(unit)}
+                                className="text-green-400 hover:bg-green-900"
+                                aria-label={`Save ${unit.name}`}
+                              >
+                                <CheckIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={handleRowCancel}
+                                className="text-gray-400 hover:bg-gray-700"
+                                aria-label="Cancel"
+                              >
+                                <CloseIcon fontSize="small" />
+                              </IconButton>
+                            </>
+                          ) : (
+                            <>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleRowEdit(unit)}
+                                className="text-blue-400 hover:bg-blue-900"
+                                aria-label={`Edit ${unit.name}`}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDelete(unit.id)}
+                                className="text-red-400 hover:bg-red-900"
+                                aria-label={`Delete ${unit.name}`}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </>
+                          )}
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
                 {uniqueUnits.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center text-gray-400 py-8">
