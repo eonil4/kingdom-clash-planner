@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useDrag } from 'react-dnd';
 import { Tooltip } from '@mui/material';
 import type { Unit } from '../types';
@@ -37,8 +37,31 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
   });
 
   const [imageError, setImageError] = useState(false);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const clickFromCardRef = useRef(false);
   const imageUrl = unit.imageUrl || getUnitImagePath(unit.name);
   const showPlaceholder = imageError || !imageUrl;
+
+  // Close tooltip on any click anywhere
+  useEffect(() => {
+    const handleClickAnywhere = () => {
+      if (tooltipOpen) {
+        // If click was from the card itself, it was already handled by handleCardClick
+        if (!clickFromCardRef.current) {
+          setTooltipOpen(false);
+        }
+        clickFromCardRef.current = false;
+      }
+    };
+
+    if (tooltipOpen) {
+      document.addEventListener('mousedown', handleClickAnywhere, true);
+      return () => {
+        document.removeEventListener('mousedown', handleClickAnywhere, true);
+      };
+    }
+  }, [tooltipOpen]);
 
   const tooltipContent = (
     <div className="p-2">
@@ -56,22 +79,59 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
     </div>
   );
 
+  // For formation tiles, use percentage to fill the cell dynamically
+  // For unit list, use fixed size
+  const cardSize = isInFormation ? '90%' : '64px';
+  // Badge size scales with card size - use percentage for formation, fixed for list
+  const badgeSize = isInFormation ? '35%' : '24px';
+  const badgeFontSize = isInFormation ? 'clamp(0.5rem, 2vw, 0.65rem)' : '0.75rem';
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isDragging) return;
+    
+    // Mark that click came from card
+    clickFromCardRef.current = true;
+    
+    // Toggle tooltip on single click
+    setTooltipOpen((prev) => !prev);
+  };
+
   const cardContent = (
     <div
-      ref={drag as unknown as React.Ref<HTMLDivElement>}
+      ref={(node) => {
+        cardRef.current = node;
+        const dragRef = drag as unknown as React.Ref<HTMLDivElement>;
+        if (typeof dragRef === 'function') {
+          dragRef(node);
+        } else if (dragRef && typeof dragRef === 'object' && 'current' in dragRef) {
+          (dragRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+        }
+      }}
       className={`
-        relative w-16 h-16 rounded-lg border-2 cursor-move overflow-hidden
+        relative rounded-lg border-2 cursor-move overflow-hidden
         ${rarityColors[unit.rarity]}
         ${isDragging ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}
         transition-all duration-200
-        hover:scale-105 hover:shadow-lg
+        ${isInFormation ? '' : 'hover:scale-105 hover:shadow-lg'}
         active:scale-95
       `}
+      style={{
+        width: cardSize,
+        height: cardSize,
+        aspectRatio: '1 / 1',
+        maxWidth: isInFormation ? '100%' : undefined,
+        maxHeight: isInFormation ? '100%' : undefined,
+        minWidth: isInFormation ? 0 : undefined,
+        minHeight: isInFormation ? 0 : undefined,
+      }}
       role="button"
       tabIndex={0}
       aria-label={`${unit.name} level ${unit.level}`}
+      onClick={handleCardClick}
       onDoubleClick={(e) => {
         e.stopPropagation();
+        setTooltipOpen(false);
         if (!isInFormation && onDoubleClick) {
           onDoubleClick();
         }
@@ -79,8 +139,11 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
     >
       {showPlaceholder ? (
         <div
-          className="w-full h-full flex items-center justify-center text-white text-xs font-bold"
-          style={{ backgroundColor: rarityBgColors[unit.rarity] }}
+          className="w-full h-full flex items-center justify-center text-white font-bold"
+          style={{ 
+            backgroundColor: rarityBgColors[unit.rarity],
+            fontSize: isInFormation ? '0.65rem' : '0.75rem',
+          }}
         >
           {unit.name.charAt(0)}
         </div>
@@ -95,14 +158,18 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
       )}
       <div
         className={`
-          absolute -top-1 -right-1 w-6 h-6 flex items-center justify-center
+          absolute -top-0.5 -right-0.5 flex items-center justify-center
           bg-blue-600 border-2 border-blue-400 shadow-lg
         `}
         style={{
+          width: badgeSize,
+          height: badgeSize,
+          minWidth: isInFormation ? '12px' : undefined,
+          minHeight: isInFormation ? '12px' : undefined,
           clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
         }}
       >
-        <span className={`text-xs font-bold text-white`}>
+        <span className={`font-bold text-white`} style={{ fontSize: badgeFontSize }}>
           {unit.level}
         </span>
       </div>
@@ -114,8 +181,11 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
       title={tooltipContent}
       arrow
       placement="top"
-      enterDelay={300}
-      leaveDelay={100}
+      open={tooltipOpen}
+      onClose={() => setTooltipOpen(false)}
+      disableHoverListener
+      disableFocusListener
+      disableTouchListener
       componentsProps={{
         tooltip: {
           sx: {
@@ -124,6 +194,7 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
             borderRadius: '8px',
             fontSize: '0.875rem',
             maxWidth: '200px',
+            pointerEvents: 'auto',
           },
         },
         arrow: {
