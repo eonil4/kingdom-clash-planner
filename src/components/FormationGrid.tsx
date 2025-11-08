@@ -27,7 +27,11 @@ export default function FormationGrid({
       <Grid
         container
         spacing={0.5}
-        className="max-w-2xl mx-auto"
+        sx={{
+          maxWidth: '672px',
+          margin: '0 auto',
+          width: '100%',
+        }}
         role="grid"
         aria-label="Formation grid"
       >

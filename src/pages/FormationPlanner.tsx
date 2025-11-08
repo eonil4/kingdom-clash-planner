@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -6,18 +5,16 @@ import { placeUnit, removeUnit } from '../store/reducers/formationSlice';
 import FormationHeader from '../components/FormationHeader';
 import FormationGrid from '../components/FormationGrid';
 import UnitList from '../components/UnitList';
-import FormationsModal from '../components/FormationsModal';
 import { useInitializeData } from '../hooks/useInitializeData';
+import { useUrlSync } from '../hooks/useUrlSync';
 import type { Unit } from '../types';
-import { useNavigate } from 'react-router-dom';
 
 export default function FormationPlanner() {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const currentFormation = useAppSelector((state) => state.formation.currentFormation);
-  const [isFormationsModalOpen, setIsFormationsModalOpen] = useState(false);
   
   useInitializeData();
+  useUrlSync();
 
   const handlePlaceUnit = (row: number, col: number, unit: Unit) => {
     dispatch(placeUnit({ row, col, unit }));
@@ -27,27 +24,6 @@ export default function FormationPlanner() {
     // Get the unit from the formation before removing it
     const unit = currentFormation?.tiles[row]?.[col] || null;
     dispatch(removeUnit({ row, col, unit }));
-  };
-
-  const handleClose = () => {
-    navigate('/formations');
-  };
-
-  const handleFormationsClick = () => {
-    setIsFormationsModalOpen(true);
-  };
-
-  const handleFormationsModalClose = () => {
-    setIsFormationsModalOpen(false);
-  };
-
-  const handleFormationsModalApply = () => {
-    setIsFormationsModalOpen(false);
-  };
-
-  const handleFormationsModalShare = () => {
-    // TODO: Implement share functionality
-    console.log('Share clicked');
   };
 
   if (!currentFormation) {
@@ -70,21 +46,15 @@ export default function FormationPlanner() {
           `,
         }}
       >
-        <FormationHeader onFormationsClick={handleFormationsClick} />
-        <div className="flex-1 overflow-auto">
+        <FormationHeader />
+        <div className="overflow-auto">
           <FormationGrid
             tiles={currentFormation.tiles}
             onPlaceUnit={handlePlaceUnit}
             onRemoveUnit={handleRemoveUnit}
           />
         </div>
-        <UnitList onClose={handleClose} />
-        <FormationsModal
-          open={isFormationsModalOpen}
-          onClose={handleFormationsModalClose}
-          onApply={handleFormationsModalApply}
-          onShare={handleFormationsModalShare}
-        />
+        <UnitList />
       </div>
     </DndProvider>
   );

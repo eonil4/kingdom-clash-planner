@@ -4,8 +4,6 @@ import type { Formation, Unit } from '../../types';
 
 interface FormationState {
   currentFormation: Formation | null;
-  formations: Formation[];
-  selectedFormationId: string | null;
 }
 
 const initialState: FormationState = {
@@ -17,8 +15,6 @@ const initialState: FormationState = {
       .map(() => Array(7).fill(null)),
     power: 0,
   },
-  formations: [],
-  selectedFormationId: '1',
 };
 
 const formationSlice = createSlice({
@@ -57,12 +53,6 @@ const formationSlice = createSlice({
         }
       }
     },
-    setFormations: (state, action: PayloadAction<Formation[]>) => {
-      state.formations = action.payload;
-    },
-    setSelectedFormationId: (state, action: PayloadAction<string>) => {
-      state.selectedFormationId = action.payload;
-    },
   },
 });
 
@@ -82,8 +72,6 @@ export const {
   setCurrentFormation,
   placeUnit,
   removeUnit,
-  setFormations,
-  setSelectedFormationId,
 } = formationSlice.actions;
 
 export default formationSlice.reducer;

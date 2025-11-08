@@ -3,14 +3,12 @@ import { useDrop } from 'react-dnd';
 import {
   Box,
   Typography,
-  IconButton,
   Select,
   MenuItem,
   FormControl,
   Button,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { setSortOption, setSortOption2, setSortOption3, setSearchTerm } from '../store/reducers/unitSlice';
 import { removeUnit as removeUnitFromFormation, placeUnit } from '../store/reducers/formationSlice';
@@ -20,11 +18,7 @@ import UnitCard from './UnitCard';
 import UnitSearch from './UnitSearch';
 import ManageUnitsModal from './ManageUnitsModal';
 
-interface UnitListProps {
-  onClose: () => void;
-}
-
-export default function UnitList({ onClose }: UnitListProps) {
+export default function UnitList() {
   const dispatch = useAppDispatch();
   const { filteredUnits, sortOption, sortOption2, sortOption3 } = useAppSelector((state) => state.unit);
   const currentFormation = useAppSelector((state) => state.formation.currentFormation);
@@ -227,13 +221,6 @@ export default function UnitList({ onClose }: UnitListProps) {
               WITHDRAW ALL
             </Button>
           </Box>
-          <IconButton
-            onClick={onClose}
-            className="bg-red-600 hover:bg-red-700 text-white"
-            aria-label="Close formation planner"
-          >
-            <CloseIcon />
-          </IconButton>
         </Box>
         <Box className="mb-2">
           <UnitSearch onSearchChange={handleSearchChange} />

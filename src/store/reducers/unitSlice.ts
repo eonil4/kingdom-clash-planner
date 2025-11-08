@@ -93,6 +93,12 @@ const unitSlice = createSlice({
       );
     },
     addUnit: (state, action: PayloadAction<Unit>) => {
+      // Maximum unit count is 49 (7x7 formation grid capacity)
+      const maxUnits = 49;
+      if (state.units.length >= maxUnits) {
+        return; // Don't add if at capacity
+      }
+      
       // Normalize unit name and ensure power is calculated
       const normalizedUnit = {
         ...action.payload,

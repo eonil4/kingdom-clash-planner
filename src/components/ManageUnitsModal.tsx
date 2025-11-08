@@ -117,7 +117,8 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
 
     const editData = rowEditData[editingRowId];
     const normalizedName = normalizeUnitName(editData.name.trim());
-    const count = Math.max(1, Math.min(100, editData.count || 1));
+    const maxUnits = 49; // Maximum capacity of 7x7 formation grid
+    const count = Math.max(1, Math.min(maxUnits, editData.count || 1));
     
     // Get unit data to ensure correct rarity and power calculation
     const unitData = getUnitDataByName(normalizedName);
@@ -156,9 +157,23 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
     // If count is more than current, add new units
     if (count > matchingUnits.length) {
       const toAdd = count - matchingUnits.length;
-      for (let i = 0; i < toAdd; i++) {
+      const currentCount = units.length;
+      const maxUnits = 49; // Maximum capacity of 7x7 formation grid
+      const available = maxUnits - currentCount;
+      
+      if (available <= 0) {
+        alert(`Cannot add more units. Maximum unit count is ${maxUnits}.`);
+        return;
+      }
+      
+      const unitsToAdd = Math.min(toAdd, available);
+      if (unitsToAdd < toAdd) {
+        alert(`Cannot add ${toAdd} units. Maximum unit count is ${maxUnits}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
+      }
+      
+      for (let i = 0; i < unitsToAdd; i++) {
         const newUnit: Unit = {
-          id: `unit-${Date.now()}-${i}`,
+          id: `unit-${Date.now()}-${i}-${Math.random()}`,
           name: normalizedName,
           level: editData.level,
           rarity: finalRarity,
@@ -231,11 +246,22 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
         return; // Require at least one level to be selected
       }
       
+      // Calculate total units to add
+      const totalToAdd = selectedLevels.reduce((sum, level) => sum + (levelCounts[level] || 1), 0);
+      const currentCount = units.length;
+      const maxUnits = 49; // Maximum capacity of 7x7 formation grid
+      
+      if (currentCount + totalToAdd > maxUnits) {
+        const available = maxUnits - currentCount;
+        alert(`Cannot add ${totalToAdd} units. Maximum unit count is ${maxUnits}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
+        return;
+      }
+      
       selectedLevels.forEach((level) => {
         const levelCount = levelCounts[level] || 1;
         for (let i = 0; i < levelCount; i++) {
           const newUnit: Unit = {
-            id: `unit-${Date.now()}-${level}-${i}`,
+            id: `unit-${Date.now()}-${level}-${i}-${Math.random()}`,
             name: normalizedName,
             level: level,
             rarity: finalRarity,
