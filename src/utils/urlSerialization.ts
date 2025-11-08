@@ -28,7 +28,8 @@ export function serializeUnits(units: Unit[]): string {
 
 /**
  * Deserialize units from URL format: id,level,count;id,level,count
- * Maximum roster size is 1000 units total
+ * Note: Maximum total units (roster + formation) is 1000, but this function
+ * only handles roster units. Combined limit is enforced at component level.
  * Maximum count per unit per level is 49
  * Uses ";" as separator instead of "#" to avoid URL fragment issues
  */
@@ -37,7 +38,7 @@ export function deserializeUnits(unitsString: string): Unit[] {
   
   const units: Unit[] = [];
   const entries = unitsString.split(';');
-  const maxRosterSize = 1000; // Maximum total roster size
+  const maxRosterSize = 1000; // Maximum roster size (component enforces combined limit)
   const maxUnitsPerLevel = 49; // Maximum count per unit per level
   
   for (const entry of entries) {

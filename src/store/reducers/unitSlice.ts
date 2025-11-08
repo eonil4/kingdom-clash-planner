@@ -93,7 +93,8 @@ const unitSlice = createSlice({
       );
     },
     addUnit: (state, action: PayloadAction<Unit>) => {
-      // Check maximum roster size (1000)
+      // Check maximum roster size
+      // Note: Combined limit (roster + formation = 1000) is enforced at component level
       const maxRosterSize = 1000;
       if (state.units.length >= maxRosterSize) {
         return; // Don't add if roster is at capacity

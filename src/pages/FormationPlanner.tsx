@@ -15,8 +15,42 @@ import type { Unit } from '../types';
 function FormationPlannerContent() {
   const dispatch = useAppDispatch();
   const currentFormation = useAppSelector((state) => state.formation.currentFormation);
+  const { units } = useAppSelector((state) => state.unit);
+
+  // Helper function to count units in formation
+  const countFormationUnits = (): number => {
+    if (!currentFormation) return 0;
+    let count = 0;
+    for (const row of currentFormation.tiles) {
+      for (const unit of row) {
+        if (unit) count++;
+      }
+    }
+    return count;
+  };
 
   const handlePlaceUnit = (row: number, col: number, unit: Unit) => {
+    // Check if we're replacing an existing unit (moving within formation) or adding new
+    const existingUnit = currentFormation?.tiles[row]?.[col];
+    const isReplacing = !!existingUnit;
+    
+    // Check if the unit is already in the roster (being moved, not added)
+    const isInRoster = units.some(u => u.id === unit.id);
+    
+    // If not replacing and unit is not in roster (truly adding a new unit), check total limit
+    if (!isReplacing && !isInRoster) {
+      const formationUnitCount = countFormationUnits();
+      const maxTotalUnits = 1000;
+      const totalUnitCount = units.length + formationUnitCount;
+      
+      if (totalUnitCount >= maxTotalUnits) {
+        alert(`Cannot place unit. Maximum total units (roster + formation) is ${maxTotalUnits}.`);
+        return;
+      }
+    }
+    // If unit is in roster, it will be moved (removed from roster, added to formation),
+    // so total count stays the same - no need to check limit
+    
     dispatch(placeUnit({ row, col, unit }));
   };
 

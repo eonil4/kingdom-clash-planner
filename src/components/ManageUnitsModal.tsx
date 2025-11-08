@@ -51,6 +51,22 @@ interface ManageUnitsModalProps {
 export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProps) {
   const dispatch = useAppDispatch();
   const { units } = useAppSelector((state) => state.unit);
+  const currentFormation = useAppSelector((state) => state.formation.currentFormation);
+  
+  // Helper function to count units in formation
+  const countFormationUnits = (): number => {
+    if (!currentFormation) return 0;
+    let count = 0;
+    for (const row of currentFormation.tiles) {
+      for (const unit of row) {
+        if (unit) count++;
+      }
+    }
+    return count;
+  };
+  
+  const formationUnitCount = countFormationUnits();
+  const totalUnitCount = units.length + formationUnitCount;
   
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -156,13 +172,13 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
     // If count is more than current, add new units
     if (count > matchingUnits.length) {
       const toAdd = count - matchingUnits.length;
-      const maxRosterSize = 1000; // Maximum total roster size
+      const maxTotalUnits = 1000; // Maximum total units (roster + formation)
       const maxUnitsPerLevel = 49; // Maximum count per unit per level
       
-      // Check total roster size
-      const rosterSpace = maxRosterSize - units.length;
-      if (rosterSpace <= 0) {
-        alert(`Cannot add more units. Maximum roster size is ${maxRosterSize}.`);
+      // Check total units (roster + formation)
+      const totalSpace = maxTotalUnits - totalUnitCount;
+      if (totalSpace <= 0) {
+        alert(`Cannot add more units. Maximum total units (roster + formation) is ${maxTotalUnits}.`);
         return;
       }
       
@@ -173,11 +189,11 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
         return;
       }
       
-      // Limit by both roster size and per-unit-per-level
-      const unitsToAdd = Math.min(toAdd, available, rosterSpace);
+      // Limit by both total units and per-unit-per-level
+      const unitsToAdd = Math.min(toAdd, available, totalSpace);
       if (unitsToAdd < toAdd) {
-        if (rosterSpace < toAdd) {
-          alert(`Cannot add ${toAdd} units. Maximum roster size is ${maxRosterSize}. You can add ${rosterSpace} more unit${rosterSpace !== 1 ? 's' : ''}.`);
+        if (totalSpace < toAdd) {
+          alert(`Cannot add ${toAdd} units. Maximum total units (roster + formation) is ${maxTotalUnits}. You can add ${totalSpace} more unit${totalSpace !== 1 ? 's' : ''}.`);
         } else {
           alert(`Cannot add ${toAdd} units. Maximum count for ${normalizedName} level ${editData.level} is ${maxUnitsPerLevel}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
         }
@@ -258,8 +274,8 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
         return; // Require at least one level to be selected
       }
       
-      // Check maximum roster size (1000) and per unit per level (49)
-      const maxRosterSize = 1000;
+      // Check maximum total units (roster + formation = 1000) and per unit per level (49)
+      const maxTotalUnits = 1000;
       const maxUnitsPerLevel = 49;
       
       // Calculate total units to add
@@ -269,15 +285,15 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
         totalToAdd += levelCount;
       }
       
-      // Check total roster size
-      const rosterSpace = maxRosterSize - units.length;
-      if (rosterSpace <= 0) {
-        alert(`Cannot add more units. Maximum roster size is ${maxRosterSize}.`);
+      // Check total units (roster + formation)
+      const totalSpace = maxTotalUnits - totalUnitCount;
+      if (totalSpace <= 0) {
+        alert(`Cannot add more units. Maximum total units (roster + formation) is ${maxTotalUnits}.`);
         return;
       }
       
-      if (totalToAdd > rosterSpace) {
-        alert(`Cannot add ${totalToAdd} units. Maximum roster size is ${maxRosterSize}. You can add ${rosterSpace} more unit${rosterSpace !== 1 ? 's' : ''}.`);
+      if (totalToAdd > totalSpace) {
+        alert(`Cannot add ${totalToAdd} units. Maximum total units (roster + formation) is ${maxTotalUnits}. You can add ${totalSpace} more unit${totalSpace !== 1 ? 's' : ''}.`);
         return;
       }
       
@@ -668,7 +684,7 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                       Max: 49 per level
                     </Typography>
                     <Typography variant="caption" className="text-gray-400 text-xs">
-                      Roster: {units.length} / 1000
+                      Total: {totalUnitCount} / 1000 (Roster: {units.length}, Formation: {formationUnitCount})
                     </Typography>
                   </Box>
                 </Box>
