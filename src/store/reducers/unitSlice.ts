@@ -93,18 +93,23 @@ const unitSlice = createSlice({
       );
     },
     addUnit: (state, action: PayloadAction<Unit>) => {
-      // Maximum unit count is 49 (7x7 formation grid capacity)
-      const maxUnits = 49;
-      if (state.units.length >= maxUnits) {
-        return; // Don't add if at capacity
-      }
-      
       // Normalize unit name and ensure power is calculated
       const normalizedUnit = {
         ...action.payload,
         name: normalizeUnitName(action.payload.name),
         power: action.payload.power || calculateUnitPower(action.payload.rarity, action.payload.level),
       };
+      
+      // Check maximum count per unit per level (49)
+      const maxUnitsPerLevel = 49;
+      const matchingUnits = state.units.filter(
+        (u) => u.name === normalizedUnit.name && u.level === normalizedUnit.level
+      );
+      
+      if (matchingUnits.length >= maxUnitsPerLevel) {
+        return; // Don't add if this unit+level combination is at capacity
+      }
+      
       state.units.push(normalizedUnit);
       state.filteredUnits = filterAndSortUnits(
         state.units,

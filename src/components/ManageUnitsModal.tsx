@@ -112,25 +112,24 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
     }));
   };
 
-  const handleRowSave = (unit: Unit) => {
+  const handleRowSave = () => {
     if (!editingRowId || !rowEditData[editingRowId]) return;
 
     const editData = rowEditData[editingRowId];
     const normalizedName = normalizeUnitName(editData.name.trim());
-    const maxUnits = 49; // Maximum capacity of 7x7 formation grid
-    const count = Math.max(1, Math.min(maxUnits, editData.count || 1));
+    const maxUnitsPerLevel = 49; // Maximum count per unit per level
+    const count = Math.max(1, Math.min(maxUnitsPerLevel, editData.count || 1));
     
     // Get unit data to ensure correct rarity and power calculation
     const unitData = getUnitDataByName(normalizedName);
     const finalRarity = unitData ? unitData.rarity : editData.rarity;
     const getPower = unitData ? unitData.getPower : (level: number) => calculateUnitPower(finalRarity, level);
 
-    // Find all matching units
+    // Find all matching units (same name and level)
     const matchingUnits = units.filter(
       (u) =>
-        u.name === unit.name &&
-        u.level === unit.level &&
-        u.rarity === unit.rarity
+        normalizeUnitName(u.name) === normalizedName &&
+        u.level === editData.level
     );
 
     // If count is less than current, remove excess units
@@ -157,18 +156,17 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
     // If count is more than current, add new units
     if (count > matchingUnits.length) {
       const toAdd = count - matchingUnits.length;
-      const currentCount = units.length;
-      const maxUnits = 49; // Maximum capacity of 7x7 formation grid
-      const available = maxUnits - currentCount;
+      const maxUnitsPerLevel = 49; // Maximum count per unit per level
+      const available = maxUnitsPerLevel - matchingUnits.length;
       
       if (available <= 0) {
-        alert(`Cannot add more units. Maximum unit count is ${maxUnits}.`);
+        alert(`Cannot add more units. Maximum count for ${normalizedName} level ${editData.level} is ${maxUnitsPerLevel}.`);
         return;
       }
       
       const unitsToAdd = Math.min(toAdd, available);
       if (unitsToAdd < toAdd) {
-        alert(`Cannot add ${toAdd} units. Maximum unit count is ${maxUnits}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
+        alert(`Cannot add ${toAdd} units. Maximum count for ${normalizedName} level ${editData.level} is ${maxUnitsPerLevel}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
       }
       
       for (let i = 0; i < unitsToAdd; i++) {
@@ -246,31 +244,41 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
         return; // Require at least one level to be selected
       }
       
-      // Calculate total units to add
-      const totalToAdd = selectedLevels.reduce((sum, level) => sum + (levelCounts[level] || 1), 0);
-      const currentCount = units.length;
-      const maxUnits = 49; // Maximum capacity of 7x7 formation grid
+      // Check maximum count per unit per level (49)
+      const maxUnitsPerLevel = 49;
       
-      if (currentCount + totalToAdd > maxUnits) {
-        const available = maxUnits - currentCount;
-        alert(`Cannot add ${totalToAdd} units. Maximum unit count is ${maxUnits}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
-        return;
+      // Validate each level separately
+      for (const level of selectedLevels) {
+        const levelCount = levelCounts[level] || 1;
+        const existingCount = units.filter(
+          (u) => normalizeUnitName(u.name) === normalizedName && u.level === level
+        ).length;
+        const available = maxUnitsPerLevel - existingCount;
+        
+        if (levelCount > available) {
+          alert(`Cannot add ${levelCount} units. Maximum count for ${normalizedName} level ${level} is ${maxUnitsPerLevel}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
+          return;
+        }
       }
       
-      selectedLevels.forEach((level) => {
+      // Create units for each selected level
+      for (const level of selectedLevels) {
         const levelCount = levelCounts[level] || 1;
+        const currentLevel = level; // Capture level in block scope to avoid closure issues
         for (let i = 0; i < levelCount; i++) {
+          const timestamp = Date.now();
+          const random = Math.random();
           const newUnit: Unit = {
-            id: `unit-${Date.now()}-${level}-${i}-${Math.random()}`,
+            id: `unit-${timestamp}-${random}-${currentLevel}-${i}`,
             name: normalizedName,
-            level: level,
+            level: currentLevel, // Use captured level value
             rarity: finalRarity,
-            power: getPower(level),
+            power: getPower(currentLevel),
             imageUrl: getUnitImagePath(normalizedName),
           };
           dispatch(addUnit(newUnit));
         }
-      });
+      }
       setIsAdding(false);
     }
     
@@ -311,18 +319,19 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
   };
 
   const handleSelectAllLevels = () => {
+    const allLevels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const maxCount = 49;
     if (selectedLevels.length === 10) {
       setSelectedLevels([]);
       setLevelCounts({});
     } else {
-      const allLevels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
       setSelectedLevels(allLevels);
-      // Set default count of 1 for all levels that don't have a count yet
-      const defaultCounts = allLevels.reduce((acc, level) => {
-        acc[level] = levelCounts[level] || 1;
+      // Set all levels to max count (49)
+      const maxCounts = allLevels.reduce((acc, level) => {
+        acc[level] = maxCount;
         return acc;
       }, {} as Record<number, number>);
-      setLevelCounts(defaultCounts);
+      setLevelCounts(maxCounts);
     }
   };
 
@@ -361,14 +370,15 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
     ])
   ).sort();
 
-  // Get unique units (by name) for the table
+  // Get unique units (by name AND level) for the table
   let uniqueUnits = Array.from(
-    new Map(units.map((unit) => [unit.name, unit])).values()
+    new Map(units.map((unit) => [`${unit.name}-${unit.level}`, unit])).values()
   );
 
-  // Count occurrences of each unit
+  // Count occurrences of each unit by name AND level
   const unitCounts = units.reduce((acc, unit) => {
-    acc[unit.name] = (acc[unit.name] || 0) + 1;
+    const key = `${unit.name}-${unit.level}`;
+    acc[key] = (acc[key] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
@@ -382,7 +392,8 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
 
   // Apply filters
   uniqueUnits = uniqueUnits.filter((unit) => {
-    const count = unitCounts[unit.name] || 1;
+    const key = `${unit.name}-${unit.level}`;
+    const count = unitCounts[key] || 1;
     
     // Name filter (exact match search)
     if (filters.name && !unit.name.toLowerCase().includes(filters.name.toLowerCase())) {
@@ -440,7 +451,9 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
           comparison = rarityOrder[a.rarity] - rarityOrder[b.rarity];
           break;
         case 'count':
-          comparison = (unitCounts[a.name] || 1) - (unitCounts[b.name] || 1);
+          const keyA = `${a.name}-${a.level}`;
+          const keyB = `${b.name}-${b.level}`;
+          comparison = (unitCounts[keyA] || 1) - (unitCounts[keyB] || 1);
           break;
       }
 
@@ -608,14 +621,19 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                       </Typography>
                     )}
                   </FormControl>
-                  <Button
-                    size="small"
-                    onClick={handleSelectAllLevels}
-                    className="text-xs bg-gray-600 hover:bg-gray-500 text-white"
-                    sx={{ fontSize: '0.7rem', padding: '4px 12px', height: '40px', alignSelf: 'flex-end' }}
-                  >
-                    {selectedLevels.length === 10 ? 'Deselect All' : 'Select All'}
-                  </Button>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                    <Button
+                      size="small"
+                      onClick={handleSelectAllLevels}
+                      className="text-xs bg-gray-600 hover:bg-gray-500 text-white"
+                      sx={{ fontSize: '0.7rem', padding: '4px 12px', height: '40px' }}
+                    >
+                      {selectedLevels.length === 10 ? 'Deselect All' : 'Select All with Max Count'}
+                    </Button>
+                    <Typography variant="caption" className="text-gray-400 text-xs">
+                      Max: 49 per level
+                    </Typography>
+                  </Box>
                 </Box>
                 <Box>
                   <Typography variant="caption" className="text-gray-300 text-xs mb-1 block">
@@ -964,7 +982,8 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
               <TableBody>
                 {uniqueUnits.map((unit) => {
                   const isEditing = editingRowId === unit.id;
-                  const editData = rowEditData[unit.id] || { name: unit.name, level: unit.level, rarity: unit.rarity, count: unitCounts[unit.name] || 1 };
+                  const unitKey = `${unit.name}-${unit.level}`;
+                  const editData = rowEditData[unit.id] || { name: unit.name, level: unit.level, rarity: unit.rarity, count: unitCounts[unitKey] || 1 };
                   
                   return (
                     <TableRow key={unit.id} className="hover:bg-gray-600">
@@ -1079,7 +1098,7 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                             }}
                           />
                         ) : (
-                          unitCounts[unit.name] || 1
+                          unitCounts[`${unit.name}-${unit.level}`] || 1
                         )}
                       </TableCell>
                       <TableCell>
@@ -1088,7 +1107,7 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                             <>
                               <IconButton
                                 size="small"
-                                onClick={() => handleRowSave(unit)}
+                                onClick={() => handleRowSave()}
                                 className="text-green-400 hover:bg-green-900"
                                 aria-label={`Save ${unit.name}`}
                               >

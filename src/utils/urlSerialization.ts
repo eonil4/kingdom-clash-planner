@@ -28,7 +28,7 @@ export function serializeUnits(units: Unit[]): string {
 
 /**
  * Deserialize units from URL format: id,level,count;id,level,count
- * Maximum unit count is 49 (7x7 formation grid capacity)
+ * Maximum count per unit per level is 49
  * Uses ";" as separator instead of "#" to avoid URL fragment issues
  */
 export function deserializeUnits(unitsString: string): Unit[] {
@@ -36,12 +36,9 @@ export function deserializeUnits(unitsString: string): Unit[] {
   
   const units: Unit[] = [];
   const entries = unitsString.split(';');
-  const maxUnits = 49;
+  const maxUnitsPerLevel = 49;
   
   for (const entry of entries) {
-    // Stop if we've reached the maximum
-    if (units.length >= maxUnits) break;
-    
     const parts = entry.split(',');
     if (parts.length !== 3) continue;
     
@@ -58,14 +55,19 @@ export function deserializeUnits(unitsString: string): Unit[] {
     // Validate level
     if (level < 1 || level > 10) continue;
     
-    // Calculate how many units we can still add
-    const remaining = maxUnits - units.length;
-    const unitsToAdd = Math.min(count, remaining);
+    // Count existing units of this type and level
+    const existingCount = units.filter(
+      (u) => u.name === unitData.name && u.level === level
+    ).length;
     
-    // Create units based on count (limited by max)
+    // Calculate how many units we can still add for this unit+level combination
+    const available = maxUnitsPerLevel - existingCount;
+    const unitsToAdd = Math.min(count, available);
+    
+    // Create units based on count (limited by max per unit per level)
     for (let i = 0; i < unitsToAdd; i++) {
       const unit: Unit = {
-        id: `${unitData.index}-${level}-${i}-${Date.now()}-${Math.random()}`,
+        id: `${unitData.index}-${level}-${existingCount + i}-${Date.now()}-${Math.random()}`,
         name: unitData.name,
         level,
         rarity: unitData.rarity,
