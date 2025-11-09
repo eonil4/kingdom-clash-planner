@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -42,6 +42,58 @@ import { normalizeUnitName } from '../utils/unitNameUtils';
 import { calculateUnitPower } from '../utils/powerUtils';
 import { UNIT_NAMES_ARRAY, getUnitDataByName } from '../types/unitNames';
 import UnitCard from './UnitCard';
+
+// Component to display unit icon with error handling
+function UnitIcon({ name, rarity }: { name: string; rarity: UnitRarity }) {
+  const [imageError, setImageError] = useState(false);
+  const imageUrl = getUnitImagePath(name);
+  const showPlaceholder = imageError || !imageUrl;
+
+  useEffect(() => {
+    setImageError(false);
+  }, [name]);
+
+  if (showPlaceholder) {
+    const initial = name.charAt(0).toUpperCase();
+    const rarityColors: Record<UnitRarity, string> = {
+      [UnitRarity.Common]: '#4a5568',
+      [UnitRarity.Rare]: '#2563eb',
+      [UnitRarity.Epic]: '#7c3aed',
+      [UnitRarity.Legendary]: '#eab308',
+    };
+    
+    return (
+      <Box
+        sx={{
+          width: '100%',
+          height: '100%',
+          backgroundColor: rarityColors[rarity],
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          fontSize: '20px',
+          fontWeight: 'bold',
+        }}
+      >
+        {initial}
+      </Box>
+    );
+  }
+
+  return (
+    <img
+      src={imageUrl}
+      alt={name}
+      onError={() => setImageError(true)}
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+      }}
+    />
+  );
+}
 
 interface ManageUnitsModalProps {
   open: boolean;
@@ -635,43 +687,108 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
               </Box>
               <Box className="space-y-2">
                 <Box className="flex items-start gap-3">
-                  <FormControl className="bg-gray-600 flex-1" sx={{ minWidth: '200px' }}>
-                    <InputLabel className="text-gray-300">Unit Name</InputLabel>
-                    <Select
-                      value={formData.name}
-                      onChange={handleNameChange}
-                      className="text-white"
-                      label="Unit Name"
-                      size="small"
-                      MenuProps={{
-                        PaperProps: {
-                          className: 'bg-gray-700 max-h-60',
-                        },
-                      }}
-                    >
-                      {allUnitNames.map((name) => (
-                        <MenuItem key={name} value={name} className="text-white hover:bg-gray-600">
-                          {name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {formData.name && (
-                      <Typography
-                        variant="caption"
-                        className={`mt-0.5 text-xs font-bold ${
-                          formData.rarity === UnitRarity.Legendary
-                            ? 'text-yellow-400'
-                            : formData.rarity === UnitRarity.Epic
-                            ? 'text-purple-400'
-                            : formData.rarity === UnitRarity.Rare
-                            ? 'text-blue-400'
-                            : 'text-gray-400'
-                        }`}
+                  <Box className="flex items-start gap-2 flex-1">
+                    <FormControl className="bg-gray-600 flex-1" sx={{ minWidth: '200px' }}>
+                      <InputLabel className="text-gray-300">Unit Name</InputLabel>
+                      <Select
+                        value={formData.name}
+                        onChange={handleNameChange}
+                        className="text-white"
+                        label="Unit Name"
+                        size="small"
+                        MenuProps={{
+                          PaperProps: {
+                            className: 'bg-gray-700 max-h-60',
+                          },
+                        }}
+                        renderValue={(value) => {
+                          const unitData = getUnitDataByName(value);
+                          const rarity = unitData?.rarity || UnitRarity.Common;
+                          return (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <Box
+                                sx={{
+                                  width: '24px',
+                                  height: '24px',
+                                  borderRadius: '2px',
+                                  border: `1px solid ${
+                                    rarity === UnitRarity.Legendary
+                                      ? '#eab308'
+                                      : rarity === UnitRarity.Epic
+                                      ? '#7c3aed'
+                                      : rarity === UnitRarity.Rare
+                                      ? '#2563eb'
+                                      : '#4a5568'
+                                  }`,
+                                  backgroundColor: '#1f2937',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                  overflow: 'hidden',
+                                }}
+                              >
+                                <UnitIcon name={value} rarity={rarity} />
+                              </Box>
+                              <span>{value}</span>
+                            </Box>
+                          );
+                        }}
                       >
-                        {formData.rarity}
-                      </Typography>
-                    )}
-                  </FormControl>
+                        {allUnitNames.map((name) => {
+                          const unitData = getUnitDataByName(name);
+                          const rarity = unitData?.rarity || UnitRarity.Common;
+                          return (
+                            <MenuItem key={name} value={name} className="text-white hover:bg-gray-600">
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+                                <Box
+                                  sx={{
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '2px',
+                                    border: `1px solid ${
+                                      rarity === UnitRarity.Legendary
+                                        ? '#eab308'
+                                        : rarity === UnitRarity.Epic
+                                        ? '#7c3aed'
+                                        : rarity === UnitRarity.Rare
+                                        ? '#2563eb'
+                                        : '#4a5568'
+                                    }`,
+                                    backgroundColor: '#1f2937',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexShrink: 0,
+                                    overflow: 'hidden',
+                                  }}
+                                >
+                                  <UnitIcon name={name} rarity={rarity} />
+                                </Box>
+                                <span>{name}</span>
+                              </Box>
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
+                      {formData.name && (
+                        <Typography
+                          variant="caption"
+                          className={`mt-0.5 text-xs font-bold ${
+                            formData.rarity === UnitRarity.Legendary
+                              ? 'text-yellow-400'
+                              : formData.rarity === UnitRarity.Epic
+                              ? 'text-purple-400'
+                              : formData.rarity === UnitRarity.Rare
+                              ? 'text-blue-400'
+                              : 'text-gray-400'
+                          }`}
+                        >
+                          {formData.rarity}
+                        </Typography>
+                      )}
+                    </FormControl>
+                  </Box>
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
                     <Button
                       size="small"
