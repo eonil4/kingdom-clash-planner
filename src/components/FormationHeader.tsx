@@ -1,8 +1,51 @@
-import { useAppSelector } from '../store/hooks';
-import { Typography, Box } from '@mui/material';
+import { useState, useRef, useEffect } from 'react';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { Typography, Box, IconButton, TextField } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import { updateFormationName } from '../store/reducers/formationSlice';
 
 export default function FormationHeader() {
+  const dispatch = useAppDispatch();
   const currentFormation = useAppSelector((state) => state.formation.currentFormation);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const handleEditClick = () => {
+    if (currentFormation) {
+      setEditValue(currentFormation.name);
+      setIsEditing(true);
+    }
+  };
+
+  const handleSave = () => {
+    if (editValue.trim() && currentFormation) {
+      dispatch(updateFormationName(editValue.trim()));
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditValue('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancel();
+    }
+  };
 
   return (
     <Box
@@ -13,13 +56,53 @@ export default function FormationHeader() {
       }}
     >
       <Box className="flex flex-col items-center">
-        <Typography
-          variant="h6"
-          className="text-white font-bold mb-2 text-xl"
-          component="h1"
-        >
-          {currentFormation?.name || 'Formation'}
-        </Typography>
+        <Box className="flex items-center gap-2 mb-2">
+          {isEditing ? (
+            <TextField
+              inputRef={inputRef}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              variant="outlined"
+              size="small"
+              className="bg-white"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: '#000',
+                  '& fieldset': {
+                    borderColor: '#fff',
+                  },
+                },
+              }}
+              inputProps={{
+                style: { 
+                  fontSize: '1.25rem',
+                  fontWeight: 'bold',
+                  padding: '8px 12px',
+                },
+              }}
+            />
+          ) : (
+            <>
+              <Typography
+                variant="h6"
+                className="text-white font-bold text-xl"
+                component="h1"
+              >
+                {currentFormation?.name || 'Formation'}
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={handleEditClick}
+                className="text-white hover:text-yellow-400"
+                aria-label="Edit formation name"
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </>
+          )}
+        </Box>
         <Box
           className="bg-blue-900 border-2 border-yellow-500 rounded-lg px-6 py-2 flex items-center gap-2"
           style={{

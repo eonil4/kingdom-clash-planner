@@ -49,6 +49,11 @@ const formationSlice = createSlice({
         );
       }
     },
+    updateFormationName: (state, action: PayloadAction<string>) => {
+      if (state.currentFormation) {
+        state.currentFormation.name = action.payload;
+      }
+    },
   },
 });
 
@@ -68,6 +73,7 @@ export const {
   setCurrentFormation,
   placeUnit,
   removeUnit,
+  updateFormationName,
 } = formationSlice.actions;
 
 export default formationSlice.reducer;
