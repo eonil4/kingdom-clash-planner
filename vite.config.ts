@@ -13,6 +13,24 @@ export default defineConfig({
     environment: 'jsdom',
     passWithNoTests: true,
     setupFiles: ['./tests/setup.ts'],
+    // Isolate tests - each test runs in its own environment
+    isolate: true,
+    // Run tests in parallel for speed
+    threads: true,
+    maxConcurrency: 5,
+    // Pool options for better performance
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: false,
+        minThreads: 1,
+        maxThreads: 4,
+      },
+    },
+    // Test timeout
+    testTimeout: 10000,
+    // Hook timeout
+    hookTimeout: 10000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

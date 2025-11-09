@@ -14,6 +14,10 @@ vi.mock('react-router-dom', () => ({
   createBrowserRouter: (routes: Array<{ path: string; element: React.ReactElement }>) => ({
     routes,
   }),
+  useSearchParams: () => {
+    const params = new URLSearchParams();
+    return [params, vi.fn()];
+  },
 }));
 
 const createMockStore = () => {
