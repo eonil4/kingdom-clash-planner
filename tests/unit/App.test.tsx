@@ -6,6 +6,10 @@ import App from '../../src/App';
 import unitReducer from '../../src/store/reducers/unitSlice';
 import formationReducer from '../../src/store/reducers/formationSlice';
 
+// Create stable mock references outside the mock to ensure consistent identity
+const mockSetSearchParams = vi.fn();
+const mockSearchParams = new URLSearchParams();
+
 // Mock react-router-dom
 vi.mock('react-router-dom', () => ({
   RouterProvider: ({ router }: { router: { routes: Array<{ path: string; element: React.ReactElement }> } }) => {
@@ -14,10 +18,7 @@ vi.mock('react-router-dom', () => ({
   createBrowserRouter: (routes: Array<{ path: string; element: React.ReactElement }>) => ({
     routes,
   }),
-  useSearchParams: () => {
-    const params = new URLSearchParams();
-    return [params, vi.fn()];
-  },
+  useSearchParams: vi.fn(() => [mockSearchParams, mockSetSearchParams]),
 }));
 
 const createMockStore = () => {
