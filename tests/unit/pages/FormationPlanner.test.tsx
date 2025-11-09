@@ -4,14 +4,20 @@ import FormationPlanner from '../../../src/pages/FormationPlanner';
 import { useAppSelector, useAppDispatch } from '../../../src/store/hooks';
 import { UnitRarity, type Unit } from '../../../src/types';
 
-const mockUseDrop = vi.fn(() => [
-  { isOver: false },
-  vi.fn(),
-]);
+let capturedDropHandler: ((item: { unit: Unit; isInFormation?: boolean; sourceRow?: number; sourceCol?: number }, monitor?: { didDrop: () => boolean }) => void) | undefined;
+const mockUseDrop = vi.fn((config?: { drop?: (item: unknown, monitor?: { didDrop: () => boolean }) => void }) => {
+  if (config?.drop) {
+    capturedDropHandler = config.drop as typeof capturedDropHandler;
+  }
+  return [
+    { isOver: false },
+    vi.fn(),
+  ];
+});
 
 vi.mock('react-dnd', () => ({
   DndProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  useDrop: () => mockUseDrop(),
+  useDrop: (config?: { drop?: (item: unknown, monitor?: { didDrop: () => boolean }) => void }) => mockUseDrop(config),
   HTML5Backend: {},
 }));
 
@@ -33,22 +39,25 @@ vi.mock('../../../src/components/FormationHeader', () => ({
 }));
 
 vi.mock('../../../src/components/FormationGrid', () => ({
-  default: ({ onPlaceUnit, onRemoveUnit }: { onPlaceUnit: (row: number, col: number, unit: Unit) => void; onRemoveUnit: (row: number, col: number) => void }) => (
-    <div data-testid="formation-grid">
-      <button
-        data-testid="place-unit"
-        onClick={() => onPlaceUnit(0, 0, { id: '1', name: 'Test', level: 1, rarity: UnitRarity.Common })}
-      >
-        Place Unit
-      </button>
-      <button
-        data-testid="remove-unit"
-        onClick={() => onRemoveUnit(0, 0)}
-      >
-        Remove Unit
-      </button>
-    </div>
-  ),
+  default: ({ onPlaceUnit, onRemoveUnit }: { onPlaceUnit: (row: number, col: number, unit: Unit) => void; onRemoveUnit: (row: number, col: number, unit: Unit | null) => void }) => {
+    const testUnit = { id: '1', name: 'Test', level: 1, rarity: UnitRarity.Common };
+    return (
+      <div data-testid="formation-grid">
+        <button
+          data-testid="place-unit"
+          onClick={() => onPlaceUnit(0, 0, testUnit)}
+        >
+          Place Unit
+        </button>
+        <button
+          data-testid="remove-unit"
+          onClick={() => onRemoveUnit(0, 0, testUnit)}
+        >
+          Remove Unit
+        </button>
+      </div>
+    );
+  },
 }));
 
 vi.mock('../../../src/components/UnitList', () => ({
@@ -71,6 +80,7 @@ describe('FormationPlanner', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    capturedDropHandler = undefined;
     (useAppDispatch as ReturnType<typeof vi.fn>).mockReturnValue(mockDispatch);
     (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
       const state = {
@@ -198,6 +208,58 @@ describe('FormationPlanner', () => {
     );
 
     alertSpy.mockRestore();
+  });
+
+  it('should not process drop if nested drop target already handled it (didDrop check)', async () => {
+    const { removeUnit } = await import('../../../src/store/reducers/formationSlice');
+    const unitFromFormation = { id: '1', name: 'FormationUnit', level: 5, rarity: UnitRarity.Epic };
+    
+    render(<FormationPlanner />);
+
+    // Simulate a drop that was already handled by a nested drop target (like UnitList)
+    // The monitor.didDrop() returns true, indicating a nested handler processed it
+    if (capturedDropHandler) {
+      capturedDropHandler(
+        {
+          unit: unitFromFormation,
+          isInFormation: true,
+          sourceRow: 2,
+          sourceCol: 3,
+        },
+        {
+          didDrop: () => true, // Simulate that a nested drop target handled it
+        }
+      );
+    }
+
+    // Should not dispatch removeUnit because didDrop() returned true
+    expect(mockDispatch).not.toHaveBeenCalledWith(removeUnit(expect.anything()));
+  });
+
+  it('should process drop if nested drop target did not handle it (didDrop returns false)', async () => {
+    const { removeUnit } = await import('../../../src/store/reducers/formationSlice');
+    const unitFromFormation = { id: '1', name: 'FormationUnit', level: 5, rarity: UnitRarity.Epic };
+    
+    render(<FormationPlanner />);
+
+    // Simulate a drop that was not handled by a nested drop target
+    // The monitor.didDrop() returns false, so parent should handle it
+    if (capturedDropHandler) {
+      capturedDropHandler(
+        {
+          unit: unitFromFormation,
+          isInFormation: true,
+          sourceRow: 2,
+          sourceCol: 3,
+        },
+        {
+          didDrop: () => false, // Simulate that no nested drop target handled it
+        }
+      );
+    }
+
+    // Should dispatch removeUnit because didDrop() returned false
+    expect(mockDispatch).toHaveBeenCalledWith(removeUnit({ row: 2, col: 3, unit: unitFromFormation }));
   });
 });
 

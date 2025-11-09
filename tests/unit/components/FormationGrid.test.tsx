@@ -8,7 +8,7 @@ vi.mock('../../../src/components/FormationTile', () => ({
     <div
       data-testid={`tile-${row}-${col}`}
       data-unit={unit ? unit.name : 'empty'}
-      onClick={() => unit && onRemoveUnit(row, col)}
+      onClick={() => unit && onRemoveUnit(row, col, unit)}
     >
       {unit ? `${unit.name} (${unit.level})` : 'Empty'}
     </div>

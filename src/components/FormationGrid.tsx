@@ -5,7 +5,7 @@ import FormationTile from './FormationTile';
 interface FormationGridProps {
   tiles: (Unit | null)[][];
   onPlaceUnit: (row: number, col: number, unit: Unit) => void;
-  onRemoveUnit: (row: number, col: number) => void;
+  onRemoveUnit: (row: number, col: number, unit: Unit | null) => void;
 }
 
 export default function FormationGrid({

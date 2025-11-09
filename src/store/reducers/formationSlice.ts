@@ -39,18 +39,14 @@ const formationSlice = createSlice({
     },
     removeUnit: (state, action: PayloadAction<{ row: number; col: number; unit?: Unit | null }>) => {
       if (state.currentFormation) {
-        // Get the unit before removing it (unit may be passed in payload or read from tiles)
-        const unitToRemove = action.payload.unit || state.currentFormation.tiles[action.payload.row]?.[action.payload.col];
+        // Remove unit from the tile
+        // Note: The unit should be passed in the payload so the saga can add it back to roster
         state.currentFormation.tiles[action.payload.row][
           action.payload.col
         ] = null;
         state.currentFormation.power = calculatePower(
           state.currentFormation.tiles
         );
-        // Store unit in action payload for saga (if not already there)
-        if (unitToRemove && !action.payload.unit) {
-          (action.payload as { row: number; col: number; unit?: Unit | null }).unit = unitToRemove;
-        }
       }
     },
   },

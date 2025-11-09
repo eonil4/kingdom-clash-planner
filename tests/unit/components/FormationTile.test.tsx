@@ -106,7 +106,7 @@ describe('FormationTile', () => {
     const unitCard = screen.getByTestId('unit-card');
     await user.dblClick(unitCard);
 
-    expect(mockOnRemoveUnit).toHaveBeenCalledWith(2, 3);
+    expect(mockOnRemoveUnit).toHaveBeenCalledWith(2, 3, mockUnit);
   });
 
   it('should have correct aria-label for different positions', () => {
@@ -176,7 +176,7 @@ describe('FormationTile', () => {
       });
     }
 
-    expect(mockOnRemoveUnit).toHaveBeenCalledWith(0, 0);
+    expect(mockOnRemoveUnit).toHaveBeenCalledWith(0, 0, droppedUnit);
     expect(mockOnPlaceUnit).toHaveBeenCalledWith(1, 1, droppedUnit);
   });
 
@@ -201,7 +201,10 @@ describe('FormationTile', () => {
       });
     }
 
-    expect(mockOnRemoveUnit).toHaveBeenCalledWith(0, 0);
+    // Should remove unit from source position
+    expect(mockOnRemoveUnit).toHaveBeenCalledWith(0, 0, droppedUnit);
+    // Should remove existing unit from target position
+    expect(mockOnRemoveUnit).toHaveBeenCalledWith(2, 2, mockUnit);
     expect(mockOnPlaceUnit).toHaveBeenCalledWith(2, 2, droppedUnit);
   });
 

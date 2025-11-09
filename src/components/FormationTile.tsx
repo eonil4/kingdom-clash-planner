@@ -7,7 +7,7 @@ interface FormationTileProps {
   col: number;
   unit: Unit | null;
   onPlaceUnit: (row: number, col: number, unit: Unit) => void;
-  onRemoveUnit: (row: number, col: number) => void;
+  onRemoveUnit: (row: number, col: number, unit: Unit | null) => void;
 }
 
 export default function FormationTile({
@@ -20,16 +20,30 @@ export default function FormationTile({
   const [{ isOver }, drop] = useDrop({
     accept: 'unit',
     drop: (item: { unit: Unit; isInFormation?: boolean; sourceRow?: number; sourceCol?: number }) => {
+      const isMovingFromFormation = item.isInFormation && item.sourceRow !== undefined && item.sourceCol !== undefined;
+      const isMovingFromDifferentTile = isMovingFromFormation && (item.sourceRow !== row || item.sourceCol !== col);
+      const isDroppingOnSameTile = isMovingFromFormation && item.sourceRow === row && item.sourceCol === col;
+      
+      // Don't do anything if dropping on the same tile
+      if (isDroppingOnSameTile) {
+        return;
+      }
+      
       // If unit is being moved from another tile, remove it from the old position first
-      if (item.isInFormation && item.sourceRow !== undefined && item.sourceCol !== undefined) {
-        if (item.sourceRow !== row || item.sourceCol !== col) {
-          onRemoveUnit(item.sourceRow, item.sourceCol);
-        }
+      // We need to get the unit from the item since we don't have access to it here
+      if (isMovingFromDifferentTile && item.sourceRow !== undefined && item.sourceCol !== undefined) {
+        // Pass the unit being moved (it's in the item)
+        onRemoveUnit(item.sourceRow, item.sourceCol, item.unit);
       }
-      // Place unit if tile is empty, or if we're moving from another tile (overwrite)
-      if (!unit || (item.isInFormation && item.sourceRow !== undefined && item.sourceCol !== undefined && (item.sourceRow !== row || item.sourceCol !== col))) {
-        onPlaceUnit(row, col, item.unit);
+      
+      // If there's an existing unit in this tile (and we're not dropping on the same tile),
+      // remove the existing unit first (it will be moved back to roster)
+      if (unit) {
+        onRemoveUnit(row, col, unit);
       }
+      
+      // Place the new unit (always place after handling removals)
+      onPlaceUnit(row, col, item.unit);
     },
     collect: (monitor) => ({
       isOver: monitor.isOver(),
@@ -39,7 +53,7 @@ export default function FormationTile({
   const handleDoubleClick = () => {
     if (unit) {
       // Remove unit from formation and add it back to roster
-      onRemoveUnit(row, col);
+      onRemoveUnit(row, col, unit);
     }
   };
 

@@ -54,18 +54,26 @@ function FormationPlannerContent() {
     dispatch(placeUnit({ row, col, unit }));
   };
 
-  const handleRemoveUnit = (row: number, col: number) => {
-    // Get the unit from the formation before removing it
-    const unit = currentFormation?.tiles[row]?.[col] || null;
-    dispatch(removeUnit({ row, col, unit }));
+  const handleRemoveUnit = (row: number, col: number, unit: Unit | null) => {
+    // Unit is passed from the component, so we use it directly
+    // This ensures we have the correct unit even if state has changed
+    dispatch(removeUnit({ row, col, unit: unit || null }));
   };
 
   // Drop zone for removing units from formation when dropped outside the grid
+  // Note: UnitList has its own drop handler, so this only handles drops outside both grid and list
   const [, dropOutside] = useDrop({
     accept: 'unit',
-    drop: (item: { unit: Unit; isInFormation?: boolean; sourceRow?: number; sourceCol?: number }) => {
+    drop: (item: { unit: Unit; isInFormation?: boolean; sourceRow?: number; sourceCol?: number }, monitor) => {
       // Only handle units that are being dragged from the formation
       if (item.isInFormation && item.sourceRow !== undefined && item.sourceCol !== undefined) {
+        // Check if the drop happened on a nested drop target (like UnitList)
+        // If so, let the nested handler deal with it to avoid double-processing
+        const didDrop = monitor.didDrop();
+        if (didDrop) {
+          // A nested drop target handled it, don't process here
+          return;
+        }
         // Remove unit from formation and add it back to roster
         dispatch(removeUnit({ row: item.sourceRow, col: item.sourceCol, unit: item.unit }));
       }

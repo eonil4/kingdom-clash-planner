@@ -8,6 +8,7 @@ export function* handlePlaceUnit(action: ReturnType<typeof placeUnit>) {
 }
 
 export function* handleRemoveUnit(action: ReturnType<typeof removeUnit>) {
+  // Get unit from payload - it should always be provided by the caller
   const { unit } = action.payload;
   if (unit) {
     // Add unit back to available units list
