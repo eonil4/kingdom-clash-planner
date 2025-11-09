@@ -500,11 +500,12 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
         case 'rarity':
           comparison = rarityOrder[a.rarity] - rarityOrder[b.rarity];
           break;
-        case 'count':
+        case 'count': {
           const keyA = `${a.name}-${a.level}`;
           const keyB = `${b.name}-${b.level}`;
           comparison = (unitCounts[keyA] || 1) - (unitCounts[keyB] || 1);
           break;
+        }
       }
 
       return sortDirection === 'asc' ? comparison : -comparison;
