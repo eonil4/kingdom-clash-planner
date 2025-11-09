@@ -41,6 +41,7 @@ export default defineConfig({
         'scripts/',
         '**/*.config.*',
         '**/mockData.ts',
+        '**/*.d.ts',
       ],
     },
   },
