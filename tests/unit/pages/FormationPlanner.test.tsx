@@ -261,5 +261,53 @@ describe('FormationPlanner', () => {
     // Should dispatch removeUnit because didDrop() returned false
     expect(mockDispatch).toHaveBeenCalledWith(removeUnit({ row: 2, col: 3, unit: unitFromFormation }));
   });
+
+  it('should update page title with formation name', () => {
+    const { rerender } = render(<FormationPlanner />);
+
+    expect(document.title).toBe('Test Formation - Kingdom Clash Planner');
+
+    // Update formation name
+    const newFormation = {
+      ...mockFormation,
+      name: 'New Formation Name',
+    };
+
+    (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
+      const state = {
+        formation: {
+          currentFormation: newFormation,
+          formations: [],
+        },
+        unit: {
+          units: [],
+        },
+      };
+      return selector(state);
+    });
+
+    rerender(<FormationPlanner />);
+
+    expect(document.title).toBe('New Formation Name - Kingdom Clash Planner');
+  });
+
+  it('should set default page title when formation is null', () => {
+    (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
+      const state = {
+        formation: {
+          currentFormation: null,
+          formations: [],
+        },
+        unit: {
+          units: [],
+        },
+      };
+      return selector(state);
+    });
+
+    render(<FormationPlanner />);
+
+    expect(document.title).toBe('Kingdom Clash Planner');
+  });
 });
 

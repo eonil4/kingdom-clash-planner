@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useDrop } from 'react-dnd';
@@ -16,6 +17,15 @@ function FormationPlannerContent() {
   const dispatch = useAppDispatch();
   const currentFormation = useAppSelector((state) => state.formation.currentFormation);
   const { units } = useAppSelector((state) => state.unit);
+
+  // Update page title with formation name
+  useEffect(() => {
+    if (currentFormation?.name) {
+      document.title = `${currentFormation.name} - Kingdom Clash Planner`;
+    } else {
+      document.title = 'Kingdom Clash Planner';
+    }
+  }, [currentFormation?.name]);
 
   // Helper function to count units in formation
   const countFormationUnits = (): number => {
