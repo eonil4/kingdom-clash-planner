@@ -2,13 +2,16 @@ import { useState, useRef, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { Typography, Box, IconButton, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import HelpIcon from '@mui/icons-material/Help';
 import { updateFormationName } from '../store/reducers/formationSlice';
+import HelpOverlay from './HelpOverlay';
 
 export default function FormationHeader() {
   const dispatch = useAppDispatch();
   const currentFormation = useAppSelector((state) => state.formation.currentFormation);
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -85,6 +88,20 @@ export default function FormationHeader() {
             />
           ) : (
             <>
+              <IconButton
+                size="small"
+                onClick={() => setIsHelpOpen(true)}
+                className="text-white hover:text-blue-400"
+                aria-label="Open help overlay"
+                sx={{
+                  position: 'absolute',
+                  left: 0,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                }}
+              >
+                <HelpIcon fontSize="small" />
+              </IconButton>
               <Typography
                 variant="h6"
                 className="text-white font-bold text-xl text-center"
@@ -122,6 +139,7 @@ export default function FormationHeader() {
           </Typography>
         </Box>
       </Box>
+      <HelpOverlay open={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </Box>
   );
 }

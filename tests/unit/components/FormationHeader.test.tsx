@@ -204,5 +204,59 @@ describe('FormationHeader', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(updateFormationName('New Formation Name'));
   });
+
+  it('should show help icon next to formation name', () => {
+    const mockFormation = {
+      id: '1',
+      name: 'Test Formation',
+      power: 100,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+
+    (useAppSelector as ReturnType<typeof vi.fn>).mockReturnValue(mockFormation);
+
+    render(<FormationHeader />);
+
+    const helpButton = screen.getByLabelText('Open help overlay');
+    expect(helpButton).toBeInTheDocument();
+  });
+
+  it('should open help overlay when help icon is clicked', async () => {
+    const user = userEvent.setup();
+    const mockFormation = {
+      id: '1',
+      name: 'Test Formation',
+      power: 100,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+
+    (useAppSelector as ReturnType<typeof vi.fn>).mockReturnValue(mockFormation);
+
+    render(<FormationHeader />);
+
+    const helpButton = screen.getByLabelText('Open help overlay');
+    await user.click(helpButton);
+
+    expect(screen.getByText('Application Guide')).toBeInTheDocument();
+  });
+
+  it('should not show help icon when editing formation name', async () => {
+    const user = userEvent.setup();
+    const mockFormation = {
+      id: '1',
+      name: 'Test Formation',
+      power: 100,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+
+    (useAppSelector as ReturnType<typeof vi.fn>).mockReturnValue(mockFormation);
+
+    render(<FormationHeader />);
+
+    const editButton = screen.getByLabelText('Edit formation name');
+    await user.click(editButton);
+
+    expect(screen.queryByLabelText('Open help overlay')).not.toBeInTheDocument();
+  });
 });
 
