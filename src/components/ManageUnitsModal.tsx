@@ -920,8 +920,15 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
             </Box>
           )}
 
-          <TableContainer component={Paper} className="bg-gray-700">
-            <Table>
+          <TableContainer 
+            component={Paper} 
+            className="bg-gray-700"
+            sx={{ 
+              maxHeight: 'calc(100vh - 400px)',
+              overflow: 'auto'
+            }}
+          >
+            <Table stickyHeader>
               <TableHead>
                 <TableRow className="bg-gray-900">
                   <TableCell className="text-white font-bold">Preview</TableCell>
@@ -971,9 +978,9 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                   </TableCell>
                   <TableCell className="text-white font-bold">Actions</TableCell>
                 </TableRow>
-                <TableRow className="bg-gray-800">
-                  <TableCell></TableCell>
-                  <TableCell>
+                <TableRow className="bg-gray-800" sx={{ position: 'sticky', top: '56px', zIndex: 10 }}>
+                  <TableCell sx={{ backgroundColor: '#1f2937' }}></TableCell>
+                  <TableCell sx={{ backgroundColor: '#1f2937' }}>
                     <TextField
                       size="small"
                       placeholder="Filter name..."
@@ -1000,7 +1007,7 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                       }}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ backgroundColor: '#1f2937' }}>
                     <Box className="flex items-center gap-1">
                       <TextField
                         size="small"
@@ -1051,7 +1058,7 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                       />
                     </Box>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ backgroundColor: '#1f2937' }}>
                     <Box className="flex items-center gap-1">
                       <FormControl size="small" className="bg-gray-700" sx={{ minWidth: '80px' }}>
                         <Select
@@ -1100,7 +1107,7 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                       </FormControl>
                     </Box>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ backgroundColor: '#1f2937' }}>
                     <Box className="flex items-center gap-1">
                       <TextField
                         size="small"
@@ -1151,7 +1158,7 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
                       />
                     </Box>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ backgroundColor: '#1f2937' }}>
                     {hasActiveFilters && (
                       <Button
                         size="small"
