@@ -7,7 +7,7 @@ describe('formationSlice', () => {
   const initialState = {
     currentFormation: {
       id: '1',
-      name: 'Formation 9',
+      name: 'Formation 1',
       tiles: Array(7)
         .fill(null)
         .map(() => Array(7).fill(null)),
@@ -27,7 +27,7 @@ describe('formationSlice', () => {
     it('should return initial state', () => {
       const state = formationReducer(undefined, { type: 'unknown' });
       expect(state.currentFormation).toBeDefined();
-      expect(state.currentFormation?.name).toBe('Formation 9');
+      expect(state.currentFormation?.name).toBe('Formation 1');
       expect(state.currentFormation?.tiles.length).toBe(7);
     });
   });

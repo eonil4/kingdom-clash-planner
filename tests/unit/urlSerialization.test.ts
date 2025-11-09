@@ -290,7 +290,7 @@ describe('urlSerialization', () => {
   describe('deserializeFormation', () => {
     it('should deserialize empty string', () => {
       const result = deserializeFormation('');
-      expect(result.name).toBe('Formation 9');
+      expect(result.name).toBe('Formation 1');
       expect(result.tiles.length).toBe(7);
       result.tiles.forEach((row) => {
         expect(row.length).toBe(7);

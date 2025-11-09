@@ -28,19 +28,48 @@ export function useUrlSync() {
     const unitsString = serializeUnits(units);
     const formationString = serializeFormation(currentFormation);
     
-    // Skip URL update on initial mount to avoid overwriting URL params during initialization
+    // Check if we need to update URL
+    const needsUpdate = 
+      lastSerializedState.current.units !== unitsString ||
+      lastSerializedState.current.formation !== formationString;
+    
+    // On initial mount, check if formation param is missing and add it if needed
     if (isInitialMount.current) {
       isInitialMount.current = false;
       // Store the initial serialized state for comparison
       lastSerializedState.current = { units: unitsString, formation: formationString };
+      
+      // If formation param is not in URL, add it
+      const hasFormationParam = searchParamsRef.current.has('formation');
+      if (!hasFormationParam && formationString) {
+        // Add formation param to URL
+        const params: string[] = [];
+        
+        // Add all existing params except units and formation
+        searchParamsRef.current.forEach((value, key) => {
+          if (key !== 'units' && key !== 'formation') {
+            params.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+          }
+        });
+        
+        // Add units param if it exists
+        if (unitsString) {
+          params.push(`units=${unitsString}`);
+        }
+        
+        // Add formation param
+        params.push(`formation=${formationString}`);
+        
+        // Update URL directly using window.history to avoid URLSearchParams encoding
+        const newQueryString = params.length > 0 ? `?${params.join('&')}` : '';
+        const newUrl = `${window.location.pathname}${newQueryString}${window.location.hash}`;
+        window.history.replaceState({}, '', newUrl);
+      }
       return;
     }
     
     // Only update if the serialized state actually changed
-    if (
-      lastSerializedState.current.units !== unitsString ||
-      lastSerializedState.current.formation !== formationString
-    ) {
+    if (needsUpdate) {
       // Update the stored state
       lastSerializedState.current = { units: unitsString, formation: formationString };
       

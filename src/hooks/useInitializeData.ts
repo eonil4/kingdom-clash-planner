@@ -61,7 +61,7 @@ export function useInitializeData() {
           // Invalid formation, use default empty formation
           const defaultFormation = {
             id: '1',
-            name: 'Formation 9',
+            name: 'Formation 1',
             tiles: Array(7)
               .fill(null)
               .map(() => Array(7).fill(null)),
@@ -74,7 +74,7 @@ export function useInitializeData() {
         // Use default empty formation on error
         const defaultFormation = {
           id: '1',
-          name: 'Formation 9',
+          name: 'Formation 1',
           tiles: Array(7)
             .fill(null)
             .map(() => Array(7).fill(null)),
@@ -86,7 +86,7 @@ export function useInitializeData() {
       // No formation in URL, use default empty formation
       const defaultFormation = {
         id: '1',
-        name: 'Formation 9',
+        name: 'Formation 1',
         tiles: Array(7)
           .fill(null)
           .map(() => Array(7).fill(null)),

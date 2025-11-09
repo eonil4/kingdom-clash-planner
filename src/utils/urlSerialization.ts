@@ -139,7 +139,7 @@ export function deserializeFormation(formationString: string): { name: string; t
     .fill(null)
     .map(() => Array(7).fill(null));
   
-  let formationName = 'Formation 9'; // Default name
+  let formationName = 'Formation 1'; // Default name
   
   if (!formationString) {
     return { name: formationName, tiles };

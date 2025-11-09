@@ -9,7 +9,7 @@ interface FormationState {
 const initialState: FormationState = {
   currentFormation: {
     id: '1',
-    name: 'Formation 9',
+    name: 'Formation 1',
     tiles: Array(7)
       .fill(null)
       .map(() => Array(7).fill(null)),
