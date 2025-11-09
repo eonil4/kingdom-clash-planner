@@ -30,10 +30,10 @@ describe('urlSerialization', () => {
       const units: Unit[] = [
         {
           id: '1',
-          name: 'ARCHERS',
+          name: 'Archers',
           level: 5,
-          rarity: UnitRarity.Rare,
-          power: 1920,
+          rarity: UnitRarity.Common,
+          power: 1600,
         },
       ];
       const result = serializeUnits(units);
@@ -44,24 +44,24 @@ describe('urlSerialization', () => {
       const units: Unit[] = [
         {
           id: '1',
-          name: 'ARCHERS',
+          name: 'Archers',
           level: 5,
-          rarity: UnitRarity.Rare,
-          power: 1920,
+          rarity: UnitRarity.Common,
+          power: 1600,
         },
         {
           id: '2',
-          name: 'ARCHERS',
+          name: 'Archers',
           level: 5,
-          rarity: UnitRarity.Rare,
-          power: 1920,
+          rarity: UnitRarity.Common,
+          power: 1600,
         },
         {
           id: '3',
-          name: 'ARCHERS',
+          name: 'Archers',
           level: 5,
-          rarity: UnitRarity.Rare,
-          power: 1920,
+          rarity: UnitRarity.Common,
+          power: 1600,
         },
       ];
       const result = serializeUnits(units);
@@ -72,17 +72,17 @@ describe('urlSerialization', () => {
       const units: Unit[] = [
         {
           id: '1',
-          name: 'ARCHERS',
+          name: 'Archers',
           level: 5,
-          rarity: UnitRarity.Rare,
-          power: 1920,
+          rarity: UnitRarity.Common,
+          power: 1600,
         },
         {
           id: '2',
-          name: 'ARCHERS',
+          name: 'Archers',
           level: 10,
-          rarity: UnitRarity.Rare,
-          power: 46080,
+          rarity: UnitRarity.Common,
+          power: 38400,
         },
       ];
       const result = serializeUnits(units);
@@ -97,17 +97,17 @@ describe('urlSerialization', () => {
       const units: Unit[] = [
         {
           id: '1',
-          name: 'ARCHERS',
+          name: 'Archers',
           level: 5,
-          rarity: UnitRarity.Rare,
-          power: 1920,
+          rarity: UnitRarity.Common,
+          power: 1600,
         },
         {
           id: '2',
-          name: 'PALADIN',
+          name: 'Paladin',
           level: 5,
-          rarity: UnitRarity.Legendary,
-          power: 2560,
+          rarity: UnitRarity.Epic,
+          power: 2240,
         },
       ];
       const result = serializeUnits(units);
@@ -124,18 +124,18 @@ describe('urlSerialization', () => {
     it('should deserialize single unit', () => {
       const result = deserializeUnits('2,5,1');
       expect(result.length).toBe(1);
-      expect(result[0].name).toBe('ARCHERS');
+      expect(result[0].name).toBe('Archers');
       expect(result[0].level).toBe(5);
-      expect(result[0].rarity).toBe(UnitRarity.Rare);
+      expect(result[0].rarity).toBe(UnitRarity.Common);
     });
 
     it('should deserialize multiple units of same type and level', () => {
       const result = deserializeUnits('2,5,3');
       expect(result.length).toBe(3);
       result.forEach((unit) => {
-        expect(unit.name).toBe('ARCHERS');
+        expect(unit.name).toBe('Archers');
         expect(unit.level).toBe(5);
-        expect(unit.rarity).toBe(UnitRarity.Rare);
+        expect(unit.rarity).toBe(UnitRarity.Common);
       });
     });
 
@@ -159,7 +159,7 @@ describe('urlSerialization', () => {
     it('should handle invalid entries gracefully', () => {
       const result = deserializeUnits('invalid,entry;2,5,1;also,invalid');
       expect(result.length).toBe(1);
-      expect(result[0].name).toBe('ARCHERS');
+      expect(result[0].name).toBe('Archers');
     });
 
     it('should handle invalid unit index', () => {
@@ -178,11 +178,11 @@ describe('urlSerialization', () => {
     });
 
     it('should handle multiple different unit types and levels', () => {
-      const result = deserializeUnits('2,5,2;27,10,3;0,1,1'); // PALADIN is index 27, not 18
+      const result = deserializeUnits('2,5,2;27,10,3;0,1,1'); // Paladin is index 27, Air Elemental is index 0
       expect(result.length).toBe(6);
-      const archers = result.filter((u) => u.name === 'ARCHERS' && u.level === 5);
-      const paladins = result.filter((u) => u.name === 'PALADIN' && u.level === 10);
-      const airElementals = result.filter((u) => u.name === 'AIR ELEMENTAL' && u.level === 1);
+      const archers = result.filter((u) => u.name === 'Archers' && u.level === 5);
+      const paladins = result.filter((u) => u.name === 'Paladin' && u.level === 10);
+      const airElementals = result.filter((u) => u.name === 'Air Elemental' && u.level === 1);
       expect(archers.length).toBe(2);
       expect(paladins.length).toBe(3);
       expect(airElementals.length).toBe(1);
@@ -209,21 +209,21 @@ describe('urlSerialization', () => {
         .map(() => Array(7).fill(null));
       tiles[0][0] = {
         id: '1',
-        name: 'ARCHERS',
+        name: 'Archers',
         level: 5,
-        rarity: UnitRarity.Rare,
-        power: 1920,
+        rarity: UnitRarity.Common,
+        power: 1600,
       };
       const formation: Formation = {
         id: '1',
         name: 'Test Formation',
         tiles,
-        power: 1920,
+        power: 1600,
       };
       const result = serializeFormation(formation);
       const parts = result.split(';');
       expect(parts[0]).toBe('Test Formation');
-      expect(parts[1]).toBe('2,5'); // First cell should have ARCHERS (index 2) at level 5
+      expect(parts[1]).toBe('2,5'); // First cell should have Archers (index 2) at level 5
       expect(parts[2]).toBe('_'); // Second cell should be empty
     });
 
@@ -233,29 +233,29 @@ describe('urlSerialization', () => {
         .map(() => Array(7).fill(null));
       tiles[0][0] = {
         id: '1',
-        name: 'ARCHERS',
+        name: 'Archers',
         level: 5,
-        rarity: UnitRarity.Rare,
-        power: 1920,
+        rarity: UnitRarity.Common,
+        power: 1600,
       };
       tiles[0][1] = {
         id: '2',
-        name: 'PALADIN',
+        name: 'Paladin',
         level: 10,
-        rarity: UnitRarity.Legendary,
-        power: 61440,
+        rarity: UnitRarity.Epic,
+        power: 53760,
       };
       const formation: Formation = {
         id: '1',
         name: 'Test Formation',
         tiles,
-        power: 63360,
+        power: 55360,
       };
       const result = serializeFormation(formation);
       const parts = result.split(';');
       expect(parts[0]).toBe('Test Formation');
-      expect(parts[1]).toBe('2,5'); // ARCHERS at level 5
-      expect(parts[2]).toBe('27,10'); // PALADIN at level 10 (index 27)
+      expect(parts[1]).toBe('2,5'); // Archers at level 5
+      expect(parts[2]).toBe('27,10'); // Paladin at level 10 (index 27)
       expect(parts[3]).toBe('_'); // Empty cell
     });
 
@@ -309,18 +309,18 @@ describe('urlSerialization', () => {
       const result = deserializeFormation(formationString);
       expect(result.name).toBe('Test Formation');
       expect(result.tiles[0][0]).not.toBeNull();
-      expect(result.tiles[0][0]?.name).toBe('ARCHERS');
+      expect(result.tiles[0][0]?.name).toBe('Archers');
       expect(result.tiles[0][0]?.level).toBe(5);
       expect(result.tiles[0][1]).toBeNull();
     });
 
     it('should deserialize formation with multiple units', () => {
-      const formationString = 'Test Formation;2,5;27,10;' + '_'.repeat(47).split('').join(';'); // PALADIN is index 27
+      const formationString = 'Test Formation;2,5;27,10;' + '_'.repeat(47).split('').join(';'); // Paladin is index 27
       const result = deserializeFormation(formationString);
       expect(result.name).toBe('Test Formation');
-      expect(result.tiles[0][0]?.name).toBe('ARCHERS');
+      expect(result.tiles[0][0]?.name).toBe('Archers');
       expect(result.tiles[0][0]?.level).toBe(5);
-      expect(result.tiles[0][1]?.name).toBe('PALADIN');
+      expect(result.tiles[0][1]?.name).toBe('Paladin');
       expect(result.tiles[0][1]?.level).toBe(10);
     });
 
@@ -330,14 +330,14 @@ describe('urlSerialization', () => {
       expect(result.name).toBe('Test Formation');
       expect(result.tiles[0][0]).toBeNull();
       expect(result.tiles[0][1]).toBeNull();
-      expect(result.tiles[0][2]?.name).toBe('ARCHERS');
+      expect(result.tiles[0][2]?.name).toBe('Archers');
     });
 
     it('should handle invalid unit data gracefully', () => {
       const formationString = 'Test Formation;invalid;2,5;' + '_'.repeat(47).split('').join(';');
       const result = deserializeFormation(formationString);
       expect(result.tiles[0][0]).toBeNull();
-      expect(result.tiles[0][1]?.name).toBe('ARCHERS');
+      expect(result.tiles[0][1]?.name).toBe('Archers');
     });
 
     it('should handle invalid unit index', () => {

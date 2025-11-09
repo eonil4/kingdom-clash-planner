@@ -41,7 +41,7 @@ describe('useInitializeData', () => {
   });
 
   it('should deserialize units from URL param', () => {
-    const mockUnits = [{ id: '1', name: 'ARCHERS', level: 5, rarity: 'Rare', power: 1920 }];
+    const mockUnits = [{ id: '1', name: 'Archers', level: 5, rarity: 'Common', power: 1600 }];
     (useSearchParams as ReturnType<typeof vi.fn>).mockReturnValue([
       new URLSearchParams('units=2,5,1'),
       mockSetSearchParams,
@@ -93,10 +93,10 @@ describe('useInitializeData', () => {
   it('should calculate formation power from units in tiles', () => {
     const mockUnit = {
       id: '1',
-      name: 'ARCHERS',
+      name: 'Archers',
       level: 5,
-      rarity: UnitRarity.Rare,
-      power: 1920,
+      rarity: UnitRarity.Common,
+      power: 1600,
     };
     const tiles = Array(7)
       .fill(null)
@@ -117,13 +117,13 @@ describe('useInitializeData', () => {
 
     expect(urlSerialization.deserializeFormation).toHaveBeenCalled();
     expect(mockDispatch).toHaveBeenCalled();
-    // Verify that the formation power was calculated (1920 + 3840 = 5760)
+    // Verify that the formation power was calculated (1600 + 3840 = 5440)
     const setFormationCall = mockDispatch.mock.calls.find(
       (call) => call[0]?.type === 'formation/setCurrentFormation'
     );
     expect(setFormationCall).toBeDefined();
     if (setFormationCall) {
-      expect(setFormationCall[0].payload.power).toBe(5760);
+      expect(setFormationCall[0].payload.power).toBe(5440);
     }
   });
 

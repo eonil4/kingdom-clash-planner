@@ -70,6 +70,7 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
       <div className="text-sm">
         <div>Level: <span className="font-bold">{unit.level}</span></div>
         <div>Rarity: <span className="font-bold">{unit.rarity}</span></div>
+        <div>Power: <span className="font-bold">{unit.power.toLocaleString()}</span></div>
         <div className="mt-1 text-xs opacity-90">
           {unit.rarity === UnitRarity.Legendary && '⭐ Legendary Unit'}
           {unit.rarity === UnitRarity.Epic && '💜 Epic Unit'}

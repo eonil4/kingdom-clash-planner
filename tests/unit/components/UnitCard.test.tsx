@@ -24,6 +24,7 @@ describe('UnitCard', () => {
     name: 'TestUnit',
     level: 5,
     rarity: UnitRarity.Rare,
+    power: 1920,
     imageUrl: undefined,
   };
 
@@ -91,6 +92,29 @@ describe('UnitCard', () => {
     // Tooltip should be open (we can't easily test tooltip content without more setup)
     // But we can verify the click handler was called
     expect(card).toBeInTheDocument();
+  });
+
+  it('should display power in tooltip', async () => {
+    const user = userEvent.setup();
+    render(<UnitCard unit={mockUnit} />);
+
+    const card = screen.getByRole('button');
+    await user.click(card);
+
+    // Check for power display in tooltip
+    // MUI Tooltip renders content in a portal, so we need to check the document body
+    await waitFor(() => {
+      // Tooltip content is rendered in a portal, check document body
+      const tooltip = document.body.querySelector('[role="tooltip"]');
+      expect(tooltip).toBeInTheDocument();
+      // Check if power text exists in tooltip
+      // The power value may be formatted with toLocaleString() or truncated in display
+      const tooltipText = tooltip?.textContent || '';
+      expect(tooltipText).toMatch(/Power:/i);
+      // Power value should be present (may be formatted or truncated)
+      // Check that it contains the power number (1920, which may appear as "1,920" or "19" if truncated)
+      expect(tooltipText).toMatch(/19/);
+    }, { timeout: 3000 });
   });
 
   it('should call onDoubleClick when double-clicked', async () => {

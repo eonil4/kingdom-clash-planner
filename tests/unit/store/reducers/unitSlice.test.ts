@@ -15,23 +15,23 @@ import { UnitRarity } from '../../../../src/types';
 describe('unitSlice', () => {
   const mockUnit1: Unit = {
     id: 'unit-1',
-    name: 'ARCHERS',
+    name: 'Archers',
     level: 5,
-    rarity: UnitRarity.Rare,
-    power: 1920,
+    rarity: UnitRarity.Common,
+    power: 1600,
   };
 
   const mockUnit2: Unit = {
     id: 'unit-2',
-    name: 'PALADIN',
+    name: 'Paladin',
     level: 10,
-    rarity: UnitRarity.Legendary,
-    power: 61440,
+    rarity: UnitRarity.Epic,
+    power: 53760,
   };
 
   const mockUnit3: Unit = {
     id: 'unit-3',
-    name: 'INFANTRY',
+    name: 'Infantry',
     level: 1,
     rarity: UnitRarity.Common,
     power: 100,
@@ -60,10 +60,10 @@ describe('unitSlice', () => {
     it('should normalize unit names', () => {
       const unitsWithNumberedName: Unit[] = [{
         ...mockUnit1,
-        name: 'ARCHERS 1',
+        name: 'Archers 1',
       }];
       const state = unitReducer(undefined, setUnits(unitsWithNumberedName));
-      expect(state.units[0].name).toBe('ARCHERS');
+      expect(state.units[0].name).toBe('Archers');
     });
   });
 
@@ -109,10 +109,10 @@ describe('unitSlice', () => {
         undefined,
         setUnits([mockUnit1, mockUnit2])
       );
-      const state = unitReducer(stateWithUnits, setSearchTerm('ARCHERS'));
-      expect(state.searchTerm).toBe('ARCHERS');
+      const state = unitReducer(stateWithUnits, setSearchTerm('Archers'));
+      expect(state.searchTerm).toBe('Archers');
       expect(state.filteredUnits.length).toBe(1);
-      expect(state.filteredUnits[0].name).toBe('ARCHERS');
+      expect(state.filteredUnits[0].name).toBe('Archers');
     });
 
     it('should filter by rarity', () => {
@@ -120,9 +120,9 @@ describe('unitSlice', () => {
         undefined,
         setUnits([mockUnit1, mockUnit2])
       );
-      const state = unitReducer(stateWithUnits, setSearchTerm('Legendary'));
+      const state = unitReducer(stateWithUnits, setSearchTerm('Epic'));
       expect(state.filteredUnits.length).toBe(1);
-      expect(state.filteredUnits[0].name).toBe('PALADIN');
+      expect(state.filteredUnits[0].name).toBe('Paladin');
     });
 
     it('should return all units for empty search term', () => {
@@ -166,10 +166,10 @@ describe('unitSlice', () => {
     it('should normalize unit name when adding', () => {
       const unitWithNumberedName: Unit = {
         ...mockUnit1,
-        name: 'ARCHERS 1',
+        name: 'Archers 1',
       };
       const state = unitReducer(undefined, addUnit(unitWithNumberedName));
-      expect(state.units[0].name).toBe('ARCHERS');
+      expect(state.units[0].name).toBe('Archers');
     });
 
     it('should calculate power if not provided', () => {
@@ -240,10 +240,10 @@ describe('unitSlice', () => {
       const stateWithUnit = unitReducer(undefined, addUnit(mockUnit1));
       const updatedUnit: Unit = {
         ...mockUnit1,
-        name: 'ARCHERS 1',
+        name: 'Archers 1',
       };
       const state = unitReducer(stateWithUnit, updateUnit(updatedUnit));
-      expect(state.units[0].name).toBe('ARCHERS');
+      expect(state.units[0].name).toBe('Archers');
     });
 
     it('should calculate power if not provided when updating', () => {
@@ -290,7 +290,7 @@ describe('unitSlice', () => {
       const units = [mockUnit3, mockUnit1, mockUnit2];
       const stateWithUnits = unitReducer(undefined, setUnits(units));
       const state = unitReducer(stateWithUnits, setSortOption('rarity'));
-      expect(state.filteredUnits[0].rarity).toBe(UnitRarity.Legendary);
+      expect(state.filteredUnits[0].rarity).toBe(UnitRarity.Epic);
       expect(state.filteredUnits[2].rarity).toBe(UnitRarity.Common);
     });
 
@@ -298,8 +298,8 @@ describe('unitSlice', () => {
       const units = [mockUnit2, mockUnit1, mockUnit3];
       const stateWithUnits = unitReducer(undefined, setUnits(units));
       const state = unitReducer(stateWithUnits, setSortOption('name'));
-      expect(state.filteredUnits[0].name).toBe('ARCHERS');
-      expect(state.filteredUnits[2].name).toBe('PALADIN');
+      expect(state.filteredUnits[0].name).toBe('Archers');
+      expect(state.filteredUnits[2].name).toBe('Paladin');
     });
 
     it('should use secondary sort when primary is equal', () => {

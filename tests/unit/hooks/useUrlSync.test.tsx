@@ -58,7 +58,7 @@ describe('useUrlSync', () => {
   });
 
   it('should update URL when units change', () => {
-    const mockUnits = [{ id: '1', name: 'ARCHERS', level: 5, rarity: 'Rare', power: 1920 }];
+    const mockUnits = [{ id: '1', name: 'Archers', level: 5, rarity: 'Common', power: 1600 }];
     (useAppSelector as ReturnType<typeof vi.fn>)
       .mockReturnValueOnce(mockUnits) // units
       .mockReturnValueOnce(null) // formationTiles
@@ -70,7 +70,7 @@ describe('useUrlSync', () => {
     
     // Change units
     (useAppSelector as ReturnType<typeof vi.fn>)
-      .mockReturnValueOnce([...mockUnits, { id: '2', name: 'PALADIN', level: 10, rarity: 'Legendary', power: 61440 }])
+      .mockReturnValueOnce([...mockUnits, { id: '2', name: 'Paladin', level: 10, rarity: 'Epic', power: 53760 }])
       .mockReturnValueOnce(null)
       .mockReturnValueOnce(null);
     
@@ -119,7 +119,7 @@ describe('useUrlSync', () => {
       mockSetSearchParams,
     ]);
     
-    const mockUnits = [{ id: '1', name: 'ARCHERS', level: 5, rarity: 'Rare', power: 1920 }];
+    const mockUnits = [{ id: '1', name: 'Archers', level: 5, rarity: 'Common', power: 1600 }];
     (useAppSelector as ReturnType<typeof vi.fn>)
       .mockReturnValueOnce([]) // Initial units
       .mockReturnValueOnce(null) // Initial formationTiles

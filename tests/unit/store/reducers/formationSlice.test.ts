@@ -17,10 +17,10 @@ describe('formationSlice', () => {
 
   const mockUnit: Unit = {
     id: 'unit-1',
-    name: 'ARCHERS',
+    name: 'Archers',
     level: 5,
-    rarity: UnitRarity.Rare,
-    power: 1920,
+    rarity: UnitRarity.Common,
+    power: 1600,
   };
 
   describe('initial state', () => {
@@ -54,7 +54,7 @@ describe('formationSlice', () => {
         placeUnit({ row: 0, col: 0, unit: mockUnit })
       );
       expect(state.currentFormation?.tiles[0][0]).toEqual(mockUnit);
-      expect(state.currentFormation?.power).toBe(1920);
+      expect(state.currentFormation?.power).toBe(1600);
     });
 
     it('should update power when placing unit', () => {
@@ -62,7 +62,7 @@ describe('formationSlice', () => {
         initialState,
         placeUnit({ row: 0, col: 0, unit: mockUnit })
       );
-      expect(state.currentFormation?.power).toBe(1920);
+      expect(state.currentFormation?.power).toBe(1600);
     });
 
     it('should replace existing unit', () => {
@@ -72,17 +72,17 @@ describe('formationSlice', () => {
       );
       const newUnit: Unit = {
         id: 'unit-2',
-        name: 'PALADIN',
+        name: 'Paladin',
         level: 10,
-        rarity: UnitRarity.Legendary,
-        power: 61440,
+        rarity: UnitRarity.Epic,
+        power: 53760,
       };
       const state = formationReducer(
         stateWithUnit,
         placeUnit({ row: 0, col: 0, unit: newUnit })
       );
       expect(state.currentFormation?.tiles[0][0]).toEqual(newUnit);
-      expect(state.currentFormation?.power).toBe(61440);
+      expect(state.currentFormation?.power).toBe(53760);
     });
 
     it('should handle null currentFormation', () => {

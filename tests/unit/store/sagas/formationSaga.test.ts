@@ -9,10 +9,10 @@ import { UnitRarity } from '../../../../src/types';
 describe('formationSaga', () => {
   const mockUnit: Unit = {
     id: 'unit-1',
-    name: 'ARCHERS',
+    name: 'Archers',
     level: 5,
-    rarity: UnitRarity.Rare,
-    power: 1920,
+    rarity: UnitRarity.Common,
+    power: 1600,
   };
 
   describe('handlePlaceUnit', () => {

@@ -16,9 +16,9 @@ describe('unitNames', () => {
     it('should return unit data for valid unit key', () => {
       const result = getUnitData('ARCHERS');
       expect(result).toBeDefined();
-      expect(result.name).toBe('ARCHERS');
+      expect(result.name).toBe('Archers');
       expect(result.index).toBe(2);
-      expect(result.rarity).toBe(UnitRarity.Rare);
+      expect(result.rarity).toBe(UnitRarity.Common);
     });
 
     it('should return unit data for all unit keys in UnitDataMap', () => {
@@ -32,11 +32,11 @@ describe('unitNames', () => {
 
   describe('getUnitDataByName', () => {
     it('should return unit data for valid unit name', () => {
-      const result = getUnitDataByName('ARCHERS');
+      const result = getUnitDataByName('Archers');
       expect(result).toBeDefined();
-      expect(result?.name).toBe('ARCHERS');
+      expect(result?.name).toBe('Archers');
       expect(result?.index).toBe(2);
-      expect(result?.rarity).toBe(UnitRarity.Rare);
+      expect(result?.rarity).toBe(UnitRarity.Common);
     });
 
     it('should return undefined for invalid unit name', () => {
@@ -93,7 +93,7 @@ describe('unitNames', () => {
   describe('getUnitNameByIndex', () => {
     it('should return unit name for valid index', () => {
       const result = getUnitNameByIndex(2);
-      expect(result).toBe('ARCHERS');
+      expect(result).toBe('Archers');
     });
 
     it('should return undefined for invalid index', () => {
@@ -111,7 +111,7 @@ describe('unitNames', () => {
 
   describe('getIndexByUnitName', () => {
     it('should return index for valid unit name', () => {
-      const result = getIndexByUnitName('ARCHERS');
+      const result = getIndexByUnitName('Archers');
       expect(result).toBe(2);
     });
 
