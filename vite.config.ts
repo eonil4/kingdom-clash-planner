@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  cacheDir: 'node_modules/.vite',
   server: {
     port: 3000,
     open: true
@@ -35,10 +36,6 @@ export default defineConfig({
     testTimeout: 10000,
     // Hook timeout
     hookTimeout: 10000,
-    // Cache configuration for faster subsequent runs
-    cache: {
-      dir: 'node_modules/.vitest',
-    },
     // Optimize JSDOM environment
     environmentOptions: {
       jsdom: {
