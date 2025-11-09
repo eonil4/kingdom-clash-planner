@@ -141,7 +141,7 @@ describe('UnitCard', () => {
     expect(img).toHaveAttribute('src', '/test-image.png');
   });
 
-  it('should show placeholder when image fails to load', () => {
+  it('should show placeholder when image fails to load', async () => {
     const unitWithImage = {
       ...mockUnit,
       imageUrl: '/test-image.png',
@@ -156,7 +156,7 @@ describe('UnitCard', () => {
     img.dispatchEvent(errorEvent);
 
     // After error, placeholder should be shown
-    waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText('T')).toBeInTheDocument();
     });
   });
