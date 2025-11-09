@@ -33,16 +33,25 @@ export function useUrlSync() {
       lastSerializedState.current.units !== unitsString ||
       lastSerializedState.current.formation !== formationString;
     
-    // On initial mount, check if formation param is missing and add it if needed
+    // On initial mount, check if units or formation params are missing and add them if needed
     if (isInitialMount.current) {
       isInitialMount.current = false;
       // Store the initial serialized state for comparison
       lastSerializedState.current = { units: unitsString, formation: formationString };
       
-      // If formation param is not in URL, add it
+      // Check if params are missing or need reordering
+      const hasUnitsParam = searchParamsRef.current.has('units');
       const hasFormationParam = searchParamsRef.current.has('formation');
-      if (!hasFormationParam && formationString) {
-        // Add formation param to URL
+      
+      // Always reorder params so formation comes before units
+      // Check current order by getting all param keys
+      const currentParamKeys = Array.from(searchParamsRef.current.keys());
+      const unitsIndex = currentParamKeys.indexOf('units');
+      const formationIndex = currentParamKeys.indexOf('formation');
+      const needsReorder = hasUnitsParam && hasFormationParam && unitsIndex < formationIndex;
+      
+      // If either param is missing or needs reordering, update URL
+      if (!hasUnitsParam || !hasFormationParam || needsReorder) {
         const params: string[] = [];
         
         // Add all existing params except units and formation
@@ -52,13 +61,31 @@ export function useUrlSync() {
           }
         });
         
-        // Add units param if it exists
-        if (unitsString) {
-          params.push(`units=${unitsString}`);
+        // Always add formation param first (even if empty)
+        if (!hasFormationParam) {
+          params.push(`formation=${formationString || ''}`);
+        } else {
+          // Keep existing formation param value if it exists
+          const existingFormation = searchParamsRef.current.get('formation');
+          if (existingFormation !== null) {
+            params.push(`formation=${existingFormation}`);
+          } else {
+            params.push(`formation=${formationString || ''}`);
+          }
         }
         
-        // Add formation param
-        params.push(`formation=${formationString}`);
+        // Always add units param second (even if empty)
+        if (!hasUnitsParam) {
+          params.push(`units=${unitsString || ''}`);
+        } else {
+          // Keep existing units param value if it exists
+          const existingUnits = searchParamsRef.current.get('units');
+          if (existingUnits !== null) {
+            params.push(`units=${existingUnits}`);
+          } else {
+            params.push(`units=${unitsString || ''}`);
+          }
+        }
         
         // Update URL directly using window.history to avoid URLSearchParams encoding
         const newQueryString = params.length > 0 ? `?${params.join('&')}` : '';
@@ -69,7 +96,13 @@ export function useUrlSync() {
     }
     
     // Only update if the serialized state actually changed
-    if (needsUpdate) {
+    // Also check if params need reordering (formation should come before units)
+    const currentParamKeys = Array.from(searchParamsRef.current.keys());
+    const unitsIndex = currentParamKeys.indexOf('units');
+    const formationIndex = currentParamKeys.indexOf('formation');
+    const needsReorder = unitsIndex !== -1 && formationIndex !== -1 && unitsIndex < formationIndex;
+    
+    if (needsUpdate || needsReorder) {
       // Update the stored state
       lastSerializedState.current = { units: unitsString, formation: formationString };
       
@@ -84,18 +117,14 @@ export function useUrlSync() {
         }
       });
       
-      // Add units param without escaping commas or semicolons
+      // Always add formation param first (even if empty)
+      // Uses ";" as separator instead of "#" to avoid URL fragment issues
+      params.push(`formation=${formationString || ''}`);
+      
+      // Always add units param second (even if empty)
       // Uses ";" as separator instead of "#" to avoid URL fragment issues
       // Commas (,) and semicolons (;) can remain unescaped in query parameter values
-      if (unitsString) {
-        params.push(`units=${unitsString}`);
-      }
-      
-      // Add formation param without escaping commas or semicolons
-      // Uses ";" as separator instead of "#" to avoid URL fragment issues
-      if (formationString) {
-        params.push(`formation=${formationString}`);
-      }
+      params.push(`units=${unitsString || ''}`);
       
       // Update URL directly using window.history to avoid URLSearchParams encoding
       // Commas and semicolons remain unescaped

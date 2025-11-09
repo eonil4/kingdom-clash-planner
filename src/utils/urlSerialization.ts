@@ -1,18 +1,56 @@
 import type { Unit, Formation } from '../types';
+import { UnitRarity } from '../types';
 import { getUnitDataByName, UnitDataMap } from '../types/unitNames';
 import { calculateUnitPower } from './powerUtils';
 import { getUnitImagePath } from './imageUtils';
 
 /**
+ * Sort units for URL serialization:
+ * 1. Level (descending - higher level first)
+ * 2. Rarity (descending - Legendary to Common)
+ * 3. Name (ascending - alphabetical)
+ */
+function sortUnitsForUrl(units: Unit[]): Unit[] {
+  const rarityOrder: Record<UnitRarity, number> = {
+    [UnitRarity.Common]: 0,
+    [UnitRarity.Rare]: 1,
+    [UnitRarity.Epic]: 2,
+    [UnitRarity.Legendary]: 3,
+  };
+
+  return [...units].sort((a, b) => {
+    // Primary: Level (descending)
+    if (b.level !== a.level) {
+      return b.level - a.level;
+    }
+    
+    // Secondary: Rarity (descending - Legendary to Common)
+    const rarityDiff = rarityOrder[b.rarity] - rarityOrder[a.rarity];
+    if (rarityDiff !== 0) {
+      return rarityDiff;
+    }
+    
+    // Tertiary: Name (ascending)
+    return a.name.localeCompare(b.name);
+  });
+}
+
+/**
  * Serialize units to URL format: id,level,count;id,level,count
  * Groups units by unit name index and level, then counts them
+ * Units are sorted by level (desc), rarity (Legendary to Common), and name (asc) before serialization
  * Uses ";" as separator instead of "#" to avoid URL fragment issues
  */
 export function serializeUnits(units: Unit[]): string {
+  if (units.length === 0) return '';
+  
+  // Sort units before grouping to ensure consistent URL param order
+  const sortedUnits = sortUnitsForUrl(units);
+  
   // Group units by unit name index and level
   const grouped = new Map<string, number>();
   
-  for (const unit of units) {
+  for (const unit of sortedUnits) {
     const unitData = getUnitDataByName(unit.name);
     if (!unitData) continue;
     
@@ -21,6 +59,7 @@ export function serializeUnits(units: Unit[]): string {
   }
   
   // Convert to string format: id,level,count;id,level,count
+  // The order is preserved from the sorted units
   return Array.from(grouped.entries())
     .map(([key, count]) => `${key},${count}`)
     .join(';');

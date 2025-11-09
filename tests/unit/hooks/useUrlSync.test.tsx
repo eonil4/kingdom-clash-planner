@@ -49,12 +49,30 @@ describe('useUrlSync', () => {
     });
   });
 
-  it('should not update URL on initial mount', () => {
-    (useAppSelector as ReturnType<typeof vi.fn>).mockReturnValue([]);
+  it('should add units and formation params to URL on initial mount if missing', () => {
+    // Mock empty search params (no units or formation params)
+    const emptySearchParams = new URLSearchParams();
+    (useSearchParams as ReturnType<typeof vi.fn>).mockReturnValue([
+      emptySearchParams,
+      mockSetSearchParams,
+    ]);
+    
+    (useAppSelector as ReturnType<typeof vi.fn>)
+      .mockReturnValueOnce([]) // units
+      .mockReturnValueOnce(null) // formationTiles
+      .mockReturnValueOnce(null); // currentFormation
+    
+    vi.mocked(urlSerialization.serializeUnits).mockReturnValue('');
+    vi.mocked(urlSerialization.serializeFormation).mockReturnValue('Formation 1;' + '_'.repeat(49).split('').join(';'));
     
     renderHook(() => useUrlSync());
 
-    expect(window.history.replaceState).not.toHaveBeenCalled();
+    // Should update URL to add missing params (even if empty)
+    expect(window.history.replaceState).toHaveBeenCalled();
+    const callArgs = (window.history.replaceState as ReturnType<typeof vi.fn>).mock.calls[0];
+    const url = callArgs[2] as string;
+    expect(url).toContain('units=');
+    expect(url).toContain('formation=');
   });
 
   it('should update URL when units change', () => {

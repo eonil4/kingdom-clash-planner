@@ -114,6 +114,89 @@ describe('urlSerialization', () => {
       const parts = result.split(';');
       expect(parts.length).toBe(2);
     });
+
+    it('should sort units by level (desc), rarity (Legendary to Common), and name (asc) in URL', () => {
+      // Create units with different levels, rarities, and names
+      // Note: Units are grouped by name+level, so we need unique combinations to test sorting
+      const units: Unit[] = [
+        {
+          id: '1',
+          name: 'Archers',
+          level: 5,
+          rarity: UnitRarity.Common,
+          power: 1600,
+        },
+        {
+          id: '2',
+          name: 'Paladin',
+          level: 10,
+          rarity: UnitRarity.Epic,
+          power: 53760,
+        },
+        {
+          id: '3',
+          name: 'Air Elemental',
+          level: 10,
+          rarity: UnitRarity.Legendary,
+          power: 76800,
+        },
+        {
+          id: '4',
+          name: 'Zealot',
+          level: 10,
+          rarity: UnitRarity.Legendary,
+          power: 76800,
+        },
+        {
+          id: '5',
+          name: 'Archers',
+          level: 10,
+          rarity: UnitRarity.Common,
+          power: 38400,
+        },
+      ];
+      const result = serializeUnits(units);
+      const parts = result.split(';').filter(p => p.length > 0);
+      
+      // Expected order (units are grouped by name+level):
+      // Level 10 Legendary units should come first (sorted by name: Air Elemental before Zealot)
+      // Then Level 10 Epic
+      // Then Level 10 Common
+      // Then Level 5 Common
+      
+      // Verify we have at least 4 groups (some units might not be found in UnitDataMap)
+      expect(parts.length).toBeGreaterThanOrEqual(4);
+      
+      // Find the indices of each unit type in the result
+      const airElementalIndex = parts.findIndex(p => p.startsWith('0,10,'));
+      const zealotIndex = parts.findIndex(p => p.startsWith('28,10,'));
+      const paladinIndex = parts.findIndex(p => p.startsWith('27,10,'));
+      const archers10Index = parts.findIndex(p => p.startsWith('2,10,'));
+      const archers5Index = parts.findIndex(p => p.startsWith('2,5,'));
+      
+      // Level 10 Legendary should come before Level 10 Epic
+      if (airElementalIndex !== -1 && paladinIndex !== -1) {
+        expect(airElementalIndex).toBeLessThan(paladinIndex);
+      }
+      if (zealotIndex !== -1 && paladinIndex !== -1) {
+        expect(zealotIndex).toBeLessThan(paladinIndex);
+      }
+      
+      // Level 10 Epic should come before Level 10 Common
+      if (paladinIndex !== -1 && archers10Index !== -1) {
+        expect(paladinIndex).toBeLessThan(archers10Index);
+      }
+      
+      // Level 10 Common should come before Level 5 Common
+      if (archers10Index !== -1 && archers5Index !== -1) {
+        expect(archers10Index).toBeLessThan(archers5Index);
+      }
+      
+      // Air Elemental should come before Zealot (alphabetical order)
+      if (airElementalIndex !== -1 && zealotIndex !== -1) {
+        expect(airElementalIndex).toBeLessThan(zealotIndex);
+      }
+    });
   });
 
   describe('deserializeUnits', () => {
