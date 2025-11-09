@@ -8,6 +8,30 @@ export default defineConfig({
     port: 3000,
     open: true
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split React and React DOM into separate chunk
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          // Split MUI into separate chunk
+          'mui-vendor': [
+            '@mui/material',
+            '@mui/icons-material',
+            '@emotion/react',
+            '@emotion/styled',
+          ],
+          // Split Redux into separate chunk
+          'redux-vendor': ['@reduxjs/toolkit', 'react-redux', 'redux-saga'],
+          // Split react-dnd into separate chunk
+          'dnd-vendor': ['react-dnd', 'react-dnd-html5-backend'],
+        },
+      },
+    },
+    // Increase chunk size warning limit to 1000kb (default is 500kb)
+    // This is reasonable for a game planner app with many assets
+    chunkSizeWarningLimit: 1000,
+  },
   // @ts-expect-error - vitest config extension
   test: {
     globals: true,
