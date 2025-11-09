@@ -4,13 +4,32 @@ import userEvent from '@testing-library/user-event';
 import FormationTile from '../../../src/components/FormationTile';
 import { UnitRarity } from '../../../src/types';
 
-const mockUseDrop = vi.fn(() => [
-  { isOver: false },
-  vi.fn(),
-]);
+interface DropItem {
+  unit: { id: string; name: string; level: number; rarity: string };
+  isInFormation?: boolean;
+  sourceRow?: number;
+  sourceCol?: number;
+}
+
+interface UseDropConfig {
+  drop?: (item: DropItem) => void;
+  accept: string;
+  collect?: (monitor: unknown) => { isOver: boolean };
+}
+
+let capturedDropHandler: ((item: DropItem) => void) | undefined;
+const mockUseDrop = vi.fn((config: UseDropConfig) => {
+  if (config && typeof config === 'object' && config.drop) {
+    capturedDropHandler = config.drop;
+  }
+  return [
+    { isOver: false },
+    vi.fn(),
+  ];
+});
 
 vi.mock('react-dnd', () => ({
-  useDrop: () => mockUseDrop(),
+  useDrop: (config: UseDropConfig) => mockUseDrop(config),
   useDrag: vi.fn(() => [
     { isDragging: false },
     vi.fn(),
@@ -38,6 +57,7 @@ describe('FormationTile', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    capturedDropHandler = undefined;
   });
 
   it('should render empty tile when unit is null', () => {
@@ -133,6 +153,103 @@ describe('FormationTile', () => {
 
     const tile = container.querySelector('.bg-blue-500');
     expect(tile).toBeInTheDocument();
+  });
+
+  it('should handle drop from another tile - remove from old position and place in new', () => {
+    render(
+      <FormationTile
+        row={1}
+        col={1}
+        unit={null}
+        onPlaceUnit={mockOnPlaceUnit}
+        onRemoveUnit={mockOnRemoveUnit}
+      />
+    );
+
+    const droppedUnit = { id: '2', name: 'DroppedUnit', level: 3, rarity: UnitRarity.Epic };
+    if (capturedDropHandler) {
+      capturedDropHandler({
+        unit: droppedUnit,
+        isInFormation: true,
+        sourceRow: 0,
+        sourceCol: 0,
+      });
+    }
+
+    expect(mockOnRemoveUnit).toHaveBeenCalledWith(0, 0);
+    expect(mockOnPlaceUnit).toHaveBeenCalledWith(1, 1, droppedUnit);
+  });
+
+  it('should handle drop when tile already has a unit - overwrite', () => {
+    render(
+      <FormationTile
+        row={2}
+        col={2}
+        unit={mockUnit}
+        onPlaceUnit={mockOnPlaceUnit}
+        onRemoveUnit={mockOnRemoveUnit}
+      />
+    );
+
+    const droppedUnit = { id: '2', name: 'DroppedUnit', level: 3, rarity: UnitRarity.Epic };
+    if (capturedDropHandler) {
+      capturedDropHandler({
+        unit: droppedUnit,
+        isInFormation: true,
+        sourceRow: 0,
+        sourceCol: 0,
+      });
+    }
+
+    expect(mockOnRemoveUnit).toHaveBeenCalledWith(0, 0);
+    expect(mockOnPlaceUnit).toHaveBeenCalledWith(2, 2, droppedUnit);
+  });
+
+  it('should not place unit if dropping on same tile', () => {
+    render(
+      <FormationTile
+        row={2}
+        col={2}
+        unit={mockUnit}
+        onPlaceUnit={mockOnPlaceUnit}
+        onRemoveUnit={mockOnRemoveUnit}
+      />
+    );
+
+    if (capturedDropHandler) {
+      capturedDropHandler({
+        unit: mockUnit,
+        isInFormation: true,
+        sourceRow: 2,
+        sourceCol: 2,
+      });
+    }
+
+    expect(mockOnRemoveUnit).not.toHaveBeenCalled();
+    expect(mockOnPlaceUnit).not.toHaveBeenCalled();
+  });
+
+  it('should handle drop from roster (not in formation)', () => {
+    render(
+      <FormationTile
+        row={0}
+        col={0}
+        unit={null}
+        onPlaceUnit={mockOnPlaceUnit}
+        onRemoveUnit={mockOnRemoveUnit}
+      />
+    );
+
+    const droppedUnit = { id: '2', name: 'DroppedUnit', level: 3, rarity: UnitRarity.Epic };
+    if (capturedDropHandler) {
+      capturedDropHandler({
+        unit: droppedUnit,
+        isInFormation: false,
+      });
+    }
+
+    expect(mockOnRemoveUnit).not.toHaveBeenCalled();
+    expect(mockOnPlaceUnit).toHaveBeenCalledWith(0, 0, droppedUnit);
   });
 });
 

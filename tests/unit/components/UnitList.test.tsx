@@ -5,13 +5,32 @@ import UnitList from '../../../src/components/UnitList';
 import { useAppSelector, useAppDispatch } from '../../../src/store/hooks';
 import { UnitRarity } from '../../../src/types';
 
-const mockUseDrop = vi.fn(() => [
-  { isOver: false },
-  vi.fn(),
-]);
+interface DropItem {
+  unit: { id: string; name: string; level: number; rarity: string };
+  isInFormation?: boolean;
+  sourceRow?: number;
+  sourceCol?: number;
+}
+
+interface UseDropConfig {
+  drop?: (item: DropItem) => void;
+  accept: string;
+  collect?: (monitor: unknown) => { isOver: boolean };
+}
+
+let capturedDropHandler: ((item: DropItem) => void) | undefined;
+const mockUseDrop = vi.fn((config: UseDropConfig) => {
+  if (config && typeof config === 'object' && config.drop) {
+    capturedDropHandler = config.drop;
+  }
+  return [
+    { isOver: false },
+    vi.fn(),
+  ];
+});
 
 vi.mock('react-dnd', () => ({
-  useDrop: () => mockUseDrop(),
+  useDrop: (config: UseDropConfig) => mockUseDrop(config),
   useDrag: vi.fn(() => [
     { isDragging: false },
     vi.fn(),
@@ -69,6 +88,7 @@ describe('UnitList', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    capturedDropHandler = undefined;
     (useAppDispatch as ReturnType<typeof vi.fn>).mockReturnValue(mockDispatch);
     (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
       const state = {
@@ -165,6 +185,123 @@ describe('UnitList', () => {
     expect(screen.getByTestId('unit-card-2')).toBeInTheDocument();
     expect(screen.getByTestId('unit-card-3')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument(); // Count should be 2
+  });
+
+  it('should call handleSearchChange when search input changes', async () => {
+    const user = userEvent.setup();
+    const { setSearchTerm } = await import('../../../src/store/reducers/unitSlice');
+    
+    render(<UnitList />);
+
+    const searchInput = screen.getByTestId('unit-search');
+    await user.type(searchInput, 'test');
+
+    // Each keystroke dispatches with cumulative value
+    expect(mockDispatch).toHaveBeenCalledWith(setSearchTerm('t'));
+    expect(mockDispatch).toHaveBeenCalledWith(setSearchTerm('te'));
+    expect(mockDispatch).toHaveBeenCalledWith(setSearchTerm('tes'));
+    expect(mockDispatch).toHaveBeenCalledWith(setSearchTerm('test'));
+  });
+
+  it('should handle withdraw all units from formation', async () => {
+    const user = userEvent.setup();
+    const { removeUnit } = await import('../../../src/store/reducers/formationSlice');
+    
+    (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
+      const state = {
+        unit: {
+          filteredUnits: mockUnits,
+          sortOption: 'level' as const,
+          sortOption2: null,
+          sortOption3: null,
+        },
+        formation: {
+          currentFormation: {
+            name: 'Test Formation',
+            power: 0,
+            tiles: [
+              [{ id: '1', name: 'Unit1', level: 1, rarity: UnitRarity.Common }, null, null, null, null, null, null],
+              [null, { id: '2', name: 'Unit2', level: 2, rarity: UnitRarity.Rare }, null, null, null, null, null],
+              ...Array(5).fill(null).map(() => Array(7).fill(null)),
+            ],
+          },
+        },
+      };
+      return selector(state);
+    });
+
+    render(<UnitList />);
+
+    const withdrawButton = screen.getByRole('button', { name: /withdraw all/i });
+    await user.click(withdrawButton);
+
+    expect(mockDispatch).toHaveBeenCalledTimes(2);
+    expect(mockDispatch).toHaveBeenCalledWith(removeUnit({ row: 0, col: 0, unit: expect.objectContaining({ id: '1' }) }));
+    expect(mockDispatch).toHaveBeenCalledWith(removeUnit({ row: 1, col: 1, unit: expect.objectContaining({ id: '2' }) }));
+  });
+
+  it('should handle unit double click - place in first empty tile', async () => {
+    const user = userEvent.setup();
+    const { placeUnit } = await import('../../../src/store/reducers/formationSlice');
+    
+    render(<UnitList />);
+
+    const unitCard = screen.getByTestId('unit-card-1');
+    await user.dblClick(unitCard);
+
+    expect(mockDispatch).toHaveBeenCalledWith(placeUnit({ row: 0, col: 0, unit: mockUnits[0] }));
+  });
+
+  it('should not place unit on double click if formation is full', async () => {
+    const user = userEvent.setup();
+    
+    (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
+      const state = {
+        unit: {
+          filteredUnits: mockUnits,
+          sortOption: 'level' as const,
+          sortOption2: null,
+          sortOption3: null,
+        },
+        formation: {
+          currentFormation: {
+            name: 'Test Formation',
+            power: 0,
+            tiles: Array(7).fill(null).map(() => 
+              Array(7).fill({ id: 'filled', name: 'Filled', level: 1, rarity: UnitRarity.Common })
+            ),
+          },
+        },
+      };
+      return selector(state);
+    });
+
+    render(<UnitList />);
+
+    const unitCard = screen.getByTestId('unit-card-1');
+    await user.dblClick(unitCard);
+
+    // Should not dispatch placeUnit since formation is full
+    const { placeUnit } = await import('../../../src/store/reducers/formationSlice');
+    expect(mockDispatch).not.toHaveBeenCalledWith(placeUnit(expect.anything()));
+  });
+
+  it('should handle drop from formation - return unit to roster', async () => {
+    const { removeUnit } = await import('../../../src/store/reducers/formationSlice');
+
+    render(<UnitList />);
+
+    const droppedUnit = { id: '1', name: 'Unit1', level: 1, rarity: UnitRarity.Common };
+    if (capturedDropHandler) {
+      capturedDropHandler({
+        unit: droppedUnit,
+        isInFormation: true,
+        sourceRow: 0,
+        sourceCol: 0,
+      });
+    }
+
+    expect(mockDispatch).toHaveBeenCalledWith(removeUnit({ row: 0, col: 0, unit: droppedUnit }));
   });
 
   // Note: Testing MUI Select interactions requires more complex setup
