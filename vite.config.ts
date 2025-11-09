@@ -13,24 +13,38 @@ export default defineConfig({
     environment: 'jsdom',
     passWithNoTests: true,
     setupFiles: ['./tests/setup.ts'],
-    // Isolate tests - each test runs in its own environment
-    isolate: true,
-    // Run tests in parallel for speed
-    threads: true,
-    maxConcurrency: 5,
-    // Pool options for better performance
+    // File-level isolation (faster than per-test isolation while still safe)
+    isolate: false,
+    // Increase concurrency for better parallelization
+    maxConcurrency: 8,
+    // Use threads pool with proper isolation
     pool: 'threads',
     poolOptions: {
       threads: {
         singleThread: false,
-        minThreads: 1,
-        maxThreads: 4,
+        isolate: true, // Keep isolation for test safety
       },
+    },
+    // Run more files in parallel
+    fileParallelism: true,
+    // Disable test shuffling to avoid overhead
+    sequence: {
+      shuffle: false,
     },
     // Test timeout
     testTimeout: 10000,
     // Hook timeout
     hookTimeout: 10000,
+    // Cache configuration for faster subsequent runs
+    cache: {
+      dir: 'node_modules/.vitest',
+    },
+    // Optimize JSDOM environment
+    environmentOptions: {
+      jsdom: {
+        resources: 'usable',
+      },
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
