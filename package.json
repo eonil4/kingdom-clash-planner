@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:watch": "chokidar \"src/**/*.{ts,tsx,json}\" \"tsconfig*.json\" \"vite.config.ts\" -c \"pnpm run build\" --initial",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "lint:watch": "chokidar \"src/**/*.{ts,tsx}\" -c \"pnpm run lint:fix\"",
     "preview": "vite preview",
     "ci": "pnpm lint && pnpm build && pnpm test:unit:coverage",
     "test:unit": "vitest run",
@@ -48,6 +50,7 @@
     "@vitest/coverage-v8": "^4.0.13",
     "@vitest/ui": "^4.0.13",
     "autoprefixer": "^10.4.22",
+    "chokidar-cli": "^3.0.0",
     "eslint": "^9.33.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.0.1",

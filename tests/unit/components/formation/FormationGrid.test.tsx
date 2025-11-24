@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import FormationGrid from '../../../../src/components/formation/FormationGrid';
 import { UnitRarity } from '../../../../src/types';
@@ -8,7 +9,16 @@ vi.mock('../../../../src/components/formation/FormationTile', () => ({
     <div
       data-testid={`tile-${row}-${col}`}
       data-unit={unit ? unit.name : 'empty'}
+      role="button"
+      tabIndex={0}
+      aria-label={unit ? `Remove ${unit.name} from position ${row},${col}` : `Empty tile at position ${row},${col}`}
       onClick={() => unit && onRemoveUnit(row, col, unit)}
+      onKeyDown={(e: React.KeyboardEvent) => {
+        if ((e.key === 'Enter' || e.key === ' ') && unit) {
+          e.preventDefault();
+          onRemoveUnit(row, col, unit);
+        }
+      }}
     >
       {unit ? `${unit.name} (${unit.level})` : 'Empty'}
     </div>

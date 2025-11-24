@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -35,24 +36,19 @@ export default defineConfig({
     // This is reasonable for a game planner app with many assets
     chunkSizeWarningLimit: 1000,
   },
-  // @ts-expect-error - vitest config extension
   test: {
     globals: true,
     environment: 'jsdom',
     passWithNoTests: true,
     setupFiles: ['./tests/setup.ts'],
+    include: ['tests/unit/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    exclude: ['node_modules', 'dist', 'tests/e2e/**', 'tests/integration/**'],
     // File-level isolation (faster than per-test isolation while still safe)
     isolate: false,
     // Increase concurrency for better parallelization
     maxConcurrency: 8,
-    // Use threads pool with proper isolation
+    // Use threads pool (default in Vitest 4.0)
     pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: false,
-        isolate: true, // Keep isolation for test safety
-      },
-    },
     // Run more files in parallel
     fileParallelism: true,
     // Disable test shuffling to avoid overhead
@@ -77,6 +73,7 @@ export default defineConfig({
         'tests/',
         'dist/',
         'scripts/',
+        'src/assets/',
         '**/*.config.*',
         '**/mockData.ts',
         '**/*.d.ts',

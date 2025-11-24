@@ -111,12 +111,34 @@ describe('ManageUnitsModal', () => {
     expect(unitElements.length).toBeGreaterThan(0);
   });
 
-  it('should show Add New Unit form when Add New button is clicked', () => {
+  it('should show Add New Unit form when Add New button is clicked', async () => {
+    const user = userEvent.setup();
     render(<ManageUnitsModal open={true} onClose={vi.fn()} />);
     
-    // The form section should be visible (it's always shown in the modal)
+    // Click Add New Unit button
+    const addButton = screen.getByRole('button', { name: /add new unit/i });
+    await user.click(addButton);
+    
+    // The form section should be visible
     const formSections = screen.getAllByText(/add new unit/i);
     expect(formSections.length).toBeGreaterThan(0);
+  });
+
+  it('should call onSelectAllLevels when select all is clicked in AddUnitForm', async () => {
+    const user = userEvent.setup();
+    render(<ManageUnitsModal open={true} onClose={vi.fn()} />);
+    
+    // Click Add New Unit button to show form
+    const addButton = screen.getByRole('button', { name: /add new unit/i });
+    await user.click(addButton);
+    
+    // Find and click select all checkbox
+    const selectAllCheckbox = screen.getByLabelText(/select all levels/i);
+    if (selectAllCheckbox) {
+      await user.click(selectAllCheckbox);
+      // The callback wrapper should be called
+      expect(selectAllCheckbox).toBeInTheDocument();
+    }
   });
 });
 

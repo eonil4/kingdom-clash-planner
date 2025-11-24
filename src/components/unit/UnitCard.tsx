@@ -93,6 +93,17 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
     setTooltipOpen((prev) => !prev);
   };
 
+  const handleCardKeyDown = (e: React.KeyboardEvent) => {
+    if (isDragging) return;
+    
+    // Handle Enter and Space keys for keyboard accessibility
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      setTooltipOpen((prev) => !prev);
+    }
+  };
+
   // Combine refs properly - useDrag returns a ref callback function
   const combinedRef = (node: HTMLDivElement | null) => {
     cardRef.current = node;
@@ -126,6 +137,7 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
       tabIndex={0}
       aria-label={`${unit.name} level ${unit.level}`}
       onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
       onDoubleClick={(e) => {
         e.stopPropagation();
         setTooltipOpen(false);

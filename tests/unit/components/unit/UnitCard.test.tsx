@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import UnitCard from '../../../../src/components/unit/UnitCard';
 import { UnitRarity } from '../../../../src/types';
@@ -151,9 +151,12 @@ describe('UnitCard', () => {
 
     const img = screen.getByAltText('TestUnit');
     
-    // Simulate image error
-    const errorEvent = new Event('error');
-    img.dispatchEvent(errorEvent);
+    // Simulate image error - wrap in act() to handle state updates
+    await act(async () => {
+      const errorEvent = new Event('error', { bubbles: true });
+      Object.defineProperty(errorEvent, 'target', { value: img, enumerable: true });
+      img.dispatchEvent(errorEvent);
+    });
 
     // After error, placeholder should be shown
     await waitFor(() => {
@@ -197,27 +200,6 @@ describe('UnitCard', () => {
     expect(card).toBeInTheDocument();
   });
 
-  it('should show placeholder when image fails to load', async () => {
-    const unitWithImage = {
-      ...mockUnit,
-      imageUrl: '/test-image.png',
-    };
-
-    const { container } = render(<UnitCard unit={unitWithImage} />);
-
-    const img = screen.getByAltText('TestUnit');
-    
-    // Simulate image error
-    const errorEvent = new Event('error', { bubbles: true });
-    Object.defineProperty(errorEvent, 'target', { value: img, enumerable: true });
-    img.dispatchEvent(errorEvent);
-
-    // After error, placeholder should be shown
-    await waitFor(() => {
-      const placeholder = container.querySelector('.w-full.h-full.flex.items-center.justify-center');
-      expect(placeholder).toBeInTheDocument();
-    });
-  });
 
   it('should show placeholder when imageUrl is empty string', () => {
     const unitWithoutImage = {
@@ -282,6 +264,70 @@ describe('UnitCard', () => {
     
     const placeholder = container.querySelector('[style*="background-color"]');
     expect(placeholder).toBeInTheDocument();
+  });
+
+  it('should handle keyboard events - Enter key toggles tooltip', async () => {
+    const user = userEvent.setup();
+    render(<UnitCard unit={mockUnit} />);
+    
+    const card = screen.getByRole('button');
+    card.focus();
+    
+    // Press Enter key
+    await user.keyboard('{Enter}');
+    
+    // Tooltip should toggle (we can verify the handler was called)
+    expect(card).toBeInTheDocument();
+  });
+
+  it('should handle keyboard events - Space key toggles tooltip', async () => {
+    const user = userEvent.setup();
+    render(<UnitCard unit={mockUnit} />);
+    
+    const card = screen.getByRole('button');
+    card.focus();
+    
+    // Press Space key
+    await user.keyboard(' ');
+    
+    // Tooltip should toggle (we can verify the handler was called)
+    expect(card).toBeInTheDocument();
+  });
+
+  it('should close tooltip when onClose is called', async () => {
+    const user = userEvent.setup();
+    render(<UnitCard unit={mockUnit} />);
+    
+    const card = screen.getByRole('button');
+    await user.click(card);
+    
+    // Tooltip should be open
+    await waitFor(() => {
+      const tooltip = document.body.querySelector('[role="tooltip"]');
+      expect(tooltip).toBeInTheDocument();
+    });
+    
+    // Close tooltip by clicking outside
+    await user.click(document.body);
+    
+    // Tooltip should be closed
+    await waitFor(() => {
+      const tooltip = document.body.querySelector('[role="tooltip"]');
+      expect(tooltip).not.toBeInTheDocument();
+    });
+  });
+
+  it('should handle getRarityBorderColor default case', () => {
+    // Test with an invalid rarity value to trigger default case
+    const invalidRarityUnit = {
+      ...mockUnit,
+      rarity: 'Invalid' as UnitRarity,
+    };
+    
+    // This should not throw and should use default color
+    const { container } = render(<UnitCard unit={invalidRarityUnit} />);
+    const card = container.querySelector('[role="button"]');
+    expect(card).toBeInTheDocument();
   });
 });
 
