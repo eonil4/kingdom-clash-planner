@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material';
-import type { Unit } from '../types';
+import type { Unit } from '../../types';
 import FormationTile from './FormationTile';
 
 interface FormationGridProps {

@@ -1,34 +1,34 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ManageUnitsModal from '../../../src/components/ManageUnitsModal';
-import { useAppSelector, useAppDispatch } from '../../../src/store/hooks';
-import { UnitRarity } from '../../../src/types';
+import ManageUnitsModal from '../../../../src/components/manage/ManageUnitsModal';
+import { useAppSelector, useAppDispatch } from '../../../../src/store/hooks';
+import { UnitRarity } from '../../../../src/types';
 
-vi.mock('../../../src/store/hooks', () => ({
+vi.mock('../../../../src/store/hooks', () => ({
   useAppSelector: vi.fn(),
   useAppDispatch: vi.fn(),
 }));
 
-vi.mock('../../../src/store/reducers/unitSlice', () => ({
+vi.mock('../../../../src/store/reducers/unitSlice', () => ({
   addUnit: vi.fn((unit) => ({ type: 'unit/addUnit', payload: unit })),
   removeUnit: vi.fn((id) => ({ type: 'unit/removeUnit', payload: id })),
   updateUnit: vi.fn((unit) => ({ type: 'unit/updateUnit', payload: unit })),
 }));
 
-vi.mock('../../../src/utils/imageUtils', () => ({
+vi.mock('../../../../src/utils/imageUtils', () => ({
   getUnitImagePath: vi.fn((name) => `/images/${name}.png`),
 }));
 
-vi.mock('../../../src/utils/unitNameUtils', () => ({
+vi.mock('../../../../src/utils/unitNameUtils', () => ({
   normalizeUnitName: vi.fn((name) => name.trim()),
 }));
 
-vi.mock('../../../src/utils/powerUtils', () => ({
+vi.mock('../../../../src/utils/powerUtils', () => ({
   calculateUnitPower: vi.fn(() => 100),
 }));
 
-vi.mock('../../../src/types/unitNames', () => ({
+vi.mock('../../../../src/types/unitNames', () => ({
   UNIT_NAMES_ARRAY: ['TestUnit'],
   getUnitDataByName: vi.fn(() => ({
     name: 'TestUnit',
@@ -37,7 +37,7 @@ vi.mock('../../../src/types/unitNames', () => ({
   })),
 }));
 
-vi.mock('../../../src/components/UnitCard', () => ({
+vi.mock('../../../../src/components/unit/UnitCard', () => ({
   default: ({ unit }: { unit: { name: string; level: number } }) => (
     <div data-testid={`unit-card-${unit.name}-${unit.level}`}>
       {unit.name} Lv{unit.level}

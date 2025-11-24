@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { Typography, Box, IconButton, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import HelpIcon from '@mui/icons-material/Help';
-import { updateFormationName } from '../store/reducers/formationSlice';
-import HelpOverlay from './HelpOverlay';
+import { updateFormationName } from '../../store/reducers/formationSlice';
+import HelpOverlay from '../help/HelpOverlay';
 
 export default function FormationHeader() {
   const dispatch = useAppDispatch();

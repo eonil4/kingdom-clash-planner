@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import FormationHeader from '../../../src/components/FormationHeader';
-import { useAppSelector, useAppDispatch } from '../../../src/store/hooks';
-import { updateFormationName } from '../../../src/store/reducers/formationSlice';
+import FormationHeader from '../../../../src/components/formation/FormationHeader';
+import { useAppSelector, useAppDispatch } from '../../../../src/store/hooks';
+import { updateFormationName } from '../../../../src/store/reducers/formationSlice';
 
-vi.mock('../../../src/store/hooks', () => ({
+vi.mock('../../../../src/store/hooks', () => ({
   useAppSelector: vi.fn(),
   useAppDispatch: vi.fn(),
 }));
 
-vi.mock('../../../src/store/reducers/formationSlice', () => ({
+vi.mock('../../../../src/store/reducers/formationSlice', () => ({
   updateFormationName: vi.fn((name) => ({ type: 'formation/updateFormationName', payload: name })),
 }));
 

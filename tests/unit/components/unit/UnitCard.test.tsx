@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UnitCard from '../../../src/components/UnitCard';
-import { UnitRarity } from '../../../src/types';
-import { getUnitImagePath } from '../../../src/utils/imageUtils';
+import UnitCard from '../../../../src/components/unit/UnitCard';
+import { UnitRarity } from '../../../../src/types';
+import { getUnitImagePath } from '../../../../src/utils/imageUtils';
 
 const mockUseDrag = vi.fn(() => [
   { isDragging: false },
@@ -14,7 +14,7 @@ vi.mock('react-dnd', () => ({
   useDrag: () => mockUseDrag(),
 }));
 
-vi.mock('../../../src/utils/imageUtils', () => ({
+vi.mock('../../../../src/utils/imageUtils', () => ({
   getUnitImagePath: vi.fn((name: string) => `/images/units/${name}.png`),
 }));
 

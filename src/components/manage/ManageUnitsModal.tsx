@@ -33,15 +33,15 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import type { SelectChangeEvent } from '@mui/material';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { addUnit, removeUnit, updateUnit } from '../store/reducers/unitSlice';
-import type { Unit } from '../types';
-import { UnitRarity } from '../types';
-import { getUnitImagePath } from '../utils/imageUtils';
-import { normalizeUnitName } from '../utils/unitNameUtils';
-import { calculateUnitPower } from '../utils/powerUtils';
-import { UNIT_NAMES_ARRAY, getUnitDataByName } from '../types/unitNames';
-import UnitCard from './UnitCard';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { addUnit, removeUnit, updateUnit } from '../../store/reducers/unitSlice';
+import type { Unit } from '../../types';
+import { UnitRarity } from '../../types';
+import { getUnitImagePath } from '../../utils/imageUtils';
+import { normalizeUnitName } from '../../utils/unitNameUtils';
+import { calculateUnitPower } from '../../utils/powerUtils';
+import { UNIT_NAMES_ARRAY, getUnitDataByName } from '../../types/unitNames';
+import UnitCard from '../unit/UnitCard';
 
 // Component to display unit icon with error handling
 function UnitIcon({ name, rarity }: { name: string; rarity: UnitRarity }) {
@@ -118,7 +118,7 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
   };
   
   const formationUnitCount = countFormationUnits();
-  const totalUnitCount = units.length + formationUnitCount;
+  const totalUnitCount = (units?.length ?? 0) + formationUnitCount;
   
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);

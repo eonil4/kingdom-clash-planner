@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import FormationFooter from '../../../src/components/FormationFooter';
-import { useAppDispatch, useAppSelector } from '../../../src/store/hooks';
-import { removeUnit } from '../../../src/store/reducers/formationSlice';
+import FormationFooter from '../../../../src/components/formation/FormationFooter';
+import { useAppDispatch, useAppSelector } from '../../../../src/store/hooks';
+import { removeUnit } from '../../../../src/store/reducers/formationSlice';
 
-vi.mock('../../../src/store/hooks', () => ({
+vi.mock('../../../../src/store/hooks', () => ({
   useAppDispatch: vi.fn(),
   useAppSelector: vi.fn(),
 }));
 
-vi.mock('../../../src/store/reducers/formationSlice', () => ({
+vi.mock('../../../../src/store/reducers/formationSlice', () => ({
   removeUnit: vi.fn((payload) => ({ type: 'formation/removeUnit', payload })),
 }));
 

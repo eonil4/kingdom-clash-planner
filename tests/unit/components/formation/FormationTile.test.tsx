@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import FormationTile from '../../../src/components/FormationTile';
-import { UnitRarity } from '../../../src/types';
+import FormationTile from '../../../../src/components/formation/FormationTile';
+import { UnitRarity } from '../../../../src/types';
 
 interface DropItem {
   unit: { id: string; name: string; level: number; rarity: string };
@@ -36,7 +36,7 @@ vi.mock('react-dnd', () => ({
   ]),
 }));
 
-vi.mock('../../../src/components/UnitCard', () => ({
+vi.mock('../../../../src/components/unit/UnitCard', () => ({
   default: vi.fn(({ unit, onDoubleClick }) => (
     <div data-testid="unit-card" onDoubleClick={onDoubleClick}>
       {unit.name} - Level {unit.level}
@@ -50,6 +50,7 @@ describe('FormationTile', () => {
     name: 'TestUnit',
     level: 5,
     rarity: UnitRarity.Rare,
+    power: 100,
   };
 
   const mockOnPlaceUnit = vi.fn();
@@ -166,7 +167,7 @@ describe('FormationTile', () => {
       />
     );
 
-    const droppedUnit = { id: '2', name: 'DroppedUnit', level: 3, rarity: UnitRarity.Epic };
+    const droppedUnit = { id: '2', name: 'DroppedUnit', level: 3, rarity: UnitRarity.Epic, power: 150 };
     if (capturedDropHandler) {
       capturedDropHandler({
         unit: droppedUnit,
@@ -191,7 +192,7 @@ describe('FormationTile', () => {
       />
     );
 
-    const droppedUnit = { id: '2', name: 'DroppedUnit', level: 3, rarity: UnitRarity.Epic };
+    const droppedUnit = { id: '2', name: 'DroppedUnit', level: 3, rarity: UnitRarity.Epic, power: 150 };
     if (capturedDropHandler) {
       capturedDropHandler({
         unit: droppedUnit,
@@ -243,7 +244,7 @@ describe('FormationTile', () => {
       />
     );
 
-    const droppedUnit = { id: '2', name: 'DroppedUnit', level: 3, rarity: UnitRarity.Epic };
+    const droppedUnit = { id: '2', name: 'DroppedUnit', level: 3, rarity: UnitRarity.Epic, power: 150 };
     if (capturedDropHandler) {
       capturedDropHandler({
         unit: droppedUnit,

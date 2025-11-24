@@ -17,6 +17,19 @@ const initialState: FormationState = {
   },
 };
 
+// Helper to calculate total power of the formation
+function calculateFormationPower(tiles: (Unit | null)[][]): number {
+  let power = 0;
+  for (const row of tiles) {
+    for (const unit of row) {
+      if (unit) {
+        power += unit.power;
+      }
+    }
+  }
+  return power;
+}
+
 const formationSlice = createSlice({
   name: 'formation',
   initialState,
@@ -32,7 +45,7 @@ const formationSlice = createSlice({
         state.currentFormation.tiles[action.payload.row][
           action.payload.col
         ] = action.payload.unit;
-        state.currentFormation.power = calculatePower(
+        state.currentFormation.power = calculateFormationPower(
           state.currentFormation.tiles
         );
       }
@@ -40,11 +53,10 @@ const formationSlice = createSlice({
     removeUnit: (state, action: PayloadAction<{ row: number; col: number; unit?: Unit | null }>) => {
       if (state.currentFormation) {
         // Remove unit from the tile
-        // Note: The unit should be passed in the payload so the saga can add it back to roster
         state.currentFormation.tiles[action.payload.row][
           action.payload.col
         ] = null;
-        state.currentFormation.power = calculatePower(
+        state.currentFormation.power = calculateFormationPower(
           state.currentFormation.tiles
         );
       }
@@ -57,18 +69,6 @@ const formationSlice = createSlice({
   },
 });
 
-function calculatePower(tiles: (Unit | null)[][]): number {
-  let power = 0;
-  for (const row of tiles) {
-    for (const unit of row) {
-      if (unit) {
-        power += unit.power;
-      }
-    }
-  }
-  return power;
-}
-
 export const {
   setCurrentFormation,
   placeUnit,
@@ -77,4 +77,3 @@ export const {
 } = formationSlice.actions;
 
 export default formationSlice.reducer;
-

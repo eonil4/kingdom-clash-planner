@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDrag } from 'react-dnd';
 import { Tooltip } from '@mui/material';
-import type { Unit } from '../types';
-import { UnitRarity } from '../types';
-import { getUnitImagePath } from '../utils/imageUtils';
+import type { Unit } from '../../types';
+import { UnitRarity } from '../../types';
+import { getUnitImagePath } from '../../utils/imageUtils';
 
 interface UnitCardProps {
   unit: Unit;
@@ -70,7 +70,7 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
       <div className="text-sm">
         <div>Level: <span className="font-bold">{unit.level}</span></div>
         <div>Rarity: <span className="font-bold">{unit.rarity}</span></div>
-        <div>Power: <span className="font-bold">{unit.power.toLocaleString()}</span></div>
+        <div>Power: <span className="font-bold">{(unit.power ?? 0).toLocaleString()}</span></div>
         <div className="mt-1 text-xs opacity-90">
           {unit.rarity === UnitRarity.Legendary && '⭐ Legendary Unit'}
           {unit.rarity === UnitRarity.Epic && '💜 Epic Unit'}

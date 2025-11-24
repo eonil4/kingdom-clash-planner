@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UnitList from '../../../src/components/UnitList';
-import { useAppSelector, useAppDispatch } from '../../../src/store/hooks';
-import { UnitRarity } from '../../../src/types';
+import UnitList from '../../../../src/components/unit/UnitList';
+import { useAppSelector, useAppDispatch } from '../../../../src/store/hooks';
+import { UnitRarity } from '../../../../src/types';
 
 interface DropItem {
   unit: { id: string; name: string; level: number; rarity: string };
@@ -37,24 +37,24 @@ vi.mock('react-dnd', () => ({
   ]),
 }));
 
-vi.mock('../../../src/store/hooks', () => ({
+vi.mock('../../../../src/store/hooks', () => ({
   useAppSelector: vi.fn(),
   useAppDispatch: vi.fn(),
 }));
 
-vi.mock('../../../src/store/reducers/unitSlice', () => ({
+vi.mock('../../../../src/store/reducers/unitSlice', () => ({
   setSortOption: vi.fn((option) => ({ type: 'unit/setSortOption', payload: option })),
   setSortOption2: vi.fn((option) => ({ type: 'unit/setSortOption2', payload: option })),
   setSortOption3: vi.fn((option) => ({ type: 'unit/setSortOption3', payload: option })),
   setSearchTerm: vi.fn((term) => ({ type: 'unit/setSearchTerm', payload: term })),
 }));
 
-vi.mock('../../../src/store/reducers/formationSlice', () => ({
+vi.mock('../../../../../src/store/reducers/formationSlice', () => ({
   removeUnit: vi.fn((payload) => ({ type: 'formation/removeUnit', payload })),
   placeUnit: vi.fn((payload) => ({ type: 'formation/placeUnit', payload })),
 }));
 
-vi.mock('../../../src/components/UnitCard', () => ({
+vi.mock('../../../../src/components/unit/UnitCard', () => ({
   default: vi.fn(({ unit, onDoubleClick }) => (
     <div data-testid={`unit-card-${unit.id}`} onDoubleClick={onDoubleClick}>
       {unit.name}
@@ -62,7 +62,7 @@ vi.mock('../../../src/components/UnitCard', () => ({
   )),
 }));
 
-vi.mock('../../../src/components/UnitSearch', () => ({
+vi.mock('../../../../src/components/unit/UnitSearch', () => ({
   default: vi.fn(({ onSearchChange }) => (
     <input
       data-testid="unit-search"
@@ -72,7 +72,7 @@ vi.mock('../../../src/components/UnitSearch', () => ({
   )),
 }));
 
-vi.mock('../../../src/components/ManageUnitsModal', () => ({
+vi.mock('../../../../src/components/manage/ManageUnitsModal', () => ({
   default: vi.fn(({ open }) => (
     open ? <div data-testid="manage-units-modal">Manage Units Modal</div> : null
   )),
@@ -81,9 +81,9 @@ vi.mock('../../../src/components/ManageUnitsModal', () => ({
 describe('UnitList', () => {
   const mockDispatch = vi.fn();
   const mockUnits = [
-    { id: '1', name: 'Unit1', level: 1, rarity: UnitRarity.Common },
-    { id: '2', name: 'Unit2', level: 2, rarity: UnitRarity.Rare },
-    { id: '3', name: 'Unit3', level: 3, rarity: UnitRarity.Epic },
+    { id: '1', name: 'Unit1', level: 1, rarity: UnitRarity.Common, power: 50 },
+    { id: '2', name: 'Unit2', level: 2, rarity: UnitRarity.Rare, power: 100 },
+    { id: '3', name: 'Unit3', level: 3, rarity: UnitRarity.Epic, power: 150 },
   ];
 
   beforeEach(() => {
@@ -93,10 +93,12 @@ describe('UnitList', () => {
     (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
       const state = {
         unit: {
+          units: mockUnits,
           filteredUnits: mockUnits,
           sortOption: 'level' as const,
           sortOption2: null,
           sortOption3: null,
+          searchTerm: '',
         },
         formation: {
           currentFormation: {
@@ -169,7 +171,7 @@ describe('UnitList', () => {
             name: 'Test Formation',
             power: 0,
             tiles: [
-              [{ id: '1', name: 'Unit1', level: 1, rarity: UnitRarity.Common }, ...Array(6).fill(null)],
+              [{ id: '1', name: 'Unit1', level: 1, rarity: UnitRarity.Common, power: 50 }, ...Array(6).fill(null)],
               ...Array(6).fill(null).map(() => Array(7).fill(null)),
             ],
           },
@@ -189,7 +191,7 @@ describe('UnitList', () => {
 
   it('should call handleSearchChange when search input changes', async () => {
     const user = userEvent.setup();
-    const { setSearchTerm } = await import('../../../src/store/reducers/unitSlice');
+    const { setSearchTerm } = await import('../../../../src/store/reducers/unitSlice');
     
     render(<UnitList />);
 
@@ -205,7 +207,7 @@ describe('UnitList', () => {
 
   it('should handle withdraw all units from formation', async () => {
     const user = userEvent.setup();
-    const { removeUnit } = await import('../../../src/store/reducers/formationSlice');
+    const { removeUnit } = await import('../../../../src/store/reducers/formationSlice');
     
     (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
       const state = {
@@ -220,8 +222,8 @@ describe('UnitList', () => {
             name: 'Test Formation',
             power: 0,
             tiles: [
-              [{ id: '1', name: 'Unit1', level: 1, rarity: UnitRarity.Common }, null, null, null, null, null, null],
-              [null, { id: '2', name: 'Unit2', level: 2, rarity: UnitRarity.Rare }, null, null, null, null, null],
+              [{ id: '1', name: 'Unit1', level: 1, rarity: UnitRarity.Common, power: 50 }, null, null, null, null, null, null],
+              [null, { id: '2', name: 'Unit2', level: 2, rarity: UnitRarity.Rare, power: 100 }, null, null, null, null, null],
               ...Array(5).fill(null).map(() => Array(7).fill(null)),
             ],
           },
@@ -242,7 +244,7 @@ describe('UnitList', () => {
 
   it('should handle unit double click - place in first empty tile', async () => {
     const user = userEvent.setup();
-    const { placeUnit } = await import('../../../src/store/reducers/formationSlice');
+    const { placeUnit } = await import('../../../../src/store/reducers/formationSlice');
     
     render(<UnitList />);
 
@@ -268,7 +270,7 @@ describe('UnitList', () => {
             name: 'Test Formation',
             power: 0,
             tiles: Array(7).fill(null).map(() => 
-              Array(7).fill({ id: 'filled', name: 'Filled', level: 1, rarity: UnitRarity.Common })
+              Array(7).fill({ id: 'filled', name: 'Filled', level: 1, rarity: UnitRarity.Common, power: 50 })
             ),
           },
         },
@@ -282,16 +284,16 @@ describe('UnitList', () => {
     await user.dblClick(unitCard);
 
     // Should not dispatch placeUnit since formation is full
-    const { placeUnit } = await import('../../../src/store/reducers/formationSlice');
+    const { placeUnit } = await import('../../../../src/store/reducers/formationSlice');
     expect(mockDispatch).not.toHaveBeenCalledWith(placeUnit(expect.anything()));
   });
 
   it('should handle drop from formation - return unit to roster', async () => {
-    const { removeUnit } = await import('../../../src/store/reducers/formationSlice');
+    const { removeUnit } = await import('../../../../src/store/reducers/formationSlice');
 
     render(<UnitList />);
 
-    const droppedUnit = { id: '1', name: 'Unit1', level: 1, rarity: UnitRarity.Common };
+    const droppedUnit = { id: '1', name: 'Unit1', level: 1, rarity: UnitRarity.Common, power: 50 };
     if (capturedDropHandler) {
       capturedDropHandler({
         unit: droppedUnit,

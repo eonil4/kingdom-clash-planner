@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import FormationGrid from '../../../src/components/FormationGrid';
-import { UnitRarity } from '../../../src/types';
+import FormationGrid from '../../../../src/components/formation/FormationGrid';
+import { UnitRarity } from '../../../../src/types';
 
-vi.mock('../../../src/components/FormationTile', () => ({
+vi.mock('../../../../src/components/formation/FormationTile', () => ({
   default: vi.fn(({ row, col, unit, onRemoveUnit }) => (
     <div
       data-testid={`tile-${row}-${col}`}

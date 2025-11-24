@@ -1,6 +1,6 @@
 import { useDrop } from 'react-dnd';
-import type { Unit } from '../types';
-import UnitCard from './UnitCard';
+import type { Unit } from '../../types';
+import UnitCard from '../unit/UnitCard';
 
 interface FormationTileProps {
   row: number;

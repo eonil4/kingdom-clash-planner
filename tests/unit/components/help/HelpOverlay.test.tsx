@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import HelpOverlay from '../../../src/components/HelpOverlay';
+import HelpOverlay from '../../../../src/components/help/HelpOverlay';
 
 describe('HelpOverlay', () => {
   const mockOnClose = vi.fn();

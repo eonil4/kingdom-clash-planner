@@ -1,7 +1,7 @@
 import { Button, Box } from '@mui/material';
-import { useAppDispatch } from '../store/hooks';
-import { removeUnit } from '../store/reducers/formationSlice';
-import { useAppSelector } from '../store/hooks';
+import { useAppDispatch } from '../../store/hooks';
+import { removeUnit } from '../../store/reducers/formationSlice';
+import { useAppSelector } from '../../store/hooks';
 
 export default function FormationFooter() {
   const dispatch = useAppDispatch();

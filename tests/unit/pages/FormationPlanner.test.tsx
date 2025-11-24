@@ -34,11 +34,11 @@ vi.mock('../../../src/hooks/useUrlSync', () => ({
   useUrlSync: vi.fn(),
 }));
 
-vi.mock('../../../src/components/FormationHeader', () => ({
+vi.mock('../../../src/components/formation/FormationHeader', () => ({
   default: () => <div data-testid="formation-header">Formation Header</div>,
 }));
 
-vi.mock('../../../src/components/FormationGrid', () => ({
+vi.mock('../../../src/components/formation/FormationGrid', () => ({
   default: ({ onPlaceUnit, onRemoveUnit }: { onPlaceUnit: (row: number, col: number, unit: Unit) => void; onRemoveUnit: (row: number, col: number, unit: Unit | null) => void }) => {
     const testUnit = { id: '1', name: 'Test', level: 1, rarity: UnitRarity.Common };
     return (
@@ -60,7 +60,7 @@ vi.mock('../../../src/components/FormationGrid', () => ({
   },
 }));
 
-vi.mock('../../../src/components/UnitList', () => ({
+vi.mock('../../../src/components/unit/UnitList', () => ({
   default: () => <div data-testid="unit-list">Unit List</div>,
 }));
 
