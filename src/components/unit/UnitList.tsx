@@ -1,22 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useDrop } from 'react-dnd';
-import {
-  Box,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  Button,
-} from '@mui/material';
+import { Box } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { setSortOption, setSortOption2, setSortOption3, setSearchTerm } from '../../store/reducers/unitSlice';
 import { removeUnit as removeUnitFromFormation, placeUnit } from '../../store/reducers/formationSlice';
 import { removeUnit } from '../../store/reducers/formationSlice';
 import type { SortOption, Unit } from '../../types';
-import UnitCard from './UnitCard';
 import UnitSearch from './UnitSearch';
 import ManageUnitsModal from '../manage/ManageUnitsModal';
+import SortControls from './SortControls';
+import UnitCountBadge from './UnitCountBadge';
+import UnitListActions from './UnitListActions';
+import AvailableUnitsGrid from './AvailableUnitsGrid';
 
 export default function UnitList() {
   const dispatch = useAppDispatch();
@@ -60,46 +56,38 @@ export default function UnitList() {
     }),
   });
 
-  const onSortChange = (level: 1 | 2 | 3) => (event: SelectChangeEvent<SortOption | ''>) => {
-    const value = event.target.value;
-    // Primary sort cannot be null/empty
-    if (level === 1 && value === '') return;
+  const handlePrimarySortChange = (event: SelectChangeEvent<SortOption>) => {
+    const newSort = event.target.value as SortOption;
+    setLocalSortOption(newSort);
+    dispatch(setSortOption(newSort));
 
-    const newSort = value === '' ? null : (value as SortOption);
-
-    if (level === 1) {
-      if (newSort) {
-        setLocalSortOption(newSort);
-        dispatch(setSortOption(newSort));
-
-        // Clear secondary/tertiary if they conflict with new primary
-        if (localSortOption2 === newSort) {
-          setLocalSortOption2(null);
-          dispatch(setSortOption2(null));
-        }
-        if (localSortOption3 === newSort) {
-          setLocalSortOption3(null);
-          dispatch(setSortOption3(null));
-        }
-      }
-    } else if (level === 2) {
-      setLocalSortOption2(newSort);
-      dispatch(setSortOption2(newSort));
-
-      // Clear tertiary if it conflicts with new secondary
-      if (localSortOption3 === newSort) {
-        setLocalSortOption3(null);
-        dispatch(setSortOption3(null));
-      }
-    } else if (level === 3) {
-      setLocalSortOption3(newSort);
-      dispatch(setSortOption3(newSort));
+    // Clear secondary/tertiary if they conflict with new primary
+    if (localSortOption2 === newSort) {
+      setLocalSortOption2(null);
+      dispatch(setSortOption2(null));
+    }
+    if (localSortOption3 === newSort) {
+      setLocalSortOption3(null);
+      dispatch(setSortOption3(null));
     }
   };
 
-  // Properly typed handler for primary sort (non-nullable)
-  const handlePrimarySortChange = (event: SelectChangeEvent<SortOption>) => {
-    onSortChange(1)(event as SelectChangeEvent<SortOption | ''>);
+  const handleSecondarySortChange = (event: SelectChangeEvent<SortOption | ''>) => {
+    const newSort = event.target.value === '' ? null : (event.target.value as SortOption);
+    setLocalSortOption2(newSort);
+    dispatch(setSortOption2(newSort));
+
+    // Clear tertiary if it conflicts with new secondary
+    if (localSortOption3 === newSort) {
+      setLocalSortOption3(null);
+      dispatch(setSortOption3(null));
+    }
+  };
+
+  const handleTertiarySortChange = (event: SelectChangeEvent<SortOption | ''>) => {
+    const newSort = event.target.value === '' ? null : (event.target.value as SortOption);
+    setLocalSortOption3(newSort);
+    dispatch(setSortOption3(newSort));
   };
 
   const handleSearchChange = (searchTerm: string) => {
@@ -150,102 +138,29 @@ export default function UnitList() {
       <Box className="mb-4">
         <Box className="flex items-center justify-between mb-2">
           <Box className="flex items-center gap-2">
-            <FormControl size="small" className="min-w-32">
-              <Select
-                value={localSortOption}
-                onChange={handlePrimarySortChange}
-                className="text-white bg-gray-700"
-                aria-label="Sort units by (primary)"
-              >
-                <MenuItem value="level">By Level</MenuItem>
-                <MenuItem value="rarity">By Rarity</MenuItem>
-                <MenuItem value="name">By Name</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl size="small" className="min-w-32">
-              <Select
-                value={localSortOption2 || ''}
-                onChange={onSortChange(2)}
-                className="text-white bg-gray-700"
-                aria-label="Sort units by (secondary)"
-                displayEmpty
-              >
-                <MenuItem value="">None</MenuItem>
-                {['level', 'rarity', 'name']
-                  .filter((option) => option !== localSortOption)
-                  .map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option === 'level' ? 'By Level' : option === 'rarity' ? 'By Rarity' : 'By Name'}
-                    </MenuItem>
-                  ))}
-              </Select>
-            </FormControl>
-            <FormControl size="small" className="min-w-32">
-              <Select
-                value={localSortOption3 || ''}
-                onChange={onSortChange(3)}
-                className="text-white bg-gray-700"
-                aria-label="Sort units by (tertiary)"
-                displayEmpty
-              >
-                <MenuItem value="">None</MenuItem>
-                {['level', 'rarity', 'name']
-                  .filter((option) => option !== localSortOption && option !== localSortOption2)
-                  .map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option === 'level' ? 'By Level' : option === 'rarity' ? 'By Rarity' : 'By Name'}
-                    </MenuItem>
-                  ))}
-              </Select>
-            </FormControl>
-            <Box className="bg-blue-900 border-2 border-blue-500 rounded-lg px-3 py-1">
-              <Typography variant="body2" className="text-white font-bold">
-                {availableUnits.length}
-              </Typography>
-            </Box>
-            <Button
-              variant="contained"
-              size="small"
-              className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-1"
-              style={{
-                clipPath: 'polygon(5% 0%, 95% 0%, 100% 50%, 95% 100%, 5% 100%, 0% 50%)',
-              }}
-              onClick={handleManageUnits}
-              aria-label="Manage units"
-            >
-              Manage Units
-            </Button>
-            <Button
-              variant="contained"
-              size="small"
-              className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-1"
-              style={{
-                clipPath: 'polygon(5% 0%, 95% 0%, 100% 50%, 95% 100%, 5% 100%, 0% 50%)',
-              }}
-              onClick={handleWithdrawAll}
-              aria-label="Withdraw all units from formation"
-            >
-              WITHDRAW ALL
-            </Button>
+            <SortControls
+              primarySort={localSortOption}
+              secondarySort={localSortOption2}
+              tertiarySort={localSortOption3}
+              onPrimaryChange={handlePrimarySortChange}
+              onSecondaryChange={handleSecondarySortChange}
+              onTertiaryChange={handleTertiarySortChange}
+            />
+            <UnitCountBadge count={availableUnits.length} />
+            <UnitListActions
+              onManageUnits={handleManageUnits}
+              onWithdrawAll={handleWithdrawAll}
+            />
           </Box>
         </Box>
         <Box className="mb-2">
           <UnitSearch onSearchChange={handleSearchChange} />
         </Box>
       </Box>
-      <Box
-        className="flex flex-wrap gap-2"
-        role="list"
-        aria-label="Available units"
-      >
-        {availableUnits.map((unit) => (
-          <UnitCard
-            key={unit.id}
-            unit={unit}
-            onDoubleClick={() => handleUnitDoubleClick(unit)}
-          />
-        ))}
-      </Box>
+      <AvailableUnitsGrid
+        units={availableUnits}
+        onUnitDoubleClick={handleUnitDoubleClick}
+      />
       <ManageUnitsModal
         open={isManageUnitsOpen}
         onClose={() => setIsManageUnitsOpen(false)}

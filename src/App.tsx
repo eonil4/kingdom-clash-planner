@@ -2,7 +2,7 @@ import { RouterProvider } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import { ErrorBoundary } from './components/error/ErrorBoundary';
 import { store } from './store';
 import { router } from './router';
 

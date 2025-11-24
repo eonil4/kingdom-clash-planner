@@ -4,6 +4,8 @@ import { Tooltip } from '@mui/material';
 import type { Unit } from '../../types';
 import { UnitRarity } from '../../types';
 import { getUnitImagePath } from '../../utils/imageUtils';
+import UnitPlaceholder from '../shared/UnitPlaceholder';
+import UnitLevelBadge from '../shared/UnitLevelBadge';
 
 interface UnitCardProps {
   unit: Unit;
@@ -18,13 +20,6 @@ const rarityColors: Record<UnitRarity, string> = {
   [UnitRarity.Rare]: 'border-blue-500 bg-blue-900',
   [UnitRarity.Epic]: 'border-purple-500 bg-purple-900',
   [UnitRarity.Legendary]: 'border-yellow-500 bg-yellow-900',
-};
-
-const rarityBgColors: Record<UnitRarity, string> = {
-  [UnitRarity.Common]: '#4a5568',
-  [UnitRarity.Rare]: '#2563eb',
-  [UnitRarity.Epic]: '#7c3aed',
-  [UnitRarity.Legendary]: '#eab308',
 };
 
 export default function UnitCard({ unit, isInFormation = false, sourceRow, sourceCol, onDoubleClick }: UnitCardProps) {
@@ -87,6 +82,7 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
   // Badge size scales with card size - use percentage for formation, fixed for list
   const badgeSize = isInFormation ? '35%' : '24px';
   const badgeFontSize = isInFormation ? 'clamp(0.5rem, 2vw, 0.65rem)' : '0.75rem';
+  const placeholderFontSize = isInFormation ? '0.65rem' : '0.75rem';
 
   const handleCardClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -138,15 +134,7 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
       }}
     >
       {showPlaceholder ? (
-        <div
-          className="w-full h-full flex items-center justify-center text-white font-bold"
-          style={{ 
-            backgroundColor: rarityBgColors[unit.rarity],
-            fontSize: isInFormation ? '0.65rem' : '0.75rem',
-          }}
-        >
-          {unit.name.charAt(0)}
-        </div>
+        <UnitPlaceholder name={unit.name} rarity={unit.rarity} fontSize={placeholderFontSize} />
       ) : (
         <img
           src={imageUrl}
@@ -156,23 +144,7 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
           loading="lazy"
         />
       )}
-      <div
-        className={`
-          absolute -top-0.5 -right-0.5 flex items-center justify-center
-          bg-blue-600 border-2 border-blue-400 shadow-lg
-        `}
-        style={{
-          width: badgeSize,
-          height: badgeSize,
-          minWidth: isInFormation ? '12px' : undefined,
-          minHeight: isInFormation ? '12px' : undefined,
-          clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
-        }}
-      >
-        <span className={`font-bold text-white`} style={{ fontSize: badgeFontSize }}>
-          {unit.level}
-        </span>
-      </div>
+      <UnitLevelBadge level={unit.level} size={badgeSize} fontSize={badgeFontSize} />
     </div>
   );
 

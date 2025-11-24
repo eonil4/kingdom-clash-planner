@@ -7,23 +7,13 @@ import {
     TableHead,
     TableRow,
     Paper,
-    TextField,
-    Select,
-    MenuItem,
-    IconButton,
     Button,
 } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import type { Unit } from '../../types';
 import { UnitRarity } from '../../types';
-import { UNIT_NAMES_ARRAY, getUnitDataByName } from '../../types/unitNames';
-import UnitCard from '../unit/UnitCard';
 import UnitFilters from './UnitFilters';
+import UnitTableRow from './UnitTableRow';
+import SortableTableHeader from './SortableTableHeader';
 import type { SortColumn, SortDirection, UnitFilters as UnitFiltersType } from '../../hooks/useManageUnits';
 
 interface UnitTableProps {
@@ -61,8 +51,6 @@ export default function UnitTable({
     onRowCancel,
     onDelete,
 }: UnitTableProps) {
-    const allUnitNames = UNIT_NAMES_ARRAY;
-
     const hasActiveFilters =
         filters.name ||
         filters.levelMin ||
@@ -85,50 +73,34 @@ export default function UnitTable({
                 <TableHead>
                     <TableRow className="bg-gray-900">
                         <TableCell className="text-white font-bold">Preview</TableCell>
-                        <TableCell
-                            className="text-white font-bold cursor-pointer hover:bg-gray-800 select-none"
-                            onClick={() => onSort('name')}
-                        >
-                            <Box className="flex items-center gap-1">
-                                Name
-                                {sortColumn === 'name' && (
-                                    sortDirection === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />
-                                )}
-                            </Box>
-                        </TableCell>
-                        <TableCell
-                            className="text-white font-bold cursor-pointer hover:bg-gray-800 select-none"
-                            onClick={() => onSort('level')}
-                        >
-                            <Box className="flex items-center gap-1">
-                                Level
-                                {sortColumn === 'level' && (
-                                    sortDirection === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />
-                                )}
-                            </Box>
-                        </TableCell>
-                        <TableCell
-                            className="text-white font-bold cursor-pointer hover:bg-gray-800 select-none"
-                            onClick={() => onSort('rarity')}
-                        >
-                            <Box className="flex items-center gap-1">
-                                Rarity
-                                {sortColumn === 'rarity' && (
-                                    sortDirection === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />
-                                )}
-                            </Box>
-                        </TableCell>
-                        <TableCell
-                            className="text-white font-bold cursor-pointer hover:bg-gray-800 select-none"
-                            onClick={() => onSort('count')}
-                        >
-                            <Box className="flex items-center gap-1">
-                                Count
-                                {sortColumn === 'count' && (
-                                    sortDirection === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />
-                                )}
-                            </Box>
-                        </TableCell>
+                        <SortableTableHeader
+                            column="name"
+                            label="Name"
+                            sortColumn={sortColumn}
+                            sortDirection={sortDirection}
+                            onSort={onSort}
+                        />
+                        <SortableTableHeader
+                            column="level"
+                            label="Level"
+                            sortColumn={sortColumn}
+                            sortDirection={sortDirection}
+                            onSort={onSort}
+                        />
+                        <SortableTableHeader
+                            column="rarity"
+                            label="Rarity"
+                            sortColumn={sortColumn}
+                            sortDirection={sortDirection}
+                            onSort={onSort}
+                        />
+                        <SortableTableHeader
+                            column="count"
+                            label="Count"
+                            sortColumn={sortColumn}
+                            sortDirection={sortDirection}
+                            onSort={onSort}
+                        />
                         <TableCell className="text-white font-bold">Actions</TableCell>
                     </TableRow>
                     <TableRow className="bg-gray-800" sx={{ position: 'sticky', top: '56px', zIndex: 10 }}>
@@ -156,166 +128,21 @@ export default function UnitTable({
                         const isEditing = editingRowId === unit.id;
                         const unitKey = `${unit.name}-${unit.level}`;
                         const editData = rowEditData[unit.id] || { name: unit.name, level: unit.level, rarity: unit.rarity, count: unitCounts[unitKey] || 1 };
+                        const unitCount = unitCounts[unitKey] || 1;
 
                         return (
-                            <TableRow key={unit.id} className="hover:bg-gray-600">
-                                <TableCell>
-                                    <div className="w-12 h-12">
-                                        <UnitCard unit={unit} />
-                                    </div>
-                                </TableCell>
-                                <TableCell className="text-white font-semibold">
-                                    {isEditing ? (
-                                        <Select
-                                            value={editData.name}
-                                            onChange={(e) => {
-                                                const selectedName = e.target.value;
-                                                const unitData = getUnitDataByName(selectedName);
-                                                onRowEditChange(unit.id, 'name', selectedName);
-                                                if (unitData) {
-                                                    onRowEditChange(unit.id, 'rarity', unitData.rarity);
-                                                }
-                                            }}
-                                            size="small"
-                                            className="text-white min-w-[150px]"
-                                            MenuProps={{
-                                                PaperProps: {
-                                                    className: 'bg-gray-700 max-h-60',
-                                                },
-                                            }}
-                                        >
-                                            {allUnitNames.map((name) => (
-                                                <MenuItem key={name} value={name} className="text-white hover:bg-gray-600">
-                                                    {name}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    ) : (
-                                        unit.name
-                                    )}
-                                </TableCell>
-                                <TableCell className="text-white">
-                                    {isEditing ? (
-                                        <TextField
-                                            type="number"
-                                            value={editData.level}
-                                            onChange={(e) => onRowEditChange(unit.id, 'level', parseInt(e.target.value) || 1)}
-                                            inputProps={{ min: 1, max: 10 }}
-                                            size="small"
-                                            className="w-20"
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.23)' },
-                                                    '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.4)' },
-                                                    '&.Mui-focused fieldset': { borderColor: 'rgba(255, 255, 255, 0.6)' },
-                                                },
-                                                '& .MuiInputBase-input': { color: 'white', padding: '8px' },
-                                            }}
-                                        />
-                                    ) : (
-                                        unit.level
-                                    )}
-                                </TableCell>
-                                <TableCell className="text-white">
-                                    {isEditing ? (
-                                        <Select
-                                            value={editData.rarity}
-                                            onChange={(e) => onRowEditChange(unit.id, 'rarity', e.target.value as UnitRarity)}
-                                            size="small"
-                                            className="text-white min-w-[120px]"
-                                            MenuProps={{
-                                                PaperProps: {
-                                                    className: 'bg-gray-700',
-                                                },
-                                            }}
-                                        >
-                                            {Object.values(UnitRarity).map((rarity) => (
-                                                <MenuItem key={rarity} value={rarity} className="text-white hover:bg-gray-600">
-                                                    {rarity}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    ) : (
-                                        <span
-                                            className={`px-2 py-1 rounded text-xs font-bold ${unit.rarity === UnitRarity.Legendary
-                                                ? 'bg-yellow-600 text-yellow-100'
-                                                : unit.rarity === UnitRarity.Epic
-                                                    ? 'bg-purple-600 text-purple-100'
-                                                    : unit.rarity === UnitRarity.Rare
-                                                        ? 'bg-blue-600 text-blue-100'
-                                                        : 'bg-gray-600 text-gray-100'
-                                                }`}
-                                        >
-                                            {unit.rarity}
-                                        </span>
-                                    )}
-                                </TableCell>
-                                <TableCell className="text-white">
-                                    {isEditing ? (
-                                        <TextField
-                                            type="number"
-                                            value={editData.count}
-                                            onChange={(e) => onRowEditChange(unit.id, 'count', parseInt(e.target.value) || 1)}
-                                            inputProps={{ min: 1, max: 100 }}
-                                            size="small"
-                                            className="w-20"
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.23)' },
-                                                    '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.4)' },
-                                                    '&.Mui-focused fieldset': { borderColor: 'rgba(255, 255, 255, 0.6)' },
-                                                },
-                                                '& .MuiInputBase-input': { color: 'white', padding: '8px' },
-                                            }}
-                                        />
-                                    ) : (
-                                        unitCounts[`${unit.name}-${unit.level}`] || 1
-                                    )}
-                                </TableCell>
-                                <TableCell>
-                                    <Box className="flex gap-2">
-                                        {isEditing ? (
-                                            <>
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={() => onRowSave()}
-                                                    className="text-green-400 hover:bg-green-900"
-                                                    aria-label={`Save ${unit.name}`}
-                                                >
-                                                    <CheckIcon fontSize="small" />
-                                                </IconButton>
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={onRowCancel}
-                                                    className="text-gray-400 hover:bg-gray-700"
-                                                    aria-label="Cancel"
-                                                >
-                                                    <CloseIcon fontSize="small" />
-                                                </IconButton>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={() => onRowEdit(unit)}
-                                                    className="text-blue-400 hover:bg-blue-900"
-                                                    aria-label={`Edit ${unit.name}`}
-                                                >
-                                                    <EditIcon fontSize="small" />
-                                                </IconButton>
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={() => onDelete(unit.id)}
-                                                    className="text-red-400 hover:bg-red-900"
-                                                    aria-label={`Delete ${unit.name}`}
-                                                >
-                                                    <DeleteIcon fontSize="small" />
-                                                </IconButton>
-                                            </>
-                                        )}
-                                    </Box>
-                                </TableCell>
-                            </TableRow>
+                            <UnitTableRow
+                                key={unit.id}
+                                unit={unit}
+                                unitCount={unitCount}
+                                isEditing={isEditing}
+                                editData={editData}
+                                onRowEditChange={onRowEditChange}
+                                onRowEdit={onRowEdit}
+                                onRowSave={onRowSave}
+                                onRowCancel={onRowCancel}
+                                onDelete={onDelete}
+                            />
                         );
                     })}
                     {uniqueUnits.length === 0 && (
