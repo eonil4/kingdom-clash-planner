@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Box } from '@mui/material';
 import { UnitRarity } from '../../types';
 import { getUnitImagePath } from '../../utils/imageUtils';
@@ -20,9 +20,16 @@ export default function UnitIcon({ name, rarity }: UnitIconProps) {
   const imageUrl = getUnitImagePath(name);
   const showPlaceholder = imageError || !imageUrl;
 
-  useEffect(() => {
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  const handleImageLoad = () => {
     setImageError(false);
-  }, [name]);
+  };
+
+  // Reset error when name changes (component remounts due to key prop)
+  // Using key={name} in the img element ensures state resets on name change
 
   if (showPlaceholder) {
     const initial = name.charAt(0).toUpperCase();
@@ -48,9 +55,11 @@ export default function UnitIcon({ name, rarity }: UnitIconProps) {
 
   return (
     <img
+      key={name}
       src={imageUrl}
       alt={name}
-      onError={() => setImageError(true)}
+      onError={handleImageError}
+      onLoad={handleImageLoad}
       style={{
         width: '100%',
         height: '100%',

@@ -93,17 +93,18 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
     setTooltipOpen((prev) => !prev);
   };
 
+  // Combine refs properly - useDrag returns a ref callback function
+  const combinedRef = (node: HTMLDivElement | null) => {
+    cardRef.current = node;
+    // drag from useDrag is a ref callback function
+    if (node && typeof drag === 'function') {
+      drag(node);
+    }
+  };
+  
   const cardContent = (
     <div
-      ref={(node) => {
-        cardRef.current = node;
-        const dragRef = drag as unknown as React.Ref<HTMLDivElement>;
-        if (typeof dragRef === 'function') {
-          dragRef(node);
-        } else if (dragRef && typeof dragRef === 'object' && 'current' in dragRef) {
-          (dragRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
-        }
-      }}
+      ref={combinedRef}
       className={`
         relative rounded-lg border-2 cursor-move overflow-hidden
         ${rarityColors[unit.rarity]}

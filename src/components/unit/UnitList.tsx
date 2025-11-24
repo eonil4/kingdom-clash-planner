@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useDrop } from 'react-dnd';
 import { Box } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
@@ -18,17 +18,11 @@ export default function UnitList() {
   const dispatch = useAppDispatch();
   const { filteredUnits, sortOption, sortOption2, sortOption3 } = useAppSelector((state) => state.unit);
   const currentFormation = useAppSelector((state) => state.formation.currentFormation);
-  const [localSortOption, setLocalSortOption] = useState<SortOption>(sortOption);
-  const [localSortOption2, setLocalSortOption2] = useState<SortOption | null>(sortOption2);
-  const [localSortOption3, setLocalSortOption3] = useState<SortOption | null>(sortOption3);
+  // Use Redux state directly instead of syncing local state
+  const localSortOption = sortOption;
+  const localSortOption2 = sortOption2;
+  const localSortOption3 = sortOption3;
   const [isManageUnitsOpen, setIsManageUnitsOpen] = useState(false);
-
-  // Sync local sort options with Redux state
-  useEffect(() => {
-    setLocalSortOption(sortOption);
-    setLocalSortOption2(sortOption2);
-    setLocalSortOption3(sortOption3);
-  }, [sortOption, sortOption2, sortOption3]);
 
   // Get all unit IDs that are currently in the formation
   const unitsInFormation = new Set(
@@ -58,35 +52,29 @@ export default function UnitList() {
 
   const handlePrimarySortChange = (event: SelectChangeEvent<SortOption>) => {
     const newSort = event.target.value as SortOption;
-    setLocalSortOption(newSort);
     dispatch(setSortOption(newSort));
 
     // Clear secondary/tertiary if they conflict with new primary
     if (localSortOption2 === newSort) {
-      setLocalSortOption2(null);
       dispatch(setSortOption2(null));
     }
     if (localSortOption3 === newSort) {
-      setLocalSortOption3(null);
       dispatch(setSortOption3(null));
     }
   };
 
   const handleSecondarySortChange = (event: SelectChangeEvent<SortOption | ''>) => {
     const newSort = event.target.value === '' ? null : (event.target.value as SortOption);
-    setLocalSortOption2(newSort);
     dispatch(setSortOption2(newSort));
 
     // Clear tertiary if it conflicts with new secondary
     if (localSortOption3 === newSort) {
-      setLocalSortOption3(null);
       dispatch(setSortOption3(null));
     }
   };
 
   const handleTertiarySortChange = (event: SelectChangeEvent<SortOption | ''>) => {
     const newSort = event.target.value === '' ? null : (event.target.value as SortOption);
-    setLocalSortOption3(newSort);
     dispatch(setSortOption3(newSort));
   };
 
