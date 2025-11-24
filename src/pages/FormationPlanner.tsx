@@ -3,7 +3,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useDrop } from 'react-dnd';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { placeUnit, removeUnit } from '../store/reducers/formationSlice';
+import { placeUnit, removeUnit, swapUnits } from '../store/reducers/formationSlice';
 import FormationHeader from '../components/formation/FormationHeader';
 import FormationGrid from '../components/formation/FormationGrid';
 import UnitList from '../components/unit/UnitList';
@@ -70,6 +70,25 @@ function FormationPlannerContent() {
     dispatch(removeUnit({ row, col, unit: unit || null }));
   };
 
+  const handleSwapUnits = (
+    sourceRow: number,
+    sourceCol: number,
+    targetRow: number,
+    targetCol: number,
+    sourceUnit: Unit,
+    targetUnit: Unit
+  ) => {
+    // Swap two units that are both in the formation
+    dispatch(swapUnits({
+      sourceRow,
+      sourceCol,
+      targetRow,
+      targetCol,
+      sourceUnit,
+      targetUnit,
+    }));
+  };
+
   // Drop zone for removing units from formation when dropped outside the grid
   // Note: UnitList has its own drop handler, so this only handles drops outside both grid and list
   const [, dropOutside] = useDrop({
@@ -116,6 +135,7 @@ function FormationPlannerContent() {
           tiles={currentFormation.tiles}
           onPlaceUnit={handlePlaceUnit}
           onRemoveUnit={handleRemoveUnit}
+          onSwapUnits={handleSwapUnits}
         />
       </div>
       <UnitList />

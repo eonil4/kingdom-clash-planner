@@ -106,7 +106,7 @@ describe('SortableTableHeader', () => {
   });
 
   it('should not show arrow when column is not sorted', () => {
-    const { container } = render(
+    render(
       <Table>
         <TableHead>
           <TableRow>

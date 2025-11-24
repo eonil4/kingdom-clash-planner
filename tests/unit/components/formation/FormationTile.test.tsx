@@ -255,5 +255,65 @@ describe('FormationTile', () => {
     expect(mockOnRemoveUnit).not.toHaveBeenCalled();
     expect(mockOnPlaceUnit).toHaveBeenCalledWith(0, 0, droppedUnit);
   });
+
+  it('should swap units when both are in formation', () => {
+    const mockOnSwapUnits = vi.fn();
+    const targetUnit = { id: '2', name: 'TargetUnit', level: 3, rarity: UnitRarity.Epic, power: 150 };
+    
+    render(
+      <FormationTile
+        row={1}
+        col={1}
+        unit={targetUnit}
+        onPlaceUnit={mockOnPlaceUnit}
+        onRemoveUnit={mockOnRemoveUnit}
+        onSwapUnits={mockOnSwapUnits}
+      />
+    );
+
+    const sourceUnit = { id: '3', name: 'SourceUnit', level: 7, rarity: UnitRarity.Legendary, power: 300 };
+    if (capturedDropHandler) {
+      capturedDropHandler({
+        unit: sourceUnit,
+        isInFormation: true,
+        sourceRow: 0,
+        sourceCol: 0,
+      });
+    }
+
+    // Should call swap instead of remove/place
+    expect(mockOnSwapUnits).toHaveBeenCalledWith(0, 0, 1, 1, sourceUnit, targetUnit);
+    expect(mockOnRemoveUnit).not.toHaveBeenCalled();
+    expect(mockOnPlaceUnit).not.toHaveBeenCalled();
+  });
+
+  it('should not swap if onSwapUnits is not provided', () => {
+    const targetUnit = { id: '2', name: 'TargetUnit', level: 3, rarity: UnitRarity.Epic, power: 150 };
+    
+    render(
+      <FormationTile
+        row={1}
+        col={1}
+        unit={targetUnit}
+        onPlaceUnit={mockOnPlaceUnit}
+        onRemoveUnit={mockOnRemoveUnit}
+      />
+    );
+
+    const sourceUnit = { id: '3', name: 'SourceUnit', level: 7, rarity: UnitRarity.Legendary, power: 300 };
+    if (capturedDropHandler) {
+      capturedDropHandler({
+        unit: sourceUnit,
+        isInFormation: true,
+        sourceRow: 0,
+        sourceCol: 0,
+      });
+    }
+
+    // Should fall back to remove/place behavior when swap handler is not provided
+    expect(mockOnRemoveUnit).toHaveBeenCalledWith(0, 0, sourceUnit);
+    expect(mockOnRemoveUnit).toHaveBeenCalledWith(1, 1, targetUnit);
+    expect(mockOnPlaceUnit).toHaveBeenCalledWith(1, 1, sourceUnit);
+  });
 });
 

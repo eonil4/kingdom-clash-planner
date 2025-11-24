@@ -55,6 +55,7 @@ describe('HelpOverlay', () => {
     expect(screen.getAllByText(/Formation Grid \(7x7\)/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Place Units:/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Remove Units:/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Swap Units:/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Replace Units:/i).length).toBeGreaterThan(0);
   });
 
@@ -73,6 +74,7 @@ describe('HelpOverlay', () => {
     
     expect(screen.getAllByText(/Adding Units to Formation/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Removing Units from Formation/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Swapping and Replacing Units/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Managing Your Roster/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Unit Information/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/URL Sharing/i).length).toBeGreaterThan(0);

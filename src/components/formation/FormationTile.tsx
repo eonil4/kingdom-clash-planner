@@ -8,6 +8,14 @@ interface FormationTileProps {
   unit: Unit | null;
   onPlaceUnit: (row: number, col: number, unit: Unit) => void;
   onRemoveUnit: (row: number, col: number, unit: Unit | null) => void;
+  onSwapUnits?: (
+    sourceRow: number,
+    sourceCol: number,
+    targetRow: number,
+    targetCol: number,
+    sourceUnit: Unit,
+    targetUnit: Unit
+  ) => void;
 }
 
 export default function FormationTile({
@@ -16,6 +24,7 @@ export default function FormationTile({
   unit,
   onPlaceUnit,
   onRemoveUnit,
+  onSwapUnits,
 }: FormationTileProps) {
   const [{ isOver }, drop] = useDrop({
     accept: 'unit',
@@ -26,6 +35,12 @@ export default function FormationTile({
       
       // Don't do anything if dropping on the same tile
       if (isDroppingOnSameTile) {
+        return;
+      }
+      
+      // If both units are in the formation, swap them instead of replacing
+      if (isMovingFromDifferentTile && unit && onSwapUnits && item.sourceRow !== undefined && item.sourceCol !== undefined) {
+        onSwapUnits(item.sourceRow, item.sourceCol, row, col, item.unit, unit);
         return;
       }
       

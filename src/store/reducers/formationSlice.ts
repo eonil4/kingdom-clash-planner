@@ -61,6 +61,30 @@ const formationSlice = createSlice({
         );
       }
     },
+    swapUnits: (
+      state,
+      action: PayloadAction<{ 
+        sourceRow: number; 
+        sourceCol: number; 
+        targetRow: number; 
+        targetCol: number;
+        sourceUnit: Unit;
+        targetUnit: Unit;
+      }>
+    ) => {
+      if (state.currentFormation) {
+        // Swap the units
+        state.currentFormation.tiles[action.payload.sourceRow][
+          action.payload.sourceCol
+        ] = action.payload.targetUnit;
+        state.currentFormation.tiles[action.payload.targetRow][
+          action.payload.targetCol
+        ] = action.payload.sourceUnit;
+        state.currentFormation.power = calculateFormationPower(
+          state.currentFormation.tiles
+        );
+      }
+    },
     updateFormationName: (state, action: PayloadAction<string>) => {
       if (state.currentFormation) {
         state.currentFormation.name = action.payload;
@@ -73,6 +97,7 @@ export const {
   setCurrentFormation,
   placeUnit,
   removeUnit,
+  swapUnits,
   updateFormationName,
 } = formationSlice.actions;
 

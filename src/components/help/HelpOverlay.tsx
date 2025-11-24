@@ -89,7 +89,10 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
                 • <strong>Remove Units:</strong> Double-click a unit in the grid or drag it back to the available units area.
               </Typography>
               <Typography variant="body2" className="mb-1">
-                • <strong>Replace Units:</strong> Drag a unit onto an occupied tile to replace it. The replaced unit will be moved back to available units.
+                • <strong>Swap Units:</strong> Drag a unit from one position in the formation onto another unit in the formation to swap their positions.
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Replace Units:</strong> Drag a unit from the available units list onto an occupied tile in the formation to replace it. The replaced unit will be moved back to available units.
               </Typography>
             </Box>
 
@@ -144,6 +147,18 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
               </Typography>
               <Typography variant="body2" className="mb-1">
                 • <strong>Drag Back:</strong> Drag a unit from the formation grid back to the available units area.
+              </Typography>
+            </Box>
+
+            <Box className="mb-4">
+              <Typography variant="h6" className="text-blue-400 font-semibold mb-2">
+                Swapping and Replacing Units
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Swap Units:</strong> Drag a unit from one position in the formation onto another unit in the formation. The two units will swap positions.
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Replace Units:</strong> Drag a unit from the available units list onto an occupied tile in the formation. The unit in the formation will be moved back to available units, and the new unit will take its place.
               </Typography>
             </Box>
 

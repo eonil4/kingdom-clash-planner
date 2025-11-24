@@ -6,12 +6,21 @@ interface FormationGridProps {
   tiles: (Unit | null)[][];
   onPlaceUnit: (row: number, col: number, unit: Unit) => void;
   onRemoveUnit: (row: number, col: number, unit: Unit | null) => void;
+  onSwapUnits?: (
+    sourceRow: number,
+    sourceCol: number,
+    targetRow: number,
+    targetCol: number,
+    sourceUnit: Unit,
+    targetUnit: Unit
+  ) => void;
 }
 
 export default function FormationGrid({
   tiles,
   onPlaceUnit,
   onRemoveUnit,
+  onSwapUnits,
 }: FormationGridProps) {
   return (
     <div
@@ -45,6 +54,7 @@ export default function FormationGrid({
                   unit={unit}
                   onPlaceUnit={onPlaceUnit}
                   onRemoveUnit={onRemoveUnit}
+                  onSwapUnits={onSwapUnits}
                 />
               </div>
             </Grid>
