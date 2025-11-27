@@ -14,7 +14,8 @@ const unitImages = import.meta.glob<string>('../assets/units/*.png', {
 // Create a lookup map by filename for easier access
 const imagesByName: Record<string, string> = {};
 for (const [path, url] of Object.entries(unitImages)) {
-  const filename = path.split('/').pop()?.replace('.png', '') || '';
+  const parts = path.split('/');
+  const filename = parts[parts.length - 1].replace('.png', '');
   imagesByName[filename] = url;
 }
 

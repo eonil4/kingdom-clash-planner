@@ -255,9 +255,14 @@ describe('AddUnitForm', () => {
     expect(previewCard).toBeInTheDocument();
   });
 
-  it('should show preview unit with default name when no unit selected', () => {
+  it('should show empty placeholder when no unit selected', () => {
     render(<AddUnitForm {...mockProps} formData={{ ...mockFormData, name: '' }} />);
-    const previewCard = screen.getByTestId('unit-card-Select Unit-1');
+    expect(screen.getByText('Select a unit')).toBeInTheDocument();
+  });
+
+  it('should show preview with zero power for unknown unit name', () => {
+    render(<AddUnitForm {...mockProps} formData={{ ...mockFormData, name: 'UnknownUnit' }} />);
+    const previewCard = screen.getByTestId('unit-card-UnknownUnit-1');
     expect(previewCard).toBeInTheDocument();
   });
 });

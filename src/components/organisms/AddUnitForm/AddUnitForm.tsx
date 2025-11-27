@@ -51,16 +51,18 @@ export default function AddUnitForm({
     const allUnitNames = UNIT_NAMES_ARRAY;
     const totalUnitCount = units.length + formationUnitCount;
 
-    const previewUnit: Unit = {
+    const hasSelectedUnit = !!formData.name;
+    
+    const previewUnit: Unit | null = hasSelectedUnit ? {
         id: 'preview',
-        name: formData.name || 'Select Unit',
+        name: formData.name,
         level: 1,
         rarity: formData.rarity,
-        power: formData.name && getUnitDataByName(formData.name) 
+        power: getUnitDataByName(formData.name) 
             ? getUnitDataByName(formData.name)!.getPower(1)
             : 0,
-        imageUrl: formData.name ? getUnitImagePath(formData.name) : undefined,
-    };
+        imageUrl: getUnitImagePath(formData.name),
+    } : null;
 
     return (
         <Box className="bg-gray-800 p-4 rounded-lg mb-4 border border-gray-700">
@@ -71,7 +73,18 @@ export default function AddUnitForm({
             <Box className="flex flex-col gap-4">
                 <Box className="flex gap-4">
                     <Box className="w-32 h-32 flex-shrink-0 flex items-center justify-center">
-                        <UnitCard unit={previewUnit} size="100%" />
+                        {previewUnit ? (
+                            <UnitCard unit={previewUnit} size="100%" />
+                        ) : (
+                            <Box 
+                                className="w-full h-full rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center"
+                                sx={{ backgroundColor: 'rgba(75, 85, 99, 0.3)' }}
+                            >
+                                <Typography variant="caption" className="text-gray-500 text-center px-2">
+                                    Select a unit
+                                </Typography>
+                            </Box>
+                        )}
                     </Box>
 
                     <Box className="flex-grow flex flex-col gap-4">
