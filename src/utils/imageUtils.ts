@@ -11,6 +11,13 @@ const unitImages = import.meta.glob<string>('../assets/units/*.png', {
   import: 'default'
 });
 
+// Create a lookup map by filename for easier access
+const imagesByName: Record<string, string> = {};
+for (const [path, url] of Object.entries(unitImages)) {
+  const filename = path.split('/').pop()?.replace('.png', '') || '';
+  imagesByName[filename] = url;
+}
+
 /**
  * Generates the expected image path for a unit
  * Loads images from src/assets/units using Vite's asset import system
@@ -33,9 +40,8 @@ export function getUnitImagePath(unitName: string): string {
       .replace(/[^a-z0-9_]/g, '');  // Remove any other non-alphanumeric characters except underscores
   }
   
-  // Try to find the image in the preloaded glob
-  const imagePath = `../assets/units/${imageName}.png`;
-  const image = unitImages[imagePath];
+  // Look up in the filename map
+  const image = imagesByName[imageName];
   
   if (image) {
     return image;

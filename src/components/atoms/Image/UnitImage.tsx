@@ -20,9 +20,11 @@ export default function UnitImage({
   className = '',
   alt 
 }: UnitImageProps) {
-  const [imageError, setImageError] = useState(false);
   const finalImageUrl = imageUrl || getUnitImagePath(name);
-  const showPlaceholder = imageError || !finalImageUrl;
+  const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set());
+  
+  const hasError = finalImageUrl ? failedUrls.has(finalImageUrl) : false;
+  const showPlaceholder = hasError || !finalImageUrl;
 
   if (showPlaceholder) {
     return <UnitPlaceholder name={name} rarity={rarity} fontSize={fontSize} />;
@@ -30,10 +32,11 @@ export default function UnitImage({
 
   return (
     <img
+      key={finalImageUrl}
       src={finalImageUrl}
       alt={alt || name}
       className={`w-full h-full object-cover ${className}`}
-      onError={() => setImageError(true)}
+      onError={() => setFailedUrls(prev => new Set(prev).add(finalImageUrl))}
       loading="lazy"
     />
   );
