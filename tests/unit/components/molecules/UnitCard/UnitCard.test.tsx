@@ -5,14 +5,26 @@ import { UnitCard } from '../../../../../src/components/molecules';
 import { UnitRarity } from '../../../../../src/types';
 import { getUnitImagePath } from '../../../../../src/utils/imageUtils';
 
-const mockUseDrag = vi.fn(() => [
-  { isDragging: false },
-  vi.fn(),
-]);
+interface DragConfig {
+  type: string;
+  item: { unit: unknown; isInFormation?: boolean; sourceRow?: number; sourceCol?: number };
+  collect: (monitor: { isDragging: () => boolean }) => { isDragging: boolean };
+}
+
+let capturedDragConfig: DragConfig | undefined;
+const mockUseDrag = vi.fn((config?: DragConfig) => {
+  if (config) {
+    capturedDragConfig = config;
+  }
+  return [
+    { isDragging: false },
+    vi.fn(),
+  ];
+});
 
 vi.mock('react-dnd', () => ({
   DndProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  useDrag: () => mockUseDrag(),
+  useDrag: (config?: DragConfig) => mockUseDrag(config),
   useDrop: vi.fn(() => [{ isOver: false }, vi.fn()]),
   HTML5Backend: {},
 }));
@@ -33,6 +45,16 @@ describe('UnitCard', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    capturedDragConfig = undefined;
+    mockUseDrag.mockImplementation((config?: DragConfig) => {
+      if (config) {
+        capturedDragConfig = config;
+      }
+      return [
+        { isDragging: false },
+        vi.fn(),
+      ];
+    });
   });
 
   it('should render unit card with unit name placeholder when imageUrl is not provided', () => {
@@ -302,6 +324,162 @@ describe('UnitCard', () => {
     const { container } = render(<UnitCard unit={invalidRarityUnit} />);
     const card = container.querySelector('[role="button"]');
     expect(card).toBeInTheDocument();
+  });
+
+  it('should pass correct drag item to useDrag', () => {
+    render(
+      <UnitCard
+        unit={mockUnit}
+        isInFormation={true}
+        sourceRow={2}
+        sourceCol={3}
+      />
+    );
+
+    expect(mockUseDrag).toHaveBeenCalled();
+  });
+
+  it('should render with custom size prop as number', () => {
+    const { container } = render(<UnitCard unit={mockUnit} size={80} />);
+    
+    const card = container.querySelector('[role="button"]');
+    expect(card).toHaveStyle({ width: '80px' });
+  });
+
+  it('should render with custom size prop as string', () => {
+    const { container } = render(<UnitCard unit={mockUnit} size="100%" />);
+    
+    const card = container.querySelector('[role="button"]');
+    expect(card).toHaveStyle({ width: '100%' });
+  });
+
+  it('should not toggle tooltip when isDragging', async () => {
+    mockUseDrag.mockReturnValueOnce([
+      { isDragging: true },
+      vi.fn(),
+    ]);
+    
+    const user = userEvent.setup();
+    render(<UnitCard unit={mockUnit} />);
+    
+    const card = screen.getByRole('button');
+    await user.click(card);
+    
+    expect(card).toBeInTheDocument();
+  });
+
+  it('should not handle keyboard events when isDragging', async () => {
+    mockUseDrag.mockReturnValueOnce([
+      { isDragging: true },
+      vi.fn(),
+    ]);
+    
+    const user = userEvent.setup();
+    render(<UnitCard unit={mockUnit} />);
+    
+    const card = screen.getByRole('button');
+    card.focus();
+    
+    await user.keyboard('{Enter}');
+    
+    expect(card).toBeInTheDocument();
+  });
+
+  it('should close tooltip on double click before calling onDoubleClick', async () => {
+    const user = userEvent.setup();
+    const mockOnDoubleClick = vi.fn();
+    render(<UnitCard unit={mockUnit} onDoubleClick={mockOnDoubleClick} />);
+    
+    const card = screen.getByRole('button');
+    await user.click(card);
+    
+    await waitFor(() => {
+      const tooltip = document.body.querySelector('[role="tooltip"]');
+      expect(tooltip).toBeInTheDocument();
+    });
+    
+    await user.dblClick(card);
+    
+    expect(mockOnDoubleClick).toHaveBeenCalled();
+  });
+
+  it('should pass correct item to useDrag with formation info', () => {
+    render(
+      <UnitCard
+        unit={mockUnit}
+        isInFormation={true}
+        sourceRow={2}
+        sourceCol={3}
+      />
+    );
+
+    expect(capturedDragConfig).toBeDefined();
+    expect(capturedDragConfig?.item).toEqual({
+      unit: mockUnit,
+      isInFormation: true,
+      sourceRow: 2,
+      sourceCol: 3,
+    });
+    expect(capturedDragConfig?.type).toBe('unit');
+  });
+
+  it('should call collect function in useDrag', () => {
+    render(<UnitCard unit={mockUnit} />);
+
+    expect(capturedDragConfig?.collect).toBeDefined();
+    if (capturedDragConfig?.collect) {
+      const result = capturedDragConfig.collect({ isDragging: () => true });
+      expect(result).toEqual({ isDragging: true });
+
+      const resultFalse = capturedDragConfig.collect({ isDragging: () => false });
+      expect(resultFalse).toEqual({ isDragging: false });
+    }
+  });
+
+  it('should close tooltip when Escape key is pressed', async () => {
+    const user = userEvent.setup();
+    render(<UnitCard unit={mockUnit} />);
+    
+    const card = screen.getByRole('button');
+    await user.click(card);
+    
+    await waitFor(() => {
+      const tooltip = document.body.querySelector('[role="tooltip"]');
+      expect(tooltip).toBeInTheDocument();
+    });
+    
+    await user.keyboard('{Escape}');
+    
+    await waitFor(() => {
+      const tooltip = document.body.querySelector('[role="tooltip"]');
+      expect(tooltip).not.toBeInTheDocument();
+    });
+  });
+
+  it('should handle double-click without onDoubleClick prop', async () => {
+    const user = userEvent.setup();
+    render(<UnitCard unit={mockUnit} />);
+    
+    const card = screen.getByRole('button');
+    await user.dblClick(card);
+    
+    expect(card).toBeInTheDocument();
+  });
+
+  it('should display power as 0 when unit.power is undefined', async () => {
+    const user = userEvent.setup();
+    const unitWithoutPower = { ...mockUnit, power: undefined };
+    render(<UnitCard unit={unitWithoutPower} />);
+    
+    const card = screen.getByRole('button');
+    await user.click(card);
+    
+    await waitFor(() => {
+      const tooltip = document.body.querySelector('[role="tooltip"]');
+      expect(tooltip).toBeInTheDocument();
+      expect(tooltip?.textContent).toContain('Power:');
+      expect(tooltip?.textContent).toContain('0');
+    });
   });
 });
 

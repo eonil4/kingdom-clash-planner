@@ -211,19 +211,32 @@ describe('useInitializeData', () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it('should only initialize once', () => {
-    mockUseSearchParams.mockReturnValue([
-      new URLSearchParams(),
-      mockSetSearchParams,
-    ]);
+  it('should only initialize once even when searchParams change', async () => {
+    const mockUnits = [{ id: '1', name: 'Archers', level: 5, rarity: 'Common', power: 1600 }];
+    vi.mocked(urlSerialization.deserializeUnits).mockReturnValue(mockUnits);
+    
+    let searchParamsState = new URLSearchParams('units=2,5,1');
+    mockUseSearchParams.mockImplementation(() => [searchParamsState, mockSetSearchParams]);
 
-    const { rerender } = renderHook(() => useInitializeData(), { wrapper: createWrapper() });
-    const initialCallCount = mockUseSearchParams.mock.calls.length;
+    const store = createMockStore();
+    const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>{children}</Provider>
+    );
+
+    const { rerender } = renderHook(() => useInitializeData(), { wrapper: wrapperWithStore });
+    
+    await waitFor(() => {
+      expect(urlSerialization.deserializeUnits).toHaveBeenCalledTimes(1);
+    });
+
+    vi.mocked(urlSerialization.deserializeUnits).mockClear();
+    searchParamsState = new URLSearchParams('units=3,6,2');
     
     rerender();
     
-    // Should not call useSearchParams again (hook uses useRef to track initialization)
-    expect(mockUseSearchParams.mock.calls.length).toBeGreaterThanOrEqual(initialCallCount);
+    await waitFor(() => {
+      expect(urlSerialization.deserializeUnits).not.toHaveBeenCalled();
+    });
   });
 });
 

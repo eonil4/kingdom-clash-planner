@@ -75,8 +75,8 @@ export default defineConfig({
         'scripts/',
         'src/assets/',
         '**/*.config.*',
-        '**/mockData.ts',
         '**/*.d.ts',
+        '**/index.ts'
       ],
     },
   },

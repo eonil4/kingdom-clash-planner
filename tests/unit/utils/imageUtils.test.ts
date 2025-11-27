@@ -178,6 +178,28 @@ describe('imageUtils', () => {
     });
   });
 
+  describe('getPlaceholderImageUrl with null context', () => {
+    it('should return empty data URL when canvas context is null', () => {
+      const originalCreateElement = document.createElement.bind(document);
+      document.createElement = vi.fn((tag: string) => {
+        if (tag === 'canvas') {
+          const canvas = originalCreateElement('canvas');
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (canvas as any).getContext = vi.fn(() => null);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (canvas as any).toDataURL = vi.fn(() => 'data:image/png;base64,');
+          return canvas;
+        }
+        return originalCreateElement(tag);
+      });
+
+      const result = getPlaceholderImageUrl('Archer');
+      expect(result).toMatch(/^data:image/);
+      
+      document.createElement = originalCreateElement;
+    });
+  });
+
   describe('checkImageExists', () => {
     it('should resolve to true for valid image URL', async () => {
       global.Image = class extends Image {

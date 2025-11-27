@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import formationReducer, { setCurrentFormation, placeUnit, removeUnit, swapUnits } from '../../../../src/store/reducers/formationSlice';
+import formationReducer, { setCurrentFormation, placeUnit, removeUnit, swapUnits, updateFormationName } from '../../../../src/store/reducers/formationSlice';
 import type { Formation, Unit } from '../../../../src/types';
 import { UnitRarity } from '../../../../src/types';
 
@@ -268,6 +268,19 @@ describe('formationSlice', () => {
         })
       );
       
+      expect(state.currentFormation).toBeNull();
+    });
+  });
+
+  describe('updateFormationName', () => {
+    it('should update formation name', () => {
+      const state = formationReducer(initialState, updateFormationName('New Name'));
+      expect(state.currentFormation?.name).toBe('New Name');
+    });
+
+    it('should handle null currentFormation', () => {
+      const nullState = { currentFormation: null };
+      const state = formationReducer(nullState, updateFormationName('New Name'));
       expect(state.currentFormation).toBeNull();
     });
   });

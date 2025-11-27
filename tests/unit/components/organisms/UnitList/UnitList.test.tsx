@@ -26,9 +26,13 @@ interface UseDropConfig {
 }
 
 let capturedDropHandler: ((item: DropItem) => void) | undefined;
+let capturedCollectFn: ((monitor: { isOver: () => boolean }) => { isOver: boolean }) | undefined;
 const mockUseDrop = vi.fn((config: UseDropConfig) => {
   if (config && typeof config === 'object' && config.drop) {
     capturedDropHandler = config.drop;
+  }
+  if (config && typeof config === 'object' && config.collect) {
+    capturedCollectFn = config.collect as typeof capturedCollectFn;
   }
   return [
     { isOver: false },
@@ -213,6 +217,7 @@ describe('UnitList', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     capturedDropHandler = undefined;
+    capturedCollectFn = undefined;
   });
 
   it('should render unit list with available units', () => {
@@ -404,8 +409,11 @@ describe('UnitList', () => {
     expect(state.formation.currentFormation?.tiles[0][0]).toBeNull();
   });
 
-  it('should handle secondary sort change and clear conflicting tertiary', () => {
+  it('should handle secondary sort change and clear conflicting tertiary', async () => {
+    const user = userEvent.setup();
     const store = createMockStore(mockUnits);
+    store.dispatch({ type: 'unit/setSortOption', payload: 'level' });
+    store.dispatch({ type: 'unit/setSortOption2', payload: 'rarity' });
     store.dispatch({ type: 'unit/setSortOption3', payload: 'name' });
     render(
       <DndProvider backend={HTML5Backend}>
@@ -416,7 +424,11 @@ describe('UnitList', () => {
     );
     
     const secondarySelect = screen.getByLabelText(/sort units by \(secondary\)/i);
-    expect(secondarySelect).toBeInTheDocument();
+    await user.selectOptions(secondarySelect, 'name');
+    
+    const state = store.getState();
+    expect(state.unit.sortOption2).toBe('name');
+    expect(state.unit.sortOption3).toBeNull();
   });
 
   it('should handle tertiary sort change', () => {
@@ -443,7 +455,300 @@ describe('UnitList', () => {
     
     expect(screen.getByTestId('manage-units-modal')).toBeInTheDocument();
     
-    expect(screen.getByTestId('manage-units-modal')).toBeInTheDocument();
+    const modalButton = screen.getByTestId('manage-units-modal');
+    await user.click(modalButton);
+    
+    expect(screen.queryByTestId('manage-units-modal')).not.toBeInTheDocument();
+  });
+
+  it('should clear secondary sort when primary sort changes to same value', async () => {
+    const user = userEvent.setup();
+    const store = createMockStore(mockUnits);
+    store.dispatch({ type: 'unit/setSortOption', payload: 'level' });
+    store.dispatch({ type: 'unit/setSortOption2', payload: 'rarity' });
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <UnitList />
+        </Provider>
+      </DndProvider>
+    );
+
+    const primarySelect = screen.getByLabelText(/sort units by \(primary\)/i);
+    await user.selectOptions(primarySelect, 'rarity');
+
+    const state = store.getState();
+    expect(state.unit.sortOption).toBe('rarity');
+    expect(state.unit.sortOption2).toBeNull();
+  });
+
+  it('should clear tertiary sort when primary sort changes to same value', async () => {
+    const user = userEvent.setup();
+    const store = createMockStore(mockUnits);
+    store.dispatch({ type: 'unit/setSortOption', payload: 'level' });
+    store.dispatch({ type: 'unit/setSortOption2', payload: 'rarity' });
+    store.dispatch({ type: 'unit/setSortOption3', payload: 'name' });
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <UnitList />
+        </Provider>
+      </DndProvider>
+    );
+
+    const primarySelect = screen.getByLabelText(/sort units by \(primary\)/i);
+    await user.selectOptions(primarySelect, 'name');
+
+    const state = store.getState();
+    expect(state.unit.sortOption).toBe('name');
+    expect(state.unit.sortOption3).toBeNull();
+  });
+
+  it('should clear tertiary sort when secondary sort changes to same value', async () => {
+    const user = userEvent.setup();
+    const store = createMockStore(mockUnits);
+    store.dispatch({ type: 'unit/setSortOption', payload: 'level' });
+    store.dispatch({ type: 'unit/setSortOption2', payload: 'rarity' });
+    store.dispatch({ type: 'unit/setSortOption3', payload: 'name' });
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <UnitList />
+        </Provider>
+      </DndProvider>
+    );
+
+    const secondarySelect = screen.getByLabelText(/sort units by \(secondary\)/i);
+    await user.selectOptions(secondarySelect, 'name');
+
+    const state = store.getState();
+    expect(state.unit.sortOption2).toBe('name');
+    expect(state.unit.sortOption3).toBeNull();
+  });
+
+  it('should set tertiary sort option', async () => {
+    const user = userEvent.setup();
+    const store = createMockStore(mockUnits);
+    store.dispatch({ type: 'unit/setSortOption', payload: 'level' });
+    store.dispatch({ type: 'unit/setSortOption2', payload: 'rarity' });
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <UnitList />
+        </Provider>
+      </DndProvider>
+    );
+
+    const tertiarySelect = screen.getByLabelText(/sort units by \(tertiary\)/i);
+    await user.selectOptions(tertiarySelect, 'name');
+
+    const state = store.getState();
+    expect(state.unit.sortOption3).toBe('name');
+  });
+
+  it('should clear secondary sort when selecting empty value', async () => {
+    const user = userEvent.setup();
+    const store = createMockStore(mockUnits);
+    store.dispatch({ type: 'unit/setSortOption', payload: 'level' });
+    store.dispatch({ type: 'unit/setSortOption2', payload: 'rarity' });
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <UnitList />
+        </Provider>
+      </DndProvider>
+    );
+
+    const secondarySelect = screen.getByLabelText(/sort units by \(secondary\)/i);
+    await user.selectOptions(secondarySelect, '');
+
+    const state = store.getState();
+    expect(state.unit.sortOption2).toBeNull();
+  });
+
+  it('should not clear tertiary sort when secondary changes to different value', async () => {
+    const user = userEvent.setup();
+    const store = createMockStore(mockUnits);
+    store.dispatch({ type: 'unit/setSortOption', payload: 'level' });
+    store.dispatch({ type: 'unit/setSortOption2', payload: 'rarity' });
+    store.dispatch({ type: 'unit/setSortOption3', payload: 'name' });
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <UnitList />
+        </Provider>
+      </DndProvider>
+    );
+
+    const secondarySelect = screen.getByLabelText(/sort units by \(secondary\)/i);
+    await user.selectOptions(secondarySelect, 'level');
+
+    const state = store.getState();
+    expect(state.unit.sortOption2).toBe('level');
+    expect(state.unit.sortOption3).toBe('name');
+  });
+
+  it('should clear tertiary sort when selecting empty value', async () => {
+    const user = userEvent.setup();
+    const store = createMockStore(mockUnits);
+    store.dispatch({ type: 'unit/setSortOption', payload: 'level' });
+    store.dispatch({ type: 'unit/setSortOption2', payload: 'rarity' });
+    store.dispatch({ type: 'unit/setSortOption3', payload: 'name' });
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <UnitList />
+        </Provider>
+      </DndProvider>
+    );
+
+    const tertiarySelect = screen.getByLabelText(/sort units by \(tertiary\)/i);
+    await user.selectOptions(tertiarySelect, '');
+
+    const state = store.getState();
+    expect(state.unit.sortOption3).toBeNull();
+  });
+
+  it('should not withdraw units when currentFormation is null', async () => {
+    const user = userEvent.setup();
+    const store = configureStore({
+      reducer: {
+        unit: unitReducer,
+        formation: formationReducer,
+      },
+      preloadedState: {
+        unit: {
+          units: mockUnits,
+          filteredUnits: mockUnits,
+          sortOption: 'level' as const,
+          sortOption2: null,
+          sortOption3: null,
+          searchTerm: '',
+        },
+        formation: {
+          currentFormation: null,
+          formations: [],
+        },
+      },
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: false,
+          immutableCheck: false,
+        }),
+    });
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <UnitList />
+        </Provider>
+      </DndProvider>
+    );
+
+    const withdrawButton = screen.getByRole('button', { name: /withdraw all/i });
+    await user.click(withdrawButton);
+
+    const state = store.getState();
+    expect(state.formation.currentFormation).toBeNull();
+  });
+
+  it('should not place unit on double click when currentFormation is null', async () => {
+    const user = userEvent.setup();
+    const store = configureStore({
+      reducer: {
+        unit: unitReducer,
+        formation: formationReducer,
+      },
+      preloadedState: {
+        unit: {
+          units: mockUnits,
+          filteredUnits: mockUnits,
+          sortOption: 'level' as const,
+          sortOption2: null,
+          sortOption3: null,
+          searchTerm: '',
+        },
+        formation: {
+          currentFormation: null,
+          formations: [],
+        },
+      },
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: false,
+          immutableCheck: false,
+        }),
+    });
+    
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <UnitList />
+        </Provider>
+      </DndProvider>
+    );
+
+    const unitCard = screen.getByTestId('unit-card-1');
+    await user.dblClick(unitCard);
+
+    const state = store.getState();
+    expect(state.formation.currentFormation).toBeNull();
+  });
+
+  it('should apply isOver styling when dragging over', () => {
+    mockUseDrop.mockReturnValueOnce([
+      { isOver: true },
+      vi.fn(),
+    ]);
+
+    const { container } = renderWithProvider();
+    
+    const section = container.querySelector('section');
+    expect(section?.className).toContain('bg-blue-900');
+  });
+
+  it('should not remove unit from roster when dropping non-formation unit', () => {
+    const store = createMockStore(mockUnits);
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <UnitList />
+        </Provider>
+      </DndProvider>
+    );
+
+    const droppedUnit = { id: '1', name: 'Unit1', level: 1, rarity: UnitRarity.Common, power: 50 };
+    if (capturedDropHandler) {
+      act(() => {
+        capturedDropHandler!({
+          unit: droppedUnit,
+          isInFormation: false,
+        });
+      });
+    }
+
+    const state = store.getState();
+    expect(state.unit.units.length).toBe(3);
+  });
+
+  it('should call collect function with monitor', () => {
+    renderWithProvider();
+
+    expect(capturedCollectFn).toBeDefined();
+    if (capturedCollectFn) {
+      const result = capturedCollectFn({ isOver: () => true });
+      expect(result).toEqual({ isOver: true });
+
+      const resultFalse = capturedCollectFn({ isOver: () => false });
+      expect(resultFalse).toEqual({ isOver: false });
+    }
   });
 });
 

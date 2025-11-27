@@ -96,5 +96,24 @@ describe('ErrorBoundary', () => {
       error: error,
     });
   });
+
+  it('should display default message when error has no message', () => {
+    class ThrowEmptyError extends Component {
+      render() {
+        const error = new Error();
+        error.message = '';
+        throw error;
+      }
+    }
+
+    render(
+      <ErrorBoundary>
+        <ThrowEmptyError />
+      </ErrorBoundary>
+    );
+
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    expect(screen.getByText('An unexpected error occurred')).toBeInTheDocument();
+  });
 });
 

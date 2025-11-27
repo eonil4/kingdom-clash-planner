@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -328,6 +328,53 @@ describe('FormationHeader', () => {
     await user.click(editButton);
 
     expect(screen.queryByLabelText('Open help overlay')).not.toBeInTheDocument();
+  });
+
+  it('should close help overlay when close button is clicked', async () => {
+    const user = userEvent.setup();
+    const mockFormation = {
+      id: '1',
+      name: 'Test Formation',
+      power: 100,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+
+    const store = createMockStore(mockFormation);
+    render(
+      <Provider store={store}>
+        <FormationHeader />
+      </Provider>
+    );
+
+    const helpButton = screen.getByLabelText('Open help overlay');
+    await user.click(helpButton);
+
+    expect(screen.getByText('Application Guide')).toBeInTheDocument();
+
+    const closeButton = screen.getByLabelText('Close help overlay');
+    await user.click(closeButton);
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    }, { timeout: 2000 });
+  });
+
+  it('should render default "Formation" when currentFormation.name is empty string', () => {
+    const mockFormation = {
+      id: '1',
+      name: '',
+      power: 100,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+
+    const store = createMockStore(mockFormation);
+    render(
+      <Provider store={store}>
+        <FormationHeader />
+      </Provider>
+    );
+
+    expect(screen.getByText('Formation')).toBeInTheDocument();
   });
 });
 

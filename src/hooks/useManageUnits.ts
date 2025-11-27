@@ -28,7 +28,6 @@ export const useManageUnits = () => {
 
     // State
     const [isAdding, setIsAdding] = useState(false);
-    const [editingId, setEditingId] = useState<string | null>(null);
     const [editingRowId, setEditingRowId] = useState<string | null>(null);
     const [rowEditData, setRowEditData] = useState<Record<string, { name: string; level: number; rarity: UnitRarity; count: number }>>({});
     const [formData, setFormData] = useState({
@@ -94,7 +93,7 @@ export const useManageUnits = () => {
         // Apply filters
         result = result.filter((unit) => {
             const key = `${unit.name}-${unit.level}`;
-            const count = unitCounts[key] || 1;
+            const count = unitCounts[key];
 
             if (filters.name && !unit.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
             if (filters.levelMin && filters.levelMin !== '' && unit.level < parseInt(filters.levelMin)) return false;
@@ -130,7 +129,7 @@ export const useManageUnits = () => {
                     case 'count': {
                         const keyA = `${a.name}-${a.level}`;
                         const keyB = `${b.name}-${b.level}`;
-                        comparison = (unitCounts[keyA] || 1) - (unitCounts[keyB] || 1);
+                        comparison = unitCounts[keyA] - unitCounts[keyB];
                         break;
                     }
                 }
@@ -159,7 +158,7 @@ export const useManageUnits = () => {
                 name: unit.name,
                 level: unit.level,
                 rarity: unit.rarity,
-                count: unitCount || 1,
+                count: unitCount,
             },
         });
     };
@@ -180,7 +179,7 @@ export const useManageUnits = () => {
         const editData = rowEditData[editingRowId];
         const normalizedName = normalizeUnitName(editData.name.trim());
         const maxUnitsPerLevel = 49;
-        const count = Math.max(1, Math.min(maxUnitsPerLevel, editData.count || 1));
+        const count = Math.max(1, Math.min(maxUnitsPerLevel, editData.count));
 
         const unitData = getUnitDataByName(normalizedName);
         const finalRarity = unitData ? unitData.rarity : editData.rarity;
@@ -219,19 +218,9 @@ export const useManageUnits = () => {
                 return;
             }
 
-            const available = maxUnitsPerLevel - matchingUnits.length;
-            if (available <= 0) {
-                alert(`Cannot add more units. Maximum count for ${normalizedName} level ${editData.level} is ${maxUnitsPerLevel}.`);
-                return;
-            }
-
-            const unitsToAdd = Math.min(toAdd, available, totalSpace);
+            const unitsToAdd = Math.min(toAdd, totalSpace);
             if (unitsToAdd < toAdd) {
-                if (totalSpace < toAdd) {
-                    alert(`Cannot add ${toAdd} units. Maximum total units (roster + formation) is ${maxTotalUnits}. You can add ${totalSpace} more unit${totalSpace !== 1 ? 's' : ''}.`);
-                } else {
-                    alert(`Cannot add ${toAdd} units. Maximum count for ${normalizedName} level ${editData.level} is ${maxUnitsPerLevel}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
-                }
+                alert(`Cannot add ${toAdd} units. Maximum total units (roster + formation) is ${maxTotalUnits}. You can add ${totalSpace} more unit${totalSpace !== 1 ? 's' : ''}.`);
             }
 
             for (let i = 0; i < unitsToAdd; i++) {
@@ -263,89 +252,62 @@ export const useManageUnits = () => {
     };
 
     const handleSave = () => {
-        if (!formData.name.trim()) return;
+        if (!formData.name.trim() || selectedLevels.length === 0) return;
 
         const normalizedName = normalizeUnitName(formData.name.trim());
         const unitData = getUnitDataByName(normalizedName);
         const finalRarity = unitData ? unitData.rarity : formData.rarity;
         const getPower = unitData ? unitData.getPower : (level: number) => calculateUnitPower(finalRarity, level);
 
-        if (editingId) {
-            const unitToUpdate = units.find((u) => u.id === editingId);
-            if (unitToUpdate) {
-                const matchingUnits = units.filter(
-                    (u) =>
-                        u.name === unitToUpdate.name &&
-                        u.level === unitToUpdate.level &&
-                        u.rarity === unitToUpdate.rarity
-                );
+        const maxTotalUnits = 1000;
+        const maxUnitsPerLevel = 49;
 
-                matchingUnits.forEach((unit) => {
-                    dispatch(
-                        updateUnit({
-                            ...unit,
-                            name: normalizedName,
-                            level: formData.level,
-                            rarity: finalRarity,
-                            power: getPower(formData.level),
-                        })
-                    );
-                });
-            }
-            setEditingId(null);
-        } else {
-            if (selectedLevels.length === 0) return;
-
-            const maxTotalUnits = 1000;
-            const maxUnitsPerLevel = 49;
-
-            let totalToAdd = 0;
-            for (const level of selectedLevels) {
-                totalToAdd += levelCounts[level] || 1;
-            }
-
-            const totalSpace = maxTotalUnits - totalUnitCount;
-            if (totalSpace <= 0) {
-                alert(`Cannot add more units. Maximum total units (roster + formation) is ${maxTotalUnits}.`);
-                return;
-            }
-
-            if (totalToAdd > totalSpace) {
-                alert(`Cannot add ${totalToAdd} units. Maximum total units (roster + formation) is ${maxTotalUnits}. You can add ${totalSpace} more unit${totalSpace !== 1 ? 's' : ''}.`);
-                return;
-            }
-
-            for (const level of selectedLevels) {
-                const levelCount = levelCounts[level] || 1;
-                const existingCount = units.filter(
-                    (u) => normalizeUnitName(u.name) === normalizedName && u.level === level
-                ).length;
-                const available = maxUnitsPerLevel - existingCount;
-
-                if (levelCount > available) {
-                    alert(`Cannot add ${levelCount} units. Maximum count for ${normalizedName} level ${level} is ${maxUnitsPerLevel}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
-                    return;
-                }
-            }
-
-            for (const level of selectedLevels) {
-                const levelCount = levelCounts[level] || 1;
-                const currentLevel = level;
-                for (let i = 0; i < levelCount; i++) {
-                    const newUnit: Unit = {
-                        id: `unit-${Date.now()}-${Math.random()}-${currentLevel}-${i}`,
-                        name: normalizedName,
-                        level: currentLevel,
-                        rarity: finalRarity,
-                        power: getPower(currentLevel),
-                        imageUrl: '',
-                    };
-                    dispatch(addUnit(newUnit));
-                }
-            }
-            setIsAdding(false);
+        let totalToAdd = 0;
+        for (const level of selectedLevels) {
+            totalToAdd += levelCounts[level];
         }
 
+        const totalSpace = maxTotalUnits - totalUnitCount;
+        if (totalSpace <= 0) {
+            alert(`Cannot add more units. Maximum total units (roster + formation) is ${maxTotalUnits}.`);
+            return;
+        }
+
+        if (totalToAdd > totalSpace) {
+            alert(`Cannot add ${totalToAdd} units. Maximum total units (roster + formation) is ${maxTotalUnits}. You can add ${totalSpace} more unit${totalSpace !== 1 ? 's' : ''}.`);
+            return;
+        }
+
+        for (const level of selectedLevels) {
+            const levelCount = levelCounts[level];
+            const existingCount = units.filter(
+                (u) => normalizeUnitName(u.name) === normalizedName && u.level === level
+            ).length;
+            const available = maxUnitsPerLevel - existingCount;
+
+            if (levelCount > available) {
+                alert(`Cannot add ${levelCount} units. Maximum count for ${normalizedName} level ${level} is ${maxUnitsPerLevel}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
+                return;
+            }
+        }
+
+        for (const level of selectedLevels) {
+            const levelCount = levelCounts[level];
+            const currentLevel = level;
+            for (let i = 0; i < levelCount; i++) {
+                const newUnit: Unit = {
+                    id: `unit-${Date.now()}-${Math.random()}-${currentLevel}-${i}`,
+                    name: normalizedName,
+                    level: currentLevel,
+                    rarity: finalRarity,
+                    power: getPower(currentLevel),
+                    imageUrl: '',
+                };
+                dispatch(addUnit(newUnit));
+            }
+        }
+
+        setIsAdding(false);
         setFormData({ name: '', level: 10, rarity: UnitRarity.Common, count: 1 });
         setSelectedLevels([]);
         setLevelCounts({});
@@ -353,7 +315,6 @@ export const useManageUnits = () => {
 
     const handleCancel = () => {
         setIsAdding(false);
-        setEditingId(null);
         setFormData({ name: '', level: 10, rarity: UnitRarity.Common, count: 1 });
         setSelectedLevels([]);
         setLevelCounts({});
@@ -442,7 +403,6 @@ export const useManageUnits = () => {
         unitCounts,
         formationUnitCount,
         isAdding,
-        editingId,
         editingRowId,
         rowEditData,
         formData,

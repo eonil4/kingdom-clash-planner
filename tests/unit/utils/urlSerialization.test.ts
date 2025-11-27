@@ -242,6 +242,21 @@ describe('urlSerialization', () => {
       expect(result.length).toBe(0);
     });
 
+    it('should skip entries with NaN values', () => {
+      const result = deserializeUnits('2,abc,1');
+      expect(result.length).toBe(0);
+    });
+
+    it('should skip entries with NaN count', () => {
+      const result = deserializeUnits('2,5,abc');
+      expect(result.length).toBe(0);
+    });
+
+    it('should skip entries with NaN unit index', () => {
+      const result = deserializeUnits('abc,5,1');
+      expect(result.length).toBe(0);
+    });
+
     it('should handle multiple different unit types and levels', () => {
       const result = deserializeUnits('2,5,2;27,10,3;0,1,1');
       expect(result.length).toBe(6);
@@ -419,6 +434,25 @@ describe('urlSerialization', () => {
 
     it('should handle invalid level (above 10)', () => {
       const formationString = 'Test Formation;2,11;' + '_'.repeat(48).split('').join(';');
+      const result = deserializeFormation(formationString);
+      expect(result.tiles[0][0]).toBeNull();
+    });
+
+    it('should handle formation with empty first part', () => {
+      const formationString = ';2,5;' + '_'.repeat(48).split('').join(';');
+      const result = deserializeFormation(formationString);
+      expect(result.name).toBe('Formation 1');
+      expect(result.tiles[0][0]?.name).toBe('Archers');
+    });
+
+    it('should handle NaN values in cell data', () => {
+      const formationString = 'Test Formation;abc,5;' + '_'.repeat(48).split('').join(';');
+      const result = deserializeFormation(formationString);
+      expect(result.tiles[0][0]).toBeNull();
+    });
+
+    it('should handle NaN level in cell data', () => {
+      const formationString = 'Test Formation;2,abc;' + '_'.repeat(48).split('').join(';');
       const result = deserializeFormation(formationString);
       expect(result.tiles[0][0]).toBeNull();
     });

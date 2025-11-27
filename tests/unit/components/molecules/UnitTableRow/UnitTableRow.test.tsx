@@ -230,6 +230,24 @@ describe('UnitTableRow', () => {
     expect(mockProps.onRowEditChange).toHaveBeenCalledWith('1', 'count', 10);
   });
 
+  it('should default level to 1 when invalid value is entered', () => {
+    renderTableRow({ ...mockProps, isEditing: true });
+    
+    const levelInput = screen.getByDisplayValue('5') as HTMLInputElement;
+    fireEvent.change(levelInput, { target: { value: '' } });
+    
+    expect(mockProps.onRowEditChange).toHaveBeenCalledWith('1', 'level', 1);
+  });
+
+  it('should default count to 1 when invalid value is entered', () => {
+    renderTableRow({ ...mockProps, isEditing: true });
+    
+    const countInput = screen.getByDisplayValue('3') as HTMLInputElement;
+    fireEvent.change(countInput, { target: { value: '' } });
+    
+    expect(mockProps.onRowEditChange).toHaveBeenCalledWith('1', 'count', 1);
+  });
+
   it('should show save and cancel buttons when editing', () => {
     renderTableRow({ ...mockProps, isEditing: true });
     

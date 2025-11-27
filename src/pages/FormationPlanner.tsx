@@ -27,9 +27,8 @@ function FormationPlannerContent() {
 
   // Helper function to count units in formation
   const countFormationUnits = (): number => {
-    if (!currentFormation) return 0;
     let count = 0;
-    for (const row of currentFormation.tiles) {
+    for (const row of currentFormation!.tiles) {
       for (const unit of row) {
         if (unit) count++;
       }

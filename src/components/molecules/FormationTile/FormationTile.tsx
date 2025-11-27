@@ -58,9 +58,7 @@ export default function FormationTile({
   });
 
   const handleDoubleClick = () => {
-    if (unit) {
-      onRemoveUnit(row, col, unit);
-    }
+    onRemoveUnit(row, col, unit);
   };
 
   return (

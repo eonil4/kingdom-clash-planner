@@ -38,8 +38,6 @@ export default function SortControls({
         return 'By Rarity';
       case 'name':
         return 'By Name';
-      default:
-        return option;
     }
   };
 

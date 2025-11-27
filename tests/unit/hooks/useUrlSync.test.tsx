@@ -202,5 +202,255 @@ describe('useUrlSync', () => {
     const callArgs = (window.history.replaceState as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(callArgs[2]).toContain('other=value');
   });
+
+  it('should use existing formation param when hasFormationParam is true and existingFormation is not null', async () => {
+    const mockSearchParams = new URLSearchParams('formation=ExistingFormation');
+    mockUseSearchParams.mockReturnValue([
+      mockSearchParams,
+      mockSetSearchParams,
+    ]);
+    
+    const store = createMockStore();
+    
+    vi.mocked(urlSerialization.serializeUnits).mockReturnValue('');
+    vi.mocked(urlSerialization.serializeFormation).mockReturnValue('New Formation');
+    
+    renderHook(() => useUrlSync(), {
+      wrapper: ({ children }) => wrapper({ children }, store),
+    });
+    
+    await waitFor(() => {
+      expect(window.history.replaceState).toHaveBeenCalled();
+    });
+    
+    const callArgs = (window.history.replaceState as ReturnType<typeof vi.fn>).mock.calls[0];
+    const url = callArgs[2] as string;
+    expect(url).toContain('formation=ExistingFormation');
+  });
+
+  it('should use existing units param when hasUnitsParam is true and existingUnits is not null', async () => {
+    const mockSearchParams = new URLSearchParams('units=2,5,1');
+    mockUseSearchParams.mockReturnValue([
+      mockSearchParams,
+      mockSetSearchParams,
+    ]);
+    
+    const store = createMockStore();
+    
+    vi.mocked(urlSerialization.serializeUnits).mockReturnValue('27,10,1');
+    vi.mocked(urlSerialization.serializeFormation).mockReturnValue('');
+    
+    renderHook(() => useUrlSync(), {
+      wrapper: ({ children }) => wrapper({ children }, store),
+    });
+    
+    await waitFor(() => {
+      expect(window.history.replaceState).toHaveBeenCalled();
+    });
+    
+    const callArgs = (window.history.replaceState as ReturnType<typeof vi.fn>).mock.calls[0];
+    const url = callArgs[2] as string;
+    expect(url).toContain('units=2,5,1');
+  });
+
+  it('should handle case when formation param exists but is empty string', async () => {
+    const mockSearchParams = new URLSearchParams('formation=');
+    mockUseSearchParams.mockReturnValue([
+      mockSearchParams,
+      mockSetSearchParams,
+    ]);
+    
+    const store = createMockStore();
+    
+    vi.mocked(urlSerialization.serializeUnits).mockReturnValue('');
+    vi.mocked(urlSerialization.serializeFormation).mockReturnValue('Test');
+    
+    renderHook(() => useUrlSync(), {
+      wrapper: ({ children }) => wrapper({ children }, store),
+    });
+    
+    await waitFor(() => {
+      expect(window.history.replaceState).toHaveBeenCalled();
+    });
+    
+    const callArgs = (window.history.replaceState as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(callArgs[2]).toContain('formation=');
+  });
+
+  it('should handle case when units param exists but is empty string', async () => {
+    const mockSearchParams = new URLSearchParams('units=');
+    mockUseSearchParams.mockReturnValue([
+      mockSearchParams,
+      mockSetSearchParams,
+    ]);
+    
+    const store = createMockStore();
+    
+    vi.mocked(urlSerialization.serializeUnits).mockReturnValue('2,5,1');
+    vi.mocked(urlSerialization.serializeFormation).mockReturnValue('');
+    
+    renderHook(() => useUrlSync(), {
+      wrapper: ({ children }) => wrapper({ children }, store),
+    });
+    
+    await waitFor(() => {
+      expect(window.history.replaceState).toHaveBeenCalled();
+    });
+    
+    const callArgs = (window.history.replaceState as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(callArgs[2]).toContain('units=');
+  });
+
+  it('should reorder params when units comes before formation', async () => {
+    const mockSearchParams = new URLSearchParams('units=2,5,1&formation=Test');
+    mockUseSearchParams.mockReturnValue([
+      mockSearchParams,
+      mockSetSearchParams,
+    ]);
+    
+    const store = createMockStore();
+    
+    vi.mocked(urlSerialization.serializeUnits).mockReturnValue('2,5,1');
+    vi.mocked(urlSerialization.serializeFormation).mockReturnValue('Test');
+    
+    renderHook(() => useUrlSync(), {
+      wrapper: ({ children }) => wrapper({ children }, store),
+    });
+    
+    await waitFor(() => {
+      expect(window.history.replaceState).toHaveBeenCalled();
+    });
+    
+    const callArgs = (window.history.replaceState as ReturnType<typeof vi.fn>).mock.calls[0];
+    const url = callArgs[2] as string;
+    const formationIndex = url.indexOf('formation=');
+    const unitsIndex = url.indexOf('units=');
+    expect(formationIndex).toBeLessThan(unitsIndex);
+  });
+
+  it('should correctly initialize with both params present', async () => {
+    const mockSearchParams = new URLSearchParams('formation=Test&units=2,5,1');
+    mockUseSearchParams.mockReturnValue([
+      mockSearchParams,
+      mockSetSearchParams,
+    ]);
+    
+    const store = createMockStore();
+    
+    vi.mocked(urlSerialization.serializeUnits).mockReturnValue('2,5,1');
+    vi.mocked(urlSerialization.serializeFormation).mockReturnValue('Test');
+    
+    renderHook(() => useUrlSync(), {
+      wrapper: ({ children }) => wrapper({ children }, store),
+    });
+    
+    expect(mockUseSearchParams).toHaveBeenCalled();
+  });
+
+  it('should preserve other params when updating URL', async () => {
+    const mockSearchParams = new URLSearchParams('other=value&another=param');
+    mockUseSearchParams.mockReturnValue([
+      mockSearchParams,
+      mockSetSearchParams,
+    ]);
+    
+    const store = createMockStore();
+    
+    vi.mocked(urlSerialization.serializeUnits).mockReturnValue('2,5,1');
+    vi.mocked(urlSerialization.serializeFormation).mockReturnValue('Test');
+    
+    renderHook(() => useUrlSync(), {
+      wrapper: ({ children }) => wrapper({ children }, store),
+    });
+    
+    await waitFor(() => {
+      expect(window.history.replaceState).toHaveBeenCalled();
+    });
+    
+    const callArgs = (window.history.replaceState as ReturnType<typeof vi.fn>).mock.calls[0];
+    const url = callArgs[2] as string;
+    expect(url).toContain('other=value');
+    expect(url).toContain('another=param');
+  });
+
+  it('should handle URL when formation param exists on mount', async () => {
+    const mockSearchParams = new URLSearchParams('formation=ExistingForm');
+    mockUseSearchParams.mockReturnValue([
+      mockSearchParams,
+      mockSetSearchParams,
+    ]);
+    
+    const store = createMockStore();
+    
+    vi.mocked(urlSerialization.serializeUnits).mockReturnValue('');
+    vi.mocked(urlSerialization.serializeFormation).mockReturnValue('');
+    
+    renderHook(() => useUrlSync(), {
+      wrapper: ({ children }) => wrapper({ children }, store),
+    });
+    
+    await waitFor(() => {
+      expect(window.history.replaceState).toHaveBeenCalled();
+    });
+    
+    const callArgs = (window.history.replaceState as ReturnType<typeof vi.fn>).mock.calls[0];
+    const url = callArgs[2] as string;
+    expect(url).toContain('formation=ExistingForm');
+  });
+
+  it('should handle URL when units param exists on mount', async () => {
+    const mockSearchParams = new URLSearchParams('units=1,2,3');
+    mockUseSearchParams.mockReturnValue([
+      mockSearchParams,
+      mockSetSearchParams,
+    ]);
+    
+    const store = createMockStore();
+    
+    vi.mocked(urlSerialization.serializeUnits).mockReturnValue('');
+    vi.mocked(urlSerialization.serializeFormation).mockReturnValue('');
+    
+    renderHook(() => useUrlSync(), {
+      wrapper: ({ children }) => wrapper({ children }, store),
+    });
+    
+    await waitFor(() => {
+      expect(window.history.replaceState).toHaveBeenCalled();
+    });
+    
+    const callArgs = (window.history.replaceState as ReturnType<typeof vi.fn>).mock.calls[0];
+    const url = callArgs[2] as string;
+    expect(url).toContain('units=1,2,3');
+  });
+
+  it('should reorder params when units comes before formation on mount', async () => {
+    const mockSearchParams = new URLSearchParams();
+    mockSearchParams.append('units', '1,2,3');
+    mockSearchParams.append('formation', 'TestForm');
+    
+    mockUseSearchParams.mockReturnValue([
+      mockSearchParams,
+      mockSetSearchParams,
+    ]);
+    
+    const store = createMockStore();
+    
+    vi.mocked(urlSerialization.serializeUnits).mockReturnValue('1,2,3');
+    vi.mocked(urlSerialization.serializeFormation).mockReturnValue('TestForm');
+    
+    renderHook(() => useUrlSync(), {
+      wrapper: ({ children }) => wrapper({ children }, store),
+    });
+    
+    await waitFor(() => {
+      expect(window.history.replaceState).toHaveBeenCalled();
+    });
+    
+    const callArgs = (window.history.replaceState as ReturnType<typeof vi.fn>).mock.calls[0];
+    const url = callArgs[2] as string;
+    const formationIndex = url.indexOf('formation=');
+    const unitsIndex = url.indexOf('units=');
+    expect(formationIndex).toBeLessThan(unitsIndex);
+  });
 });
 

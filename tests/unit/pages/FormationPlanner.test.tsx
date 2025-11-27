@@ -49,8 +49,9 @@ vi.mock('../../../src/components/molecules', async (importOriginal) => {
 
 vi.mock('../../../src/components/organisms', () => ({
   FormationHeader: () => <div data-testid="formation-header">Formation Header</div>,
-  FormationGrid: ({ onPlaceUnit, onRemoveUnit }: { onPlaceUnit: (row: number, col: number, unit: Unit) => void; onRemoveUnit: (row: number, col: number, unit: Unit | null) => void }) => {
+  FormationGrid: ({ onPlaceUnit, onRemoveUnit, onSwapUnits }: { onPlaceUnit: (row: number, col: number, unit: Unit) => void; onRemoveUnit: (row: number, col: number, unit: Unit | null) => void; onSwapUnits: (sourceRow: number, sourceCol: number, targetRow: number, targetCol: number, sourceUnit: Unit, targetUnit: Unit) => void }) => {
     const testUnit = { id: '1', name: 'Test', level: 1, rarity: UnitRarity.Common };
+    const testUnit2 = { id: '2', name: 'Test2', level: 5, rarity: UnitRarity.Epic };
     return (
       <div data-testid="formation-grid">
         <button
@@ -65,6 +66,18 @@ vi.mock('../../../src/components/organisms', () => ({
         >
           Remove Unit
         </button>
+        <button
+          data-testid="remove-unit-null"
+          onClick={() => onRemoveUnit(0, 0, null)}
+        >
+          Remove Null Unit
+        </button>
+        <button
+          data-testid="swap-units"
+          onClick={() => onSwapUnits(0, 0, 1, 1, testUnit, testUnit2)}
+        >
+          Swap Units
+        </button>
       </div>
     );
   },
@@ -75,6 +88,7 @@ vi.mock('../../../src/components/organisms', () => ({
 vi.mock('../../../src/store/reducers/formationSlice', () => ({
   placeUnit: vi.fn((payload) => ({ type: 'formation/placeUnit', payload })),
   removeUnit: vi.fn((payload) => ({ type: 'formation/removeUnit', payload })),
+  swapUnits: vi.fn((payload) => ({ type: 'formation/swapUnits', payload })),
 }));
 
 describe('FormationPlanner', () => {
@@ -187,6 +201,39 @@ describe('FormationPlanner', () => {
     removeButton.click();
 
     expect(mockDispatch).toHaveBeenCalled();
+  });
+
+  it('should handle removing with null unit', () => {
+    render(<FormationPlanner />);
+
+    const removeNullButton = screen.getByTestId('remove-unit-null');
+    removeNullButton.click();
+
+    expect(mockDispatch).toHaveBeenCalled();
+  });
+
+  it('should allow placing unit when under total limit', async () => {
+    const { placeUnit } = await import('../../../src/store/reducers/formationSlice');
+
+    mockUseAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
+      const state = {
+        formation: {
+          currentFormation: mockFormation,
+          formations: [],
+        },
+        unit: {
+          units: [],
+        },
+      };
+      return selector(state);
+    });
+
+    render(<FormationPlanner />);
+
+    const placeButton = screen.getByTestId('place-unit');
+    placeButton.click();
+
+    expect(mockDispatch).toHaveBeenCalledWith(placeUnit(expect.anything()));
   });
 
   it('should prevent placing unit when total limit is reached', () => {
@@ -321,6 +368,147 @@ describe('FormationPlanner', () => {
     render(<FormationPlanner />);
 
     expect(document.title).toBe('Kingdom Clash Planner');
+  });
+
+  it('should handle swapping two units in formation', async () => {
+    const { swapUnits } = await import('../../../src/store/reducers/formationSlice');
+    
+    render(<FormationPlanner />);
+
+    const swapButton = screen.getByTestId('swap-units');
+    swapButton.click();
+
+    expect(mockDispatch).toHaveBeenCalledWith(swapUnits({
+      sourceRow: 0,
+      sourceCol: 0,
+      targetRow: 1,
+      targetCol: 1,
+      sourceUnit: { id: '1', name: 'Test', level: 1, rarity: UnitRarity.Common },
+      targetUnit: { id: '2', name: 'Test2', level: 5, rarity: UnitRarity.Epic },
+    }));
+  });
+
+  it('should count formation units correctly when tiles have units', () => {
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    const formationWithUnits = {
+      ...mockFormation,
+      tiles: [
+        [null, { id: 'f2', name: 'Test2', level: 2, rarity: UnitRarity.Rare }, ...Array(5).fill(null)],
+        [{ id: 'f3', name: 'Test3', level: 3, rarity: UnitRarity.Epic }, ...Array(6).fill(null)],
+        [{ id: 'f4', name: 'Test4', level: 4, rarity: UnitRarity.Legendary }, ...Array(6).fill(null)],
+        ...Array(4).fill(null).map(() => Array(7).fill(null)),
+      ],
+    };
+
+    const manyUnits = Array(997).fill(null).map((_, i) => ({
+      id: `unit-${i}`,
+      name: `Unit${i}`,
+      level: 1,
+      rarity: UnitRarity.Common,
+    }));
+
+    mockUseAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
+      const state = {
+        formation: {
+          currentFormation: formationWithUnits,
+          formations: [],
+        },
+        unit: {
+          units: manyUnits,
+        },
+      };
+      return selector(state);
+    });
+
+    render(<FormationPlanner />);
+
+    const placeButton = screen.getByTestId('place-unit');
+    placeButton.click();
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Maximum total units')
+    );
+    alertSpy.mockRestore();
+  });
+
+  it('should handle placing unit when replacing existing unit', async () => {
+    const { placeUnit } = await import('../../../src/store/reducers/formationSlice');
+    const formationWithExistingUnit = {
+      ...mockFormation,
+      tiles: [
+        [{ id: 'existing', name: 'Existing', level: 5, rarity: UnitRarity.Epic }, ...Array(6).fill(null)],
+        ...Array(6).fill(null).map(() => Array(7).fill(null)),
+      ],
+    };
+
+    mockUseAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
+      const state = {
+        formation: {
+          currentFormation: formationWithExistingUnit,
+          formations: [],
+        },
+        unit: {
+          units: [],
+        },
+      };
+      return selector(state);
+    });
+
+    render(<FormationPlanner />);
+
+    const placeButton = screen.getByTestId('place-unit');
+    placeButton.click();
+
+    expect(mockDispatch).toHaveBeenCalledWith(placeUnit(expect.objectContaining({
+      row: 0,
+      col: 0,
+    })));
+  });
+
+  it('should not show alert when drop is from roster unit not at limit', () => {
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    const unitInRoster = { id: '1', name: 'Test', level: 1, rarity: UnitRarity.Common };
+    
+    mockUseAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
+      const state = {
+        formation: {
+          currentFormation: mockFormation,
+          formations: [],
+        },
+        unit: {
+          units: [unitInRoster],
+        },
+      };
+      return selector(state);
+    });
+
+    render(<FormationPlanner />);
+
+    const placeButton = screen.getByTestId('place-unit');
+    placeButton.click();
+
+    expect(alertSpy).not.toHaveBeenCalled();
+    alertSpy.mockRestore();
+  });
+
+  it('should skip drop handler when unit is not in formation', () => {
+    const unitFromRoster = { id: '1', name: 'RosterUnit', level: 5, rarity: UnitRarity.Epic };
+    
+    render(<FormationPlanner />);
+
+    if (capturedDropHandler) {
+      capturedDropHandler(
+        {
+          unit: unitFromRoster,
+          isInFormation: false,
+        },
+        {
+          didDrop: () => false,
+        }
+      );
+    }
+
+    expect(mockDispatch).not.toHaveBeenCalled();
   });
 });
 

@@ -41,21 +41,19 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
 
   // Close tooltip on any click outside the card
   useEffect(() => {
+    if (!tooltipOpen) return;
+
     const handleClickAnywhere = (event: MouseEvent) => {
-      if (tooltipOpen && cardRef.current) {
-        const target = event.target as Node;
-        if (!cardRef.current.contains(target)) {
-          setTooltipOpen(false);
-        }
+      const target = event.target as Node;
+      if (cardRef.current && !cardRef.current.contains(target)) {
+        setTooltipOpen(false);
       }
     };
 
-    if (tooltipOpen) {
-      document.addEventListener('click', handleClickAnywhere, true);
-      return () => {
-        document.removeEventListener('click', handleClickAnywhere, true);
-      };
-    }
+    document.addEventListener('click', handleClickAnywhere, true);
+    return () => {
+      document.removeEventListener('click', handleClickAnywhere, true);
+    };
   }, [tooltipOpen]);
 
   const tooltipContent = (

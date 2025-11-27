@@ -22,9 +22,14 @@ interface UseDropConfig {
 
 let capturedDropHandler: ((item: DropItem) => void) | undefined;
 
+let capturedCollectFn: ((monitor: { isOver: () => boolean }) => { isOver: boolean }) | undefined;
+
 const mockUseDropFn = vi.fn((config: UseDropConfig) => {
   if (config && typeof config === 'object' && config.drop) {
     capturedDropHandler = config.drop as (item: DropItem) => void;
+  }
+  if (config && typeof config === 'object' && config.collect) {
+    capturedCollectFn = config.collect as typeof capturedCollectFn;
   }
   const mockDropRef = vi.fn();
   return [
@@ -77,9 +82,13 @@ describe('FormationTile', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     capturedDropHandler = undefined;
+    capturedCollectFn = undefined;
     mockUseDropFn.mockImplementation((config: UseDropConfig) => {
       if (config && typeof config === 'object' && config.drop) {
         capturedDropHandler = config.drop as (item: DropItem) => void;
+      }
+      if (config && typeof config === 'object' && config.collect) {
+        capturedCollectFn = config.collect as typeof capturedCollectFn;
       }
       return [
         { isOver: false },
@@ -135,6 +144,24 @@ describe('FormationTile', () => {
     await user.dblClick(unitCard);
 
     expect(mockOnRemoveUnit).toHaveBeenCalledWith(2, 3, mockUnit);
+  });
+
+  it('should not call onRemoveUnit when double-clicking empty tile', async () => {
+    const user = userEvent.setup();
+    renderWithDndProvider(
+      <FormationTile
+        row={0}
+        col={0}
+        unit={null}
+        onPlaceUnit={mockOnPlaceUnit}
+        onRemoveUnit={mockOnRemoveUnit}
+      />
+    );
+
+    const tile = screen.getByRole('gridcell');
+    await user.dblClick(tile);
+
+    expect(mockOnRemoveUnit).not.toHaveBeenCalled();
   });
 
   it('should have correct aria-label for different positions', () => {
@@ -371,6 +398,27 @@ describe('FormationTile', () => {
     expect(mockOnRemoveUnit).toHaveBeenCalledWith(0, 0, expect.objectContaining({ id: '3', name: 'SourceUnit' }));
     expect(mockOnRemoveUnit).toHaveBeenCalledWith(1, 1, targetUnit);
     expect(mockOnPlaceUnit).toHaveBeenCalledWith(1, 1, expect.objectContaining({ id: '3', name: 'SourceUnit' }));
+  });
+
+  it('should call collect function with monitor', () => {
+    renderWithDndProvider(
+      <FormationTile
+        row={0}
+        col={0}
+        unit={null}
+        onPlaceUnit={mockOnPlaceUnit}
+        onRemoveUnit={mockOnRemoveUnit}
+      />
+    );
+
+    expect(capturedCollectFn).toBeDefined();
+    if (capturedCollectFn) {
+      const result = capturedCollectFn({ isOver: () => true });
+      expect(result).toEqual({ isOver: true });
+
+      const resultFalse = capturedCollectFn({ isOver: () => false });
+      expect(resultFalse).toEqual({ isOver: false });
+    }
   });
 });
 
