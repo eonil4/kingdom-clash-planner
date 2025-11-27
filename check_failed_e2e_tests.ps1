@@ -1,0 +1,1 @@
+pnpm test:e2e 2>&1 | Select-String -Pattern "failed"

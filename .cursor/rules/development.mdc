@@ -1,0 +1,12 @@
+---
+alwaysApply: true
+---
+Development:
+- follow clean code principles
+- follow design patterns
+- follow OOP principles
+- follow dev princioles (e.g. DRY, KISS, SOLID, YAGNI)
+- follow accessibility principles (WCAG AAA)
+- follow security principles
+- follow performance optimization principles
+- check all changes before commit and refactor if necessary

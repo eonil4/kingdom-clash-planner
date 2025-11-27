@@ -1,4 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock('../../../../src/utils/unitNameUtils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../src/utils/unitNameUtils')>();
+  const realNormalizeUnitName = actual.normalizeUnitName;
+  return {
+    ...actual,
+    normalizeUnitName: (name: string) => realNormalizeUnitName(name),
+  };
+});
+
 import unitReducer, {
   setUnits,
   setSortOption,
@@ -309,9 +319,12 @@ describe('unitSlice', () => {
       ];
       const stateWithUnits = unitReducer(undefined, setUnits(units));
       const state = unitReducer(stateWithUnits, setSortOption('level'));
-      unitReducer(state, setSortOption2('name'));
+      const stateWithSecondarySort = unitReducer(state, setSortOption2('name'));
       // Both have level 5, so should sort by name
-      expect(state.filteredUnits.length).toBe(2);
+      expect(stateWithSecondarySort.filteredUnits.length).toBe(2);
+      // Archers should come before Paladin alphabetically
+      expect(stateWithSecondarySort.filteredUnits[0].name).toBe('Archers');
+      expect(stateWithSecondarySort.filteredUnits[1].name).toBe('Paladin');
     });
 
     it('should handle invalid sort option with default case', () => {

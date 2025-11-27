@@ -21,6 +21,34 @@ vi.mock('react-router-dom', () => ({
   useSearchParams: vi.fn(() => [mockSearchParams, mockSetSearchParams]),
 }));
 
+// Mock react-dnd
+vi.mock('react-dnd', () => ({
+  DndProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  useDrop: vi.fn(() => [{ isOver: false }, vi.fn()]),
+  useDrag: vi.fn(() => [{ isDragging: false }, vi.fn()]),
+  HTML5Backend: {},
+}));
+
+// Mock molecules to include FormationNameEditor
+const mockFormationNameEditor = vi.hoisted(() => vi.fn(() => <div>Formation Name Editor</div>));
+
+vi.mock('../../src/components/molecules', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../src/components/molecules')>();
+  return {
+    ...actual,
+    FormationNameEditor: mockFormationNameEditor,
+  };
+});
+
+// Mock atoms to include PowerBadge and other exports
+vi.mock('../../src/components/atoms', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../src/components/atoms')>();
+  return {
+    ...actual,
+    PowerBadge: ({ power }: { power: number }) => <div data-testid="power-badge">{power}</div>,
+  };
+});
+
 const createMockStore = () => {
   return configureStore({
     reducer: {

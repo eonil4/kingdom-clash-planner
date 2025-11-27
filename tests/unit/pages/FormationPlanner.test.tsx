@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import FormationPlanner from '../../../src/pages/FormationPlanner';
-import { useAppSelector, useAppDispatch } from '../../../src/store/hooks';
 import { UnitRarity, type Unit } from '../../../src/types';
 
 let capturedDropHandler: ((item: { unit: Unit; isInFormation?: boolean; sourceRow?: number; sourceCol?: number }, monitor?: { didDrop: () => boolean }) => void) | undefined;
@@ -15,31 +14,42 @@ const mockUseDrop = vi.fn((config?: { drop?: (item: unknown, monitor?: { didDrop
   ];
 });
 
+const mockUseDrag = vi.fn(() => [
+  { isDragging: false },
+  vi.fn(),
+]);
+
 vi.mock('react-dnd', () => ({
   DndProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   useDrop: (config?: { drop?: (item: unknown, monitor?: { didDrop: () => boolean }) => void }) => mockUseDrop(config),
+  useDrag: () => mockUseDrag(),
   HTML5Backend: {},
 }));
 
+const mockUseAppSelector = vi.fn();
+const mockUseAppDispatch = vi.fn();
+
 vi.mock('../../../src/store/hooks', () => ({
-  useAppSelector: vi.fn(),
-  useAppDispatch: vi.fn(),
+  useAppSelector: (...args: unknown[]) => mockUseAppSelector(...args),
+  useAppDispatch: (...args: unknown[]) => mockUseAppDispatch(...args),
 }));
 
 vi.mock('../../../src/hooks/useInitializeData', () => ({
-  useInitializeData: vi.fn(),
+  useInitializeData: () => {},
 }));
 
 vi.mock('../../../src/hooks/useUrlSync', () => ({
-  useUrlSync: vi.fn(),
+  useUrlSync: () => {},
 }));
 
-vi.mock('../../../src/components/formation/FormationHeader', () => ({
-  default: () => <div data-testid="formation-header">Formation Header</div>,
-}));
+vi.mock('../../../src/components/molecules', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../src/components/molecules')>();
+  return actual;
+});
 
-vi.mock('../../../src/components/formation/FormationGrid', () => ({
-  default: ({ onPlaceUnit, onRemoveUnit }: { onPlaceUnit: (row: number, col: number, unit: Unit) => void; onRemoveUnit: (row: number, col: number, unit: Unit | null) => void }) => {
+vi.mock('../../../src/components/organisms', () => ({
+  FormationHeader: () => <div data-testid="formation-header">Formation Header</div>,
+  FormationGrid: ({ onPlaceUnit, onRemoveUnit }: { onPlaceUnit: (row: number, col: number, unit: Unit) => void; onRemoveUnit: (row: number, col: number, unit: Unit | null) => void }) => {
     const testUnit = { id: '1', name: 'Test', level: 1, rarity: UnitRarity.Common };
     return (
       <div data-testid="formation-grid">
@@ -58,11 +68,9 @@ vi.mock('../../../src/components/formation/FormationGrid', () => ({
       </div>
     );
   },
+  UnitList: () => <div data-testid="unit-list">Unit List</div>,
 }));
 
-vi.mock('../../../src/components/unit/UnitList', () => ({
-  default: () => <div data-testid="unit-list">Unit List</div>,
-}));
 
 vi.mock('../../../src/store/reducers/formationSlice', () => ({
   placeUnit: vi.fn((payload) => ({ type: 'formation/placeUnit', payload })),
@@ -81,8 +89,8 @@ describe('FormationPlanner', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     capturedDropHandler = undefined;
-    (useAppDispatch as ReturnType<typeof vi.fn>).mockReturnValue(mockDispatch);
-    (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
+    mockUseAppDispatch.mockReturnValue(mockDispatch);
+    mockUseAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
       const state = {
         formation: {
           currentFormation: mockFormation,
@@ -90,6 +98,11 @@ describe('FormationPlanner', () => {
         },
         unit: {
           units: [],
+          filteredUnits: [],
+          sortOption: 'level' as const,
+          sortOption2: null,
+          sortOption3: null,
+          searchTerm: '',
         },
       };
       return selector(state);
@@ -97,7 +110,7 @@ describe('FormationPlanner', () => {
   });
 
   it('should render loading state when currentFormation is null', () => {
-    (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
+    mockUseAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
       const state = {
         formation: {
           currentFormation: null,
@@ -125,7 +138,7 @@ describe('FormationPlanner', () => {
 
   it('should handle placing a unit when unit is in roster', () => {
     const unitInRoster = { id: '1', name: 'Test', level: 1, rarity: UnitRarity.Common };
-    (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
+    mockUseAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
       const state = {
         formation: {
           currentFormation: mockFormation,
@@ -155,7 +168,7 @@ describe('FormationPlanner', () => {
       ],
     };
 
-    (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
+    mockUseAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
       const state = {
         formation: {
           currentFormation: formationWithUnit,
@@ -185,7 +198,7 @@ describe('FormationPlanner', () => {
       rarity: UnitRarity.Common,
     }));
 
-    (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
+    mockUseAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
       const state = {
         formation: {
           currentFormation: mockFormation,
@@ -273,7 +286,7 @@ describe('FormationPlanner', () => {
       name: 'New Formation Name',
     };
 
-    (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
+    mockUseAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
       const state = {
         formation: {
           currentFormation: newFormation,
@@ -292,7 +305,7 @@ describe('FormationPlanner', () => {
   });
 
   it('should set default page title when formation is null', () => {
-    (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
+    mockUseAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
       const state = {
         formation: {
           currentFormation: null,

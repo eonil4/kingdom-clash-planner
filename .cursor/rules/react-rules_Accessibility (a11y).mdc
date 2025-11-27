@@ -1,0 +1,11 @@
+---
+description: blob:
+globs: false
+alwaysApply: false
+---
+
+Use semantic HTML.
+
+Apply appropriate ARIA attributes.
+
+Ensure full keyboard navigation.

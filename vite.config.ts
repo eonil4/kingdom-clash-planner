@@ -43,8 +43,8 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/unit/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     exclude: ['node_modules', 'dist', 'tests/e2e/**', 'tests/integration/**'],
-    // File-level isolation (faster than per-test isolation while still safe)
-    isolate: false,
+    // Enable test file isolation to prevent mock leakage between files
+    isolate: true,
     // Increase concurrency for better parallelization
     maxConcurrency: 8,
     // Use threads pool (default in Vitest 4.0)

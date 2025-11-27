@@ -1,0 +1,8 @@
+---
+alwaysApply: true
+---
+After a source file ("*.(js|ksx|ts|tsx)") change:
+- check and fix all linter issues
+- check and fix all build issues
+- check and fix all unit tests one by one until all pass
+- check and fix all e2e tests one by one until all pass

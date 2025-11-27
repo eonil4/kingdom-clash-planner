@@ -1,0 +1,13 @@
+---
+alwaysApply: true
+---
+Fix failed unit tests, and retest all ones until there is no failed one:
+1. always use the following command to list failed tests:
+```
+pnpm test:unit 2>&1 | Select-String -Pattern "failed"
+```
+2. fix tests one by one with test isolation
+3. check linter
+4. repeat from "point 1" until there is no failed test
+5. check code coverage
+6. add a few more test cases to increase code coverage, then make sure the code passes

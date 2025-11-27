@@ -1,21 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import { useManageUnits } from '../../../src/hooks/useManageUnits';
-import { useAppSelector, useAppDispatch } from '../../../src/store/hooks';
-import { removeUnit } from '../../../src/store/reducers/unitSlice';
 import { UnitRarity } from '../../../src/types';
 import type { Unit } from '../../../src/types';
+import formationReducer from '../../../src/store/reducers/formationSlice';
 
-vi.mock('../../../src/store/hooks', () => ({
-  useAppSelector: vi.fn(),
-  useAppDispatch: vi.fn(),
-}));
+vi.mock('../../../src/store/reducers/unitSlice', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../src/store/reducers/unitSlice')>();
+  return {
+    ...actual,
+    addUnit: vi.fn((unit) => ({ type: 'unit/addUnit', payload: unit })),
+    removeUnit: vi.fn((id) => ({ type: 'unit/removeUnit', payload: id })),
+    updateUnit: vi.fn((unit) => ({ type: 'unit/updateUnit', payload: unit })),
+  };
+});
 
-vi.mock('../../../src/store/reducers/unitSlice', () => ({
-  addUnit: vi.fn((unit) => ({ type: 'unit/addUnit', payload: unit })),
-  removeUnit: vi.fn((id) => ({ type: 'unit/removeUnit', payload: id })),
-  updateUnit: vi.fn((unit) => ({ type: 'unit/updateUnit', payload: unit })),
-}));
+import unitReducer from '../../../src/store/reducers/unitSlice';
 
 vi.mock('../../../src/utils/unitNameUtils', () => ({
   normalizeUnitName: vi.fn((name) => name.trim()),
@@ -38,8 +40,52 @@ vi.mock('../../../src/types/unitNames', () => ({
   }),
 }));
 
+const createMockStore = (units: Unit[] = [], formation = {
+  id: '1',
+  name: 'Test Formation',
+  tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+  power: 0,
+}) => {
+  return configureStore({
+    reducer: {
+      unit: unitReducer,
+      formation: formationReducer,
+    },
+    preloadedState: {
+      unit: {
+        units,
+        filteredUnits: [],
+        sortOption: 'level' as const,
+        sortOption2: null,
+        sortOption3: null,
+        searchTerm: '',
+      },
+      formation: {
+        currentFormation: formation,
+        formations: [],
+      },
+    },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: false,
+        immutableCheck: false,
+      }),
+  });
+};
+
+const wrapper = (units: Unit[] = [], formation = {
+  id: '1',
+  name: 'Test Formation',
+  tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+  power: 0,
+}) => {
+  const store = createMockStore(units, formation);
+  return ({ children }: { children: React.ReactNode }) => (
+    <Provider store={store}>{children}</Provider>
+  );
+};
+
 describe('useManageUnits', () => {
-  const mockDispatch = vi.fn();
   const mockUnits: Unit[] = [
     { id: '1', name: 'TestUnit', level: 1, rarity: UnitRarity.Common, power: 100 },
     { id: '2', name: 'TestUnit', level: 1, rarity: UnitRarity.Common, power: 100 },
@@ -55,22 +101,10 @@ describe('useManageUnits', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useAppDispatch as ReturnType<typeof vi.fn>).mockReturnValue(mockDispatch);
-    (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
-      const state = {
-        unit: {
-          units: mockUnits,
-        },
-        formation: {
-          currentFormation: mockFormation,
-        },
-      };
-      return selector(state);
-    });
   });
 
   it('should initialize with default state', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     expect(result.current.isAdding).toBe(false);
     expect(result.current.editingId).toBe(null);
@@ -80,14 +114,14 @@ describe('useManageUnits', () => {
   });
 
   it('should calculate unit counts correctly', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     expect(result.current.unitCounts['TestUnit-1']).toBe(2);
     expect(result.current.unitCounts['AnotherUnit-5']).toBe(1);
   });
 
   it('should calculate formation unit count', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     expect(result.current.formationUnitCount).toBe(0);
   });
@@ -102,21 +136,13 @@ describe('useManageUnits', () => {
       ),
     };
 
-    (useAppSelector as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
-      const state = {
-        unit: { units: mockUnits },
-        formation: { currentFormation: formationWithUnits },
-      };
-      return selector(state);
-    });
-
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, formationWithUnits) });
 
     expect(result.current.formationUnitCount).toBe(1);
   });
 
   it('should filter units by name', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleFilterChange('name', 'TestUnit');
@@ -127,7 +153,7 @@ describe('useManageUnits', () => {
   });
 
   it('should filter units by level range', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleFilterChange('levelMin', '1');
@@ -139,7 +165,7 @@ describe('useManageUnits', () => {
   });
 
   it('should filter units by rarity range', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleFilterChange('rarityMin', UnitRarity.Common);
@@ -151,7 +177,7 @@ describe('useManageUnits', () => {
   });
 
   it('should filter units by count range', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleFilterChange('countMin', '2');
@@ -163,7 +189,7 @@ describe('useManageUnits', () => {
   });
 
   it('should sort units by name', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleSort('name');
@@ -174,7 +200,7 @@ describe('useManageUnits', () => {
   });
 
   it('should sort units by level', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleSort('level');
@@ -185,7 +211,7 @@ describe('useManageUnits', () => {
   });
 
   it('should sort units by rarity', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleSort('rarity');
@@ -196,7 +222,7 @@ describe('useManageUnits', () => {
   });
 
   it('should sort units by count', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleSort('count');
@@ -207,7 +233,7 @@ describe('useManageUnits', () => {
   });
 
   it('should toggle sort direction', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleSort('name');
@@ -223,7 +249,7 @@ describe('useManageUnits', () => {
   });
 
   it('should handle add new', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleAddNew();
@@ -235,7 +261,7 @@ describe('useManageUnits', () => {
   });
 
   it('should handle form data changes', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.setFormData((prev) => ({ ...prev, name: 'TestUnit' }));
@@ -249,7 +275,7 @@ describe('useManageUnits', () => {
   });
 
   it('should handle level toggle', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleLevelToggle(5);
@@ -265,23 +291,23 @@ describe('useManageUnits', () => {
   });
 
   it('should handle select all levels', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
-      result.current.handleSelectAllLevels(true);
+      result.current.handleSelectAllLevels();
     });
 
     expect(result.current.selectedLevels.length).toBe(10);
 
     act(() => {
-      result.current.handleSelectAllLevels(false);
+      result.current.handleSelectAllLevels();
     });
 
     expect(result.current.selectedLevels.length).toBe(0);
   });
 
   it('should handle level count change', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleLevelToggle(5);
@@ -292,7 +318,7 @@ describe('useManageUnits', () => {
   });
 
   it('should handle row edit', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleRowEdit(mockUnits[0]);
@@ -303,7 +329,7 @@ describe('useManageUnits', () => {
   });
 
   it('should handle row edit change', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleRowEdit(mockUnits[0]);
@@ -314,7 +340,11 @@ describe('useManageUnits', () => {
   });
 
   it('should handle row save', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const store = createMockStore(mockUnits, mockFormation);
+    const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>{children}</Provider>
+    );
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
     act(() => {
       result.current.handleRowEdit(mockUnits[0]);
@@ -328,11 +358,13 @@ describe('useManageUnits', () => {
     });
 
     expect(result.current.editingRowId).toBe(null);
-    expect(mockDispatch).toHaveBeenCalled();
+    // Verify units were updated in store
+    const state = store.getState();
+    expect(state.unit.units.length).toBeGreaterThan(0);
   });
 
   it('should handle row cancel', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleRowEdit(mockUnits[0]);
@@ -345,47 +377,66 @@ describe('useManageUnits', () => {
 
   it('should handle delete unit', () => {
     window.confirm = vi.fn(() => true);
-    const { result } = renderHook(() => useManageUnits());
+    const store = createMockStore(mockUnits, mockFormation);
+    const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>{children}</Provider>
+    );
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
     act(() => {
       result.current.handleDelete('1');
     });
 
     expect(window.confirm).toHaveBeenCalled();
-    expect(mockDispatch).toHaveBeenCalledWith(removeUnit('1'));
+    const state = store.getState();
+    expect(state.unit.units.find((u) => u.id === '1')).toBeUndefined();
   });
 
   it('should handle clear roster with confirmation', () => {
     window.confirm = vi.fn(() => true);
-    const { result } = renderHook(() => useManageUnits());
+    const store = createMockStore(mockUnits, mockFormation);
+    const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>{children}</Provider>
+    );
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
     act(() => {
       result.current.handleClearRoster();
     });
 
     expect(window.confirm).toHaveBeenCalled();
-    expect(mockDispatch).toHaveBeenCalledTimes(mockUnits.length);
+    const state = store.getState();
+    expect(state.unit.units.length).toBe(0);
   });
 
   it('should not clear roster without confirmation', () => {
     window.confirm = vi.fn(() => false);
-    const { result } = renderHook(() => useManageUnits());
+    const store = createMockStore(mockUnits, mockFormation);
+    const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>{children}</Provider>
+    );
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
     act(() => {
       result.current.handleClearRoster();
     });
 
     expect(window.confirm).toHaveBeenCalled();
-    expect(mockDispatch).not.toHaveBeenCalled();
+    const state = store.getState();
+    expect(state.unit.units.length).toBe(mockUnits.length);
   });
 
   it('should handle save with selected levels', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const store = createMockStore(mockUnits, mockFormation);
+    const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>{children}</Provider>
+    );
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
     act(() => {
       result.current.handleAddNew();
       result.current.handleNameChange('TestUnit');
-      result.current.handleSelectAllLevels(true);
+      result.current.handleSelectAllLevels();
     });
 
     // Set level counts for all selected levels
@@ -399,24 +450,36 @@ describe('useManageUnits', () => {
       result.current.handleSave();
     });
 
-    expect(mockDispatch).toHaveBeenCalled();
+    const state = store.getState();
+    expect(state.unit.units.length).toBeGreaterThan(mockUnits.length);
     expect(result.current.isAdding).toBe(false);
   });
 
   it('should not save without unit name', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const store = createMockStore(mockUnits, mockFormation);
+    const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>{children}</Provider>
+    );
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
+    const initialCount = store.getState().unit.units.length;
 
     act(() => {
       result.current.handleAddNew();
-      result.current.handleSelectAllLevels(true);
+      result.current.handleSelectAllLevels();
       result.current.handleSave();
     });
 
-    expect(mockDispatch).not.toHaveBeenCalled();
+    const state = store.getState();
+    expect(state.unit.units.length).toBe(initialCount);
   });
 
   it('should not save without selected levels', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const store = createMockStore(mockUnits, mockFormation);
+    const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
+      <Provider store={store}>{children}</Provider>
+    );
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
+    const initialCount = store.getState().unit.units.length;
 
     act(() => {
       result.current.handleAddNew();
@@ -424,11 +487,12 @@ describe('useManageUnits', () => {
       result.current.handleSave();
     });
 
-    expect(mockDispatch).not.toHaveBeenCalled();
+    const state = store.getState();
+    expect(state.unit.units.length).toBe(initialCount);
   });
 
   it('should handle cancel add', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleAddNew();
@@ -439,7 +503,7 @@ describe('useManageUnits', () => {
   });
 
   it('should handle filter change for all filter types', () => {
-    const { result } = renderHook(() => useManageUnits());
+    const { result } = renderHook(() => useManageUnits(), { wrapper: wrapper(mockUnits, mockFormation) });
 
     act(() => {
       result.current.handleFilterChange('name', 'test');

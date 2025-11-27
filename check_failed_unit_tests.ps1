@@ -1,0 +1,1 @@
+pnpm test:unit 2>&1 | Select-String -Pattern "failed"

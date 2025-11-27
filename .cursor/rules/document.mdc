@@ -1,0 +1,8 @@
+---
+alwaysApply: true
+---
+Document:
+- update documents before commit!
+- detailed architecure files with UML diagrams in /doc/architecture/*.MD
+- detailed features with git commit in /doc/features/<git commit hash>-<git commit message>.MD
+- release notes with feature references to feature files in /doc/releases/<semantic vesrion>/<semantic versions>.MD
