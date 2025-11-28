@@ -33,8 +33,8 @@ function createUnitData(
   index: number,
   rarity: UnitRarity
 ): UnitData {
-  // Generate imageName from unit name: convert to lowercase and replace spaces with underscores
-  const imageName = name.toLowerCase().replace(/\s+/g, '_');
+  // Generate imageName from unit name: convert to lowercase, remove apostrophes, replace spaces with underscores
+  const imageName = name.toLowerCase().replace(/'/g, '').replace(/\s+/g, '_');
   
   return {
     name,
