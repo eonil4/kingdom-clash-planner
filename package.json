@@ -18,8 +18,10 @@
     "test:unit:coverage:ui:watch": "vitest --coverage --ui --watch",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:integration:watch": "vitest --config vitest.integration.config.ts",
-    "test:e2e": "playwright test",
-    "test:e2e:watch": "playwright test --ui",
+    "test:e2e": "playwright test --reporter=line",
+    "test:e2e:html": "playwright test --reporter=html",
+    "test:e2e:watch": "playwright test --reporter=line --ui",
+    "test:e2e:show-report": "playwright show-report",
     "extract:unit-images": "node scripts/extract-unit-images/extract-unit-images.js"
   },
   "dependencies": {

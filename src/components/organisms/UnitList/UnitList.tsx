@@ -102,7 +102,7 @@ export default function UnitList() {
     <Box
       ref={drop as unknown as React.Ref<HTMLElement>}
       className={`
-          w-full bg-gray-800 p-4
+          w-full bg-gray-800 p-2 sm:p-4
           ${isOver ? 'bg-blue-900 bg-opacity-50' : ''}
           transition-colors
         `}
@@ -110,8 +110,8 @@ export default function UnitList() {
       aria-label="Unit list"
     >
       <Box className="mb-4">
-        <Box className="flex items-center justify-between mb-2">
-          <Box className="flex items-center gap-2">
+        <Box className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+          <Box className="flex flex-wrap items-center gap-2">
             <SortControls
               primarySort={localSortOption}
               secondarySort={localSortOption2}
@@ -121,11 +121,11 @@ export default function UnitList() {
               onTertiaryChange={handleTertiarySortChange}
             />
             <UnitCountBadge count={availableUnits.length} />
-            <UnitListActions
-              onManageUnits={handleManageUnits}
-              onWithdrawAll={handleWithdrawAll}
-            />
           </Box>
+          <UnitListActions
+            onManageUnits={handleManageUnits}
+            onWithdrawAll={handleWithdrawAll}
+          />
         </Box>
         <Box className="mb-2">
           <SearchInput onSearchChange={handleSearchChange} placeholder="Search units..." />

@@ -43,7 +43,7 @@ export default function SortControls({
 
   return (
     <>
-      <FormControl size="small" className="min-w-32">
+      <FormControl size="small" className="min-w-24 sm:min-w-32">
         <Select
           value={primarySort}
           onChange={onPrimaryChange}
@@ -57,7 +57,7 @@ export default function SortControls({
           ))}
         </Select>
       </FormControl>
-      <FormControl size="small" className="min-w-32">
+      <FormControl size="small" className="min-w-24 sm:min-w-32">
         <Select
           value={secondarySort || ''}
           onChange={onSecondaryChange}
@@ -73,7 +73,7 @@ export default function SortControls({
           ))}
         </Select>
       </FormControl>
-      <FormControl size="small" className="min-w-32">
+      <FormControl size="small" className="min-w-24 sm:min-w-32">
         <Select
           value={tertiarySort || ''}
           onChange={onTertiaryChange}
