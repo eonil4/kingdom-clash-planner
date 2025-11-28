@@ -74,7 +74,7 @@ export default function AddUnitForm({
                 <Box className="flex gap-4">
                     <Box className="w-32 h-32 flex-shrink-0 flex items-center justify-center">
                         {previewUnit ? (
-                            <UnitCard unit={previewUnit} size="100%" />
+                            <UnitCard unit={previewUnit} size="100%" showLevelBadge={false} />
                         ) : (
                             <Box 
                                 className="w-full h-full rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center"

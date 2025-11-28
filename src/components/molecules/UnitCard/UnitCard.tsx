@@ -13,6 +13,7 @@ interface UnitCardProps {
   sourceCol?: number;
   onDoubleClick?: () => void;
   size?: string | number;
+  showLevelBadge?: boolean;
 }
 
 const rarityColors: Record<UnitRarity, string> = {
@@ -22,7 +23,7 @@ const rarityColors: Record<UnitRarity, string> = {
   [UnitRarity.Legendary]: 'border-yellow-500 bg-yellow-900',
 };
 
-export default function UnitCard({ unit, isInFormation = false, sourceRow, sourceCol, onDoubleClick, size }: UnitCardProps) {
+export default function UnitCard({ unit, isInFormation = false, sourceRow, sourceCol, onDoubleClick, size, showLevelBadge = true }: UnitCardProps) {
   const [{ isDragging }, drag] = useDrag({
     type: 'unit',
     item: { unit, isInFormation, sourceRow, sourceCol },
@@ -134,7 +135,7 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
         imageUrl={imageUrl}
         fontSize={placeholderFontSize}
       />
-      <UnitLevelBadge level={unit.level} size={badgeSize} fontSize={badgeFontSize} />
+      {showLevelBadge && <UnitLevelBadge level={unit.level} size={badgeSize} fontSize={badgeFontSize} />}
     </div>
   );
 
