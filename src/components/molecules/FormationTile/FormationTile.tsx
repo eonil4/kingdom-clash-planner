@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { useDrop } from 'react-dnd';
 import type { Unit } from '../../../types';
 import { UnitCard } from '../UnitCard';
@@ -18,7 +19,7 @@ interface FormationTileProps {
   ) => void;
 }
 
-export default function FormationTile({
+function FormationTileComponent({
   row,
   col,
   unit,
@@ -57,9 +58,9 @@ export default function FormationTile({
     }),
   });
 
-  const handleDoubleClick = () => {
+  const handleDoubleClick = useCallback(() => {
     onRemoveUnit(row, col, unit);
-  };
+  }, [onRemoveUnit, row, col, unit]);
 
   const ariaLabel = unit
     ? `${unit.level} ${unit.name} at row ${row + 1} column ${col + 1}`
@@ -90,3 +91,5 @@ export default function FormationTile({
     </div>
   );
 }
+
+export default memo(FormationTileComponent);

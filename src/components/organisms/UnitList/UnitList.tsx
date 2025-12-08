@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import { Box } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
@@ -22,14 +22,17 @@ export default function UnitList() {
   const localSortOption3 = sortOption3;
   const [isManageUnitsOpen, setIsManageUnitsOpen] = useState(false);
 
-  const unitsInFormation = new Set(
+  const unitsInFormation = useMemo(() => new Set(
     currentFormation?.tiles
       .flat()
       .filter((unit) => unit !== null)
       .map((unit) => unit!.id) || []
-  );
+  ), [currentFormation?.tiles]);
 
-  const availableUnits = filteredUnits.filter((unit) => !unitsInFormation.has(unit.id));
+  const availableUnits = useMemo(
+    () => filteredUnits.filter((unit) => !unitsInFormation.has(unit.id)),
+    [filteredUnits, unitsInFormation]
+  );
 
   const [{ isOver }, drop] = useDrop({
     accept: 'unit',
@@ -43,7 +46,7 @@ export default function UnitList() {
     }),
   });
 
-  const handlePrimarySortChange = (event: SelectChangeEvent<SortOption>) => {
+  const handlePrimarySortChange = useCallback((event: SelectChangeEvent<SortOption>) => {
     const newSort = event.target.value as SortOption;
     dispatch(setSortOption(newSort));
     if (localSortOption2 === newSort) {
@@ -52,30 +55,30 @@ export default function UnitList() {
     if (localSortOption3 === newSort) {
       dispatch(setSortOption3(null));
     }
-  };
+  }, [dispatch, localSortOption2, localSortOption3]);
 
-  const handleSecondarySortChange = (event: SelectChangeEvent<SortOption | ''>) => {
+  const handleSecondarySortChange = useCallback((event: SelectChangeEvent<SortOption | ''>) => {
     const newSort = event.target.value === '' ? null : (event.target.value as SortOption);
     dispatch(setSortOption2(newSort));
     if (localSortOption3 === newSort) {
       dispatch(setSortOption3(null));
     }
-  };
+  }, [dispatch, localSortOption3]);
 
-  const handleTertiarySortChange = (event: SelectChangeEvent<SortOption | ''>) => {
+  const handleTertiarySortChange = useCallback((event: SelectChangeEvent<SortOption | ''>) => {
     const newSort = event.target.value === '' ? null : (event.target.value as SortOption);
     dispatch(setSortOption3(newSort));
-  };
+  }, [dispatch]);
 
-  const handleSearchChange = (searchTerm: string) => {
+  const handleSearchChange = useCallback((searchTerm: string) => {
     dispatch(setSearchTerm(searchTerm));
-  };
+  }, [dispatch]);
 
-  const handleManageUnits = () => {
+  const handleManageUnits = useCallback(() => {
     setIsManageUnitsOpen(true);
-  };
+  }, []);
 
-  const handleWithdrawAll = () => {
+  const handleWithdrawAll = useCallback(() => {
     if (!currentFormation) return;
     for (let row = 0; row < 7; row++) {
       for (let col = 0; col < 7; col++) {
@@ -85,9 +88,9 @@ export default function UnitList() {
         }
       }
     }
-  };
+  }, [currentFormation, dispatch]);
 
-  const handleUnitDoubleClick = (unit: Unit) => {
+  const handleUnitDoubleClick = useCallback((unit: Unit) => {
     if (!currentFormation) return;
     for (let row = 0; row < 7; row++) {
       for (let col = 0; col < 7; col++) {
@@ -97,7 +100,7 @@ export default function UnitList() {
         }
       }
     }
-  };
+  }, [currentFormation, dispatch]);
 
   return (
     <Box

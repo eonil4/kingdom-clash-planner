@@ -1,13 +1,16 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useCallback, useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useDrop } from 'react-dnd';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { placeUnit, removeUnit, swapUnits } from '../store/reducers/formationSlice';
-import { FormationHeader, FormationGrid, UnitList } from '../components/organisms';
+import FormationHeader from '../components/organisms/FormationHeader/FormationHeader';
+import FormationGrid from '../components/organisms/FormationGrid/FormationGrid';
 import { useInitializeData } from '../hooks/useInitializeData';
 import { useUrlSync } from '../hooks/useUrlSync';
 import type { Unit } from '../types';
+
+const UnitList = lazy(() => import('../components/organisms/UnitList/UnitList'));
 
 // Component that wraps the content and provides the drop zone
 // This must be inside DndProvider to use useDrop hook
@@ -25,28 +28,18 @@ function FormationPlannerContent() {
     }
   }, [currentFormation?.name]);
 
-  // Helper function to count units in formation
-  const countFormationUnits = (): number => {
-    let count = 0;
-    for (const row of currentFormation!.tiles) {
-      for (const unit of row) {
-        if (unit) count++;
-      }
-    }
-    return count;
-  };
-
-  const handlePlaceUnit = (row: number, col: number, unit: Unit) => {
-    // Check if we're replacing an existing unit (moving within formation) or adding new
+  const handlePlaceUnit = useCallback((row: number, col: number, unit: Unit) => {
     const existingUnit = currentFormation?.tiles[row]?.[col];
     const isReplacing = !!existingUnit;
-    
-    // Check if the unit is already in the roster (being moved, not added)
     const isInRoster = units.some(u => u.id === unit.id);
     
-    // If not replacing and unit is not in roster (truly adding a new unit), check total limit
     if (!isReplacing && !isInRoster) {
-      const formationUnitCount = countFormationUnits();
+      let formationUnitCount = 0;
+      for (const r of currentFormation!.tiles) {
+        for (const u of r) {
+          if (u) formationUnitCount++;
+        }
+      }
       const maxTotalUnits = 1000;
       const totalUnitCount = units.length + formationUnitCount;
       
@@ -55,19 +48,15 @@ function FormationPlannerContent() {
         return;
       }
     }
-    // If unit is in roster, it will be moved (removed from roster, added to formation),
-    // so total count stays the same - no need to check limit
     
     dispatch(placeUnit({ row, col, unit }));
-  };
+  }, [dispatch, currentFormation, units]);
 
-  const handleRemoveUnit = (row: number, col: number, unit: Unit | null) => {
-    // Unit is passed from the component, so we use it directly
-    // This ensures we have the correct unit even if state has changed
+  const handleRemoveUnit = useCallback((row: number, col: number, unit: Unit | null) => {
     dispatch(removeUnit({ row, col, unit: unit || null }));
-  };
+  }, [dispatch]);
 
-  const handleSwapUnits = (
+  const handleSwapUnits = useCallback((
     sourceRow: number,
     sourceCol: number,
     targetRow: number,
@@ -75,7 +64,6 @@ function FormationPlannerContent() {
     sourceUnit: Unit,
     targetUnit: Unit
   ) => {
-    // Swap two units that are both in the formation
     dispatch(swapUnits({
       sourceRow,
       sourceCol,
@@ -84,7 +72,7 @@ function FormationPlannerContent() {
       sourceUnit,
       targetUnit,
     }));
-  };
+  }, [dispatch]);
 
   // Drop zone for removing units from formation when dropped outside the grid
   // Note: UnitList has its own drop handler, so this only handles drops outside both grid and list
@@ -128,7 +116,9 @@ function FormationPlannerContent() {
           onSwapUnits={handleSwapUnits}
         />
       </div>
-      <UnitList />
+      <Suspense fallback={<div className="w-full bg-gray-800 p-4 min-h-32" />}>
+        <UnitList />
+      </Suspense>
     </main>
   );
 }

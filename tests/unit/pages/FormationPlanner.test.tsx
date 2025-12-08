@@ -47,41 +47,51 @@ vi.mock('../../../src/components/molecules', async (importOriginal) => {
   return actual;
 });
 
-vi.mock('../../../src/components/organisms', () => ({
-  FormationHeader: () => <div data-testid="formation-header">Formation Header</div>,
-  FormationGrid: ({ onPlaceUnit, onRemoveUnit, onSwapUnits }: { onPlaceUnit: (row: number, col: number, unit: Unit) => void; onRemoveUnit: (row: number, col: number, unit: Unit | null) => void; onSwapUnits: (sourceRow: number, sourceCol: number, targetRow: number, targetCol: number, sourceUnit: Unit, targetUnit: Unit) => void }) => {
-    const testUnit = { id: '1', name: 'Test', level: 1, rarity: UnitRarity.Common };
-    const testUnit2 = { id: '2', name: 'Test2', level: 5, rarity: UnitRarity.Epic };
-    return (
-      <div data-testid="formation-grid">
-        <button
-          data-testid="place-unit"
-          onClick={() => onPlaceUnit(0, 0, testUnit)}
-        >
-          Place Unit
-        </button>
-        <button
-          data-testid="remove-unit"
-          onClick={() => onRemoveUnit(0, 0, testUnit)}
-        >
-          Remove Unit
-        </button>
-        <button
-          data-testid="remove-unit-null"
-          onClick={() => onRemoveUnit(0, 0, null)}
-        >
-          Remove Null Unit
-        </button>
-        <button
-          data-testid="swap-units"
-          onClick={() => onSwapUnits(0, 0, 1, 1, testUnit, testUnit2)}
-        >
-          Swap Units
-        </button>
-      </div>
-    );
-  },
-  UnitList: () => <div data-testid="unit-list">Unit List</div>,
+const mockFormationHeader = vi.hoisted(() => () => <div data-testid="formation-header">Formation Header</div>);
+const mockFormationGrid = vi.hoisted(() => ({ onPlaceUnit, onRemoveUnit, onSwapUnits }: { onPlaceUnit: (row: number, col: number, unit: Unit) => void; onRemoveUnit: (row: number, col: number, unit: Unit | null) => void; onSwapUnits: (sourceRow: number, sourceCol: number, targetRow: number, targetCol: number, sourceUnit: Unit, targetUnit: Unit) => void }) => {
+  const testUnit = { id: '1', name: 'Test', level: 1, rarity: 'Common' as const };
+  const testUnit2 = { id: '2', name: 'Test2', level: 5, rarity: 'Epic' as const };
+  return (
+    <div data-testid="formation-grid">
+      <button
+        data-testid="place-unit"
+        onClick={() => onPlaceUnit(0, 0, testUnit)}
+      >
+        Place Unit
+      </button>
+      <button
+        data-testid="remove-unit"
+        onClick={() => onRemoveUnit(0, 0, testUnit)}
+      >
+        Remove Unit
+      </button>
+      <button
+        data-testid="remove-unit-null"
+        onClick={() => onRemoveUnit(0, 0, null)}
+      >
+        Remove Null Unit
+      </button>
+      <button
+        data-testid="swap-units"
+        onClick={() => onSwapUnits(0, 0, 1, 1, testUnit, testUnit2)}
+      >
+        Swap Units
+      </button>
+    </div>
+  );
+});
+const mockUnitList = vi.hoisted(() => () => <div data-testid="unit-list">Unit List</div>);
+
+vi.mock('../../../src/components/organisms/FormationHeader/FormationHeader', () => ({
+  default: mockFormationHeader,
+}));
+
+vi.mock('../../../src/components/organisms/FormationGrid/FormationGrid', () => ({
+  default: mockFormationGrid,
+}));
+
+vi.mock('../../../src/components/organisms/UnitList/UnitList', () => ({
+  default: mockUnitList,
 }));
 
 
@@ -142,12 +152,12 @@ describe('FormationPlanner', () => {
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
-  it('should render formation planner with all components', () => {
+  it('should render formation planner with all components', async () => {
     render(<FormationPlanner />);
 
     expect(screen.getByTestId('formation-header')).toBeInTheDocument();
     expect(screen.getByTestId('formation-grid')).toBeInTheDocument();
-    expect(screen.getByTestId('unit-list')).toBeInTheDocument();
+    expect(await screen.findByTestId('unit-list')).toBeInTheDocument();
   });
 
   it('should handle placing a unit when unit is in roster', () => {
@@ -511,4 +521,3 @@ describe('FormationPlanner', () => {
     expect(mockDispatch).not.toHaveBeenCalled();
   });
 });
-

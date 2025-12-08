@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { Box } from '@mui/material';
 import type { Unit } from '../../../types';
 import { UnitCard } from '../../molecules';
@@ -7,7 +8,20 @@ interface AvailableUnitsGridProps {
   onUnitDoubleClick: (unit: Unit) => void;
 }
 
-export default function AvailableUnitsGrid({ units, onUnitDoubleClick }: AvailableUnitsGridProps) {
+interface UnitCardWrapperProps {
+  unit: Unit;
+  onDoubleClick: (unit: Unit) => void;
+}
+
+const UnitCardWrapper = memo(function UnitCardWrapper({ unit, onDoubleClick }: UnitCardWrapperProps) {
+  const handleDoubleClick = useCallback(() => {
+    onDoubleClick(unit);
+  }, [onDoubleClick, unit]);
+
+  return <UnitCard unit={unit} onDoubleClick={handleDoubleClick} />;
+});
+
+function AvailableUnitsGridComponent({ units, onUnitDoubleClick }: AvailableUnitsGridProps) {
   return (
     <Box
       className="flex flex-wrap gap-2"
@@ -15,13 +29,14 @@ export default function AvailableUnitsGrid({ units, onUnitDoubleClick }: Availab
       aria-label="Available units"
     >
       {units.map((unit) => (
-        <UnitCard
+        <UnitCardWrapper
           key={unit.id}
           unit={unit}
-          onDoubleClick={() => onUnitDoubleClick(unit)}
+          onDoubleClick={onUnitDoubleClick}
         />
       ))}
     </Box>
   );
 }
 
+export default memo(AvailableUnitsGridComponent);

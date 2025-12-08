@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Grid } from '@mui/material';
 import type { Unit } from '../../../types';
 import { FormationTile } from '../../molecules';
@@ -16,7 +17,7 @@ interface FormationGridProps {
   ) => void;
 }
 
-export default function FormationGrid({
+function FormationGridComponent({
   tiles,
   onPlaceUnit,
   onRemoveUnit,
@@ -55,3 +56,5 @@ export default function FormationGrid({
     </div>
   );
 }
+
+export default memo(FormationGridComponent);
