@@ -9,12 +9,14 @@ interface SearchInputProps {
   onSearchChange: (searchTerm: string) => void;
   placeholder?: string;
   className?: string;
+  ariaLabel?: string;
 }
 
 export default function SearchInput({ 
   onSearchChange, 
   placeholder = 'Search...',
-  className = 'bg-gray-700'
+  className = 'bg-gray-700',
+  ariaLabel
 }: SearchInputProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -37,10 +39,13 @@ export default function SearchInput({
       value={searchTerm}
       onChange={handleChange}
       className={className}
+      inputProps={{
+        'aria-label': ariaLabel || placeholder,
+      }}
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
-            <SearchIcon className="text-gray-400" />
+            <SearchIcon className="text-gray-300" aria-hidden="true" />
           </InputAdornment>
         ),
         endAdornment: searchTerm && (
@@ -49,7 +54,7 @@ export default function SearchInput({
               icon={<ClearIcon fontSize="small" />}
               size="small"
               onClick={handleClear}
-              className="text-gray-400"
+              className="text-gray-300 hover:text-white"
               aria-label="Clear search"
             />
           </InputAdornment>
@@ -72,11 +77,10 @@ export default function SearchInput({
           color: 'white',
         },
         '& .MuiInputBase-input::placeholder': {
-          color: 'rgba(255, 255, 255, 0.5)',
+          color: 'rgba(255, 255, 255, 0.7)',
           opacity: 1,
         },
       }}
     />
   );
 }
-

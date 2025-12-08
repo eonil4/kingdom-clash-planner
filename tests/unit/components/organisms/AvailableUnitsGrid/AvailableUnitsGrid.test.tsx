@@ -10,7 +10,8 @@ vi.mock('../../../../../src/components/molecules', () => ({
     <div
       data-testid={`unit-card-${unit.id}`}
       onDoubleClick={onDoubleClick}
-      role="listitem"
+      role="button"
+      tabIndex={0}
     >
       {unit.name} Lv{unit.level}
     </div>
@@ -114,4 +115,3 @@ describe('AvailableUnitsGrid', () => {
     expect(screen.getByTestId('unit-card-50')).toBeInTheDocument();
   });
 });
-

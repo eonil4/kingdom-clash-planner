@@ -18,7 +18,11 @@ const UnitCardWrapper = memo(function UnitCardWrapper({ unit, onDoubleClick }: U
     onDoubleClick(unit);
   }, [onDoubleClick, unit]);
 
-  return <UnitCard unit={unit} onDoubleClick={handleDoubleClick} />;
+  return (
+    <div role="listitem">
+      <UnitCard unit={unit} onDoubleClick={handleDoubleClick} />
+    </div>
+  );
 });
 
 function AvailableUnitsGridComponent({ units, onUnitDoubleClick }: AvailableUnitsGridProps) {

@@ -16,12 +16,19 @@
       .loading-skeleton{display:flex;flex-direction:column;min-height:100vh;background-color:#111827;color:#e5e5e5;align-items:center;justify-content:center}
       .loading-spinner{width:40px;height:40px;border:3px solid #374151;border-top-color:#3b82f6;border-radius:50%;animation:spin 1s linear infinite}
       @keyframes spin{to{transform:rotate(360deg)}}
+      /* Skip link for keyboard navigation */
+      .skip-link{position:absolute;top:-40px;left:0;background:#3b82f6;color:#fff;padding:8px 16px;z-index:10000;text-decoration:none;font-weight:600;border-radius:0 0 4px 0}
+      .skip-link:focus{top:0}
+      /* Screen reader only */
+      .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     </style>
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div id="root">
-      <div class="loading-skeleton" aria-label="Loading application">
-        <div class="loading-spinner" role="progressbar" aria-busy="true"></div>
+      <div class="loading-skeleton" role="status" aria-live="polite" aria-label="Loading Kingdom Clash Planner">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <span class="sr-only">Loading application, please wait...</span>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>

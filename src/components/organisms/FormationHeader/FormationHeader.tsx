@@ -31,7 +31,7 @@ export default function FormationHeader() {
       </Box>
       {isHelpOpen && (
         <Suspense fallback={null}>
-          <HelpOverlay open={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+      <HelpOverlay open={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
         </Suspense>
       )}
     </Box>

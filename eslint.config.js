@@ -26,7 +26,7 @@ export default tseslint.config([
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      ...jsxA11y.configs.recommended.rules,
+      ...jsxA11y.configs.strict.rules,
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
@@ -53,4 +53,3 @@ export default tseslint.config([
     },
   },
 ])
-

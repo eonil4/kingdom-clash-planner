@@ -58,7 +58,7 @@ const mockSearchInput = vi.hoisted(() => vi.fn(({ onSearchChange, placeholder }:
 
 const mockMolecules = vi.hoisted(() => ({
   UnitCard: ({ unit, onDoubleClick }: { unit: { id: string; name: string; level: number }; onDoubleClick?: () => void }) => (
-    <div data-testid={`unit-card-${unit.id}`} onDoubleClick={onDoubleClick}>
+    <div data-testid={`unit-card-${unit.id}`} onDoubleClick={onDoubleClick} role="button" tabIndex={0}>
       {unit.name} - Level {unit.level}
     </div>
   ),
@@ -126,7 +126,7 @@ vi.mock('../../../../../src/components/atoms', async (importOriginal) => {
 
 const mockAvailableUnitsGrid = vi.hoisted(() => {
   const UnitCardMock = ({ unit, onDoubleClick }: { unit: { id: string; name: string; level: number }; onDoubleClick?: () => void }) => (
-    <div data-testid={`unit-card-${unit.id}`} onDoubleClick={onDoubleClick}>
+    <div data-testid={`unit-card-${unit.id}`} onDoubleClick={onDoubleClick} role="button" tabIndex={0}>
       {unit.name} - Level {unit.level}
     </div>
   );

@@ -104,6 +104,7 @@ function UnitCardComponent({ unit, isInFormation = false, sourceRow, sourceCol, 
         relative rounded-lg border-2 cursor-move overflow-hidden
         ${rarityColors[unit.rarity]}
         ${isDragging ? 'opacity-50' : 'opacity-100'}
+        focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-900
       `}
       style={{
         width: cardSize,

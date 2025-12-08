@@ -49,7 +49,7 @@ vi.mock('react-dnd', async (importOriginal) => {
 });
 
 const mockUnitCard = vi.hoisted(() => ({ unit, onDoubleClick }: { unit: { name: string; level: number }; onDoubleClick?: () => void }) => (
-  <div data-testid="unit-card" onDoubleClick={onDoubleClick}>
+  <div data-testid="unit-card" onDoubleClick={onDoubleClick} role="button" tabIndex={0}>
     {unit.name} - Level {unit.level}
   </div>
 ));

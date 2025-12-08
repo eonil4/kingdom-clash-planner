@@ -73,6 +73,7 @@ function FormationTileComponent({
         w-full h-full border border-gray-500 rounded-sm
         flex items-center justify-center
         ${isOver ? 'bg-blue-500 bg-opacity-30 border-blue-400' : 'bg-gray-800'}
+        focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-offset-1 focus-within:ring-offset-gray-900
       `}
       role="gridcell"
       aria-label={ariaLabel}

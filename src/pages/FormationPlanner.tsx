@@ -104,6 +104,7 @@ function FormationPlannerContent() {
 
   return (
     <main
+      id="main-content"
       ref={dropOutside as unknown as React.Ref<HTMLElement>}
       className="min-h-screen bg-gray-900 flex flex-col text-white"
     >
@@ -117,7 +118,7 @@ function FormationPlannerContent() {
         />
       </div>
       <Suspense fallback={<div className="w-full bg-gray-800 p-4 min-h-32" />}>
-        <UnitList />
+      <UnitList />
       </Suspense>
     </main>
   );

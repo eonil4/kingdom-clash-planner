@@ -15,6 +15,7 @@ export default function UnitLevelBadge({ level, size = '24px', fontSize = '0.75r
         minHeight: size.includes('%') ? '12px' : undefined,
         clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
       }}
+      aria-hidden="true"
     >
       <span className="font-bold text-white" style={{ fontSize }}>
         {level}
@@ -22,4 +23,3 @@ export default function UnitLevelBadge({ level, size = '24px', fontSize = '0.75r
     </div>
   );
 }
-

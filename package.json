@@ -6,12 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:ci": "pnpm lint && pnpm build && pnpm test:unit:coverage",
     "build:watch": "chokidar \"src/**/*.{ts,tsx,json}\" \"tsconfig*.json\" \"vite.config.ts\" -c \"pnpm run build\" --initial",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:watch": "chokidar \"src/**/*.{ts,tsx}\" -c \"pnpm run lint:fix\"",
     "preview": "vite preview",
-    "ci": "pnpm lint && pnpm build && pnpm test:unit:coverage",
     "test:unit": "vitest run",
     "test:unit:coverage": "vitest run --coverage",
     "test:unit:watch": "vitest",
@@ -22,7 +22,9 @@
     "test:e2e:html": "playwright test --reporter=html",
     "test:e2e:watch": "playwright test --reporter=line --ui",
     "test:e2e:show-report": "playwright show-report",
-    "extract:unit-images": "node scripts/extract-unit-images/extract-unit-images.js"
+    "extract:unit-images": "node scripts/extract-unit-images/extract-unit-images.js",
+    "lighthouse": "lhci autorun",
+    "lighthouse:ci": "pnpm build && pnpm lighthouse"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -40,6 +42,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@lhci/cli": "^0.14.0",
     "@playwright/test": "^1.48.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
@@ -74,4 +77,3 @@
     }
   }
 }
-
