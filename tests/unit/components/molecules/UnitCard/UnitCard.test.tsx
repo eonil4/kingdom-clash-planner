@@ -125,7 +125,7 @@ describe('UnitCard', () => {
       expect(tooltip).toBeInTheDocument();
       const tooltipText = tooltip?.textContent || '';
       expect(tooltipText).toMatch(/Power:/i);
-      expect(tooltipText).toMatch(/19/);
+      expect(tooltipText).toMatch(/1 920/);
     }, { timeout: 3000 });
   });
 
@@ -482,4 +482,3 @@ describe('UnitCard', () => {
     });
   });
 });
-

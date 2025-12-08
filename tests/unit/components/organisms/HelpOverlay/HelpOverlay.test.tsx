@@ -122,7 +122,7 @@ describe('HelpOverlay', () => {
     render(<HelpOverlay open={true} onClose={mockOnClose} />);
     
     expect(screen.getAllByText(/Limits and Constraints/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Maximum 1000 units total/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Maximum 1 000 units total/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Maximum 49 units of the same name and level/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/7x7 grid \(49 tiles maximum\)/i).length).toBeGreaterThan(0);
   });
@@ -163,4 +163,3 @@ describe('HelpOverlay', () => {
     expect(screen.getAllByText(/units/i).length).toBeGreaterThan(0);
   });
 });
-

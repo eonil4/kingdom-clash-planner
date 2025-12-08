@@ -76,7 +76,7 @@ describe('FormationHeader', () => {
     );
 
     expect(screen.getByText('Test Formation')).toBeInTheDocument();
-    expect(screen.getByText('12345')).toBeInTheDocument();
+    expect(screen.getByText('12 345')).toBeInTheDocument();
   });
 
   it('should render with correct styling classes', () => {
@@ -88,7 +88,7 @@ describe('FormationHeader', () => {
     );
     const header = container.querySelector('header');
 
-    expect(header).toHaveClass('w-full', 'p-4', 'bg-gradient-to-b', 'from-gray-700', 'to-gray-800');
+    expect(header).toHaveClass('w-full', 'p-4', 'bg-gray-800');
   });
 
   it('should render power badge with correct styling', () => {
@@ -106,9 +106,9 @@ describe('FormationHeader', () => {
       </Provider>
     );
 
-    const powerElement = screen.getByText('5000');
+    const powerElement = screen.getByText('5 000');
     expect(powerElement).toBeInTheDocument();
-    expect(powerElement.closest('.bg-blue-900')).toBeInTheDocument();
+    expect(powerElement.closest('.bg-gray-700')).toBeInTheDocument();
   });
 
   it('should show edit icon next to formation name', () => {
@@ -377,4 +377,3 @@ describe('FormationHeader', () => {
     expect(screen.getByText('Formation')).toBeInTheDocument();
   });
 });
-

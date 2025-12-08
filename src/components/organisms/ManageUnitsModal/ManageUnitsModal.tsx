@@ -5,6 +5,7 @@ export { AddUnitForm } from '../../organisms';
 import { UnitTable } from '../UnitTable';
 import { IconButton, Button } from '../../atoms';
 import { AddUnitForm } from '../../organisms';
+import { formatNumber } from '../../../utils/powerUtils';
 
 interface ManageUnitsModalProps {
   open: boolean;
@@ -80,7 +81,7 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
           {!isAdding && (
             <Box className="mb-4 flex items-center justify-between gap-2">
               <Typography variant="h6" className="text-white">
-                Unit Roster ({Object.values(unitCounts).reduce((sum, count) => sum + count, 0)} total units)
+                Unit Roster ({formatNumber(Object.values(unitCounts).reduce((sum, count) => sum + count, 0))} total units)
               </Typography>
               <Box className="flex gap-2">
                 <Button
@@ -120,4 +121,3 @@ export default function ManageUnitsModal({ open, onClose }: ManageUnitsModalProp
     </Dialog>
   );
 }
-

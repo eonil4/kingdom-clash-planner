@@ -182,7 +182,7 @@ describe('AddUnitForm', () => {
   it('should display total unit count', () => {
     render(<AddUnitForm {...mockProps} units={[{ id: '1', name: 'TestUnit', level: 1, rarity: UnitRarity.Common, power: 100 }]} formationUnitCount={5} />);
     
-    expect(screen.getByText(/Total: 6 \/ 1000/)).toBeInTheDocument();
+    expect(screen.getByText(/Total: 6 \/ 1 000/)).toBeInTheDocument();
     expect(screen.getByText(/Roster: 1, Formation: 5/)).toBeInTheDocument();
   });
 
@@ -266,4 +266,3 @@ describe('AddUnitForm', () => {
     expect(previewCard).toBeInTheDocument();
   });
 });
-

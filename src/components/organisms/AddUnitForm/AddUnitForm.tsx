@@ -13,6 +13,7 @@ import { UnitRarity } from '../../../types';
 import { UNIT_NAMES_ARRAY, getUnitDataByName } from '../../../types/unitNames';
 import { normalizeUnitName } from '../../../utils/unitNameUtils';
 import { getUnitImagePath } from '../../../utils/imageUtils';
+import { formatNumber } from '../../../utils/powerUtils';
 import { UnitCard } from '../../molecules';
 import { TextField, Select } from '../../atoms';
 
@@ -168,7 +169,7 @@ export default function AddUnitForm({
                                 Max: 49 per level
                             </Typography>
                             <Typography variant="caption" className="text-gray-400 text-xs block">
-                                Total: {totalUnitCount} / 1000 (Roster: {units.length}, Formation: {formationUnitCount})
+                                Total: {formatNumber(totalUnitCount)} / 1 000 (Roster: {formatNumber(units.length)}, Formation: {formatNumber(formationUnitCount)})
                             </Typography>
                         </Box>
                     </Box>
@@ -285,4 +286,3 @@ export default function AddUnitForm({
         </Box>
     );
 }
-

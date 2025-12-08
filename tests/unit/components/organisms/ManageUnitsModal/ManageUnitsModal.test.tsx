@@ -41,6 +41,7 @@ vi.mock('../../../../../src/utils/unitNameUtils', async (importOriginal) => {
 
 vi.mock('../../../../../src/utils/powerUtils', () => ({
   calculateUnitPower: vi.fn(() => 100),
+  formatNumber: vi.fn((value: number) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')),
 }));
 
 vi.mock('../../../../../src/types/unitNames', () => ({
@@ -299,4 +300,3 @@ describe('ManageUnitsModal', () => {
     });
   });
 });
-

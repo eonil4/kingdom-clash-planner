@@ -65,11 +65,9 @@ export default function FormationTile({
     <div
       ref={drop as unknown as React.Ref<HTMLDivElement>}
       className={`
-        w-full h-full border-2 border-white border-opacity-40 rounded-sm
+        w-full h-full border border-gray-500 rounded-sm
         flex items-center justify-center
-        ${isOver ? 'bg-blue-500 bg-opacity-40 border-blue-400' : 'bg-transparent'}
-        transition-all duration-200
-        hover:border-opacity-60
+        ${isOver ? 'bg-blue-500 bg-opacity-30 border-blue-400' : 'bg-gray-800'}
       `}
       role="gridcell"
       aria-label={`Formation tile row ${row + 1} column ${col + 1}`}
@@ -88,4 +86,3 @@ export default function FormationTile({
     </div>
   );
 }
-

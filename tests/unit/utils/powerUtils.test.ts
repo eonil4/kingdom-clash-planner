@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateUnitPower } from '../../../src/utils/powerUtils';
+import { calculateUnitPower, formatNumber } from '../../../src/utils/powerUtils';
 import { UnitRarity } from '../../../src/types';
 
 describe('powerUtils', () => {
@@ -87,5 +87,29 @@ describe('powerUtils', () => {
       expect(calculateUnitPower(invalidRarity, 1)).toBe(0);
     });
   });
-});
 
+  describe('formatNumber', () => {
+    it('should format small numbers without separator', () => {
+      expect(formatNumber(0)).toBe('0');
+      expect(formatNumber(1)).toBe('1');
+      expect(formatNumber(100)).toBe('100');
+      expect(formatNumber(999)).toBe('999');
+    });
+
+    it('should format thousands with space separator', () => {
+      expect(formatNumber(1000)).toBe('1 000');
+      expect(formatNumber(1920)).toBe('1 920');
+      expect(formatNumber(5000)).toBe('5 000');
+      expect(formatNumber(12345)).toBe('12 345');
+    });
+
+    it('should format millions with space separators', () => {
+      expect(formatNumber(1000000)).toBe('1 000 000');
+      expect(formatNumber(2201600)).toBe('2 201 600');
+    });
+
+    it('should format large numbers correctly', () => {
+      expect(formatNumber(999999999)).toBe('999 999 999');
+    });
+  });
+});

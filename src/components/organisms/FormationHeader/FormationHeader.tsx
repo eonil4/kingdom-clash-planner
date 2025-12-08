@@ -18,10 +18,7 @@ export default function FormationHeader() {
   return (
     <Box
       component="header"
-      className="w-full p-4 bg-gradient-to-b from-gray-700 to-gray-800 flex items-center justify-center"
-      style={{
-        backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-      }}
+      className="w-full p-4 bg-gray-800 flex items-center justify-center"
     >
       <Box className="flex flex-col items-center w-full">
         <FormationNameEditor
@@ -35,4 +32,3 @@ export default function FormationHeader() {
     </Box>
   );
 }
-

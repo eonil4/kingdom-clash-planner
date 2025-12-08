@@ -181,7 +181,7 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
                 Limits and Constraints
               </Typography>
               <Typography variant="body2" className="mb-1">
-                • <strong>Total Units:</strong> Maximum 1000 units total (roster + formation combined).
+                • <strong>Total Units:</strong> Maximum 1 000 units total (roster + formation combined).
               </Typography>
               <Typography variant="body2" className="mb-1">
                 • <strong>Per Unit Per Level:</strong> Maximum 49 units of the same name and level.
@@ -240,4 +240,3 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
     </Dialog>
   );
 }
-

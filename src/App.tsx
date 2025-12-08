@@ -10,9 +10,12 @@ const theme = createTheme({
   palette: {
     mode: 'dark',
     background: {
-      default: '#1a1a1a',
-      paper: '#1a1a1a',
+      default: '#111827',
+      paper: '#1f2937',
     },
+  },
+  typography: {
+    fontFamily: 'system-ui, -apple-system, sans-serif',
   },
 });
 

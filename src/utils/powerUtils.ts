@@ -22,3 +22,11 @@ export function calculateUnitPower(rarity: UnitRarity, level: number): number {
   return powerTable[rarity]?.[clampedLevel - 1] || 0;
 }
 
+/**
+ * Format a number with space as thousand separator
+ * @param value - Number to format
+ * @returns Formatted string (e.g., 2201600 -> "2 201 600")
+ */
+export function formatNumber(value: number): string {
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}

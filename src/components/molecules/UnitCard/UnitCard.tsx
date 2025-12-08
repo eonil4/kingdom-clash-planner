@@ -5,6 +5,7 @@ import type { Unit } from '../../../types';
 import { UnitRarity } from '../../../types';
 import { UnitLevelBadge } from '../../atoms';
 import { UnitImage } from '../../atoms';
+import { formatNumber } from '../../../utils/powerUtils';
 
 interface UnitCardProps {
   unit: Unit;
@@ -63,7 +64,7 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
       <div className="text-sm">
         <div>Level: <span className="font-bold">{unit.level}</span></div>
         <div>Rarity: <span className="font-bold">{unit.rarity}</span></div>
-        <div>Power: <span className="font-bold">{(unit.power ?? 0).toLocaleString()}</span></div>
+        <div>Power: <span className="font-bold">{formatNumber(unit.power ?? 0)}</span></div>
         <div className="mt-1 text-xs opacity-90">
           {unit.rarity === UnitRarity.Legendary && '⭐ Legendary Unit'}
           {unit.rarity === UnitRarity.Epic && '💜 Epic Unit'}
@@ -102,10 +103,7 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
       className={`
         relative rounded-lg border-2 cursor-move overflow-hidden
         ${rarityColors[unit.rarity]}
-        ${isDragging ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}
-        transition-all duration-200
-        ${isInFormation ? '' : 'hover:scale-105 hover:shadow-lg'}
-        active:scale-95
+        ${isDragging ? 'opacity-50' : 'opacity-100'}
       `}
       style={{
         width: cardSize,
@@ -186,4 +184,3 @@ function getRarityBorderColor(rarity: UnitRarity): string {
       return '#6b7280';
   }
 }
-
