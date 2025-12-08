@@ -194,7 +194,7 @@ describe('UnitCard', () => {
   it('should have correct aria-label', () => {
     render(<UnitCard unit={mockUnit} />);
 
-    const card = screen.getByLabelText('TestUnit level 5');
+    const card = screen.getByLabelText('5 TestUnit');
     expect(card).toBeInTheDocument();
   });
 

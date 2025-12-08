@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../../../store/hooks';
 import { Box } from '@mui/material';
 import { updateFormationName } from '../../../store/reducers/formationSlice';
-import { HelpOverlay } from '../HelpOverlay';
 import { FormationNameEditor } from '../../molecules';
 import { PowerBadge } from '../../atoms';
+
+const HelpOverlay = lazy(() => import('../HelpOverlay/HelpOverlay'));
 
 export default function FormationHeader() {
   const dispatch = useAppDispatch();
@@ -28,7 +29,11 @@ export default function FormationHeader() {
         />
         <PowerBadge power={currentFormation?.power || 0} />
       </Box>
-      <HelpOverlay open={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+      {isHelpOpen && (
+        <Suspense fallback={null}>
+          <HelpOverlay open={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+        </Suspense>
+      )}
     </Box>
   );
 }

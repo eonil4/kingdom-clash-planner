@@ -154,6 +154,11 @@ vi.mock('../../../../../src/components/organisms/ManageUnitsModal', () => ({
   default: mockManageUnitsModal,
 }));
 
+vi.mock('../../../../../src/components/organisms/ManageUnitsModal/ManageUnitsModal', () => ({
+  ManageUnitsModal: mockManageUnitsModal,
+  default: mockManageUnitsModal,
+}));
+
 const createMockStore = (units = [
   { id: '1', name: 'Unit1', level: 1, rarity: UnitRarity.Common, power: 50 },
   { id: '2', name: 'Unit2', level: 2, rarity: UnitRarity.Rare, power: 100 },
@@ -256,7 +261,7 @@ describe('UnitList', () => {
     const manageButton = screen.getByRole('button', { name: /manage units/i });
     await user.click(manageButton);
 
-    expect(screen.getByTestId('manage-units-modal')).toBeInTheDocument();
+    expect(await screen.findByTestId('manage-units-modal')).toBeInTheDocument();
   });
 
   it('should render UnitSearch component', () => {
@@ -453,7 +458,7 @@ describe('UnitList', () => {
     const manageButton = screen.getByRole('button', { name: /manage units/i });
     await user.click(manageButton);
     
-    expect(screen.getByTestId('manage-units-modal')).toBeInTheDocument();
+    expect(await screen.findByTestId('manage-units-modal')).toBeInTheDocument();
     
     const modalButton = screen.getByTestId('manage-units-modal');
     await user.click(modalButton);
@@ -751,4 +756,3 @@ describe('UnitList', () => {
     }
   });
 });
-

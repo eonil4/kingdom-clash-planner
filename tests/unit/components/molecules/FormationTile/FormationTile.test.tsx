@@ -110,7 +110,7 @@ describe('FormationTile', () => {
 
     const tile = screen.getByRole('gridcell');
     expect(tile).toBeInTheDocument();
-    expect(tile).toHaveAttribute('aria-label', 'Formation tile row 1 column 1');
+    expect(tile).toHaveAttribute('aria-label', 'Empty tile at row 1 column 1');
   });
 
   it('should render UnitCard when unit exists', () => {
@@ -175,7 +175,7 @@ describe('FormationTile', () => {
       />
     );
 
-    expect(screen.getByRole('gridcell')).toHaveAttribute('aria-label', 'Formation tile row 1 column 1');
+    expect(screen.getByRole('gridcell')).toHaveAttribute('aria-label', 'Empty tile at row 1 column 1');
 
     rerender(
       <DndProvider backend={HTML5Backend}>
@@ -189,7 +189,7 @@ describe('FormationTile', () => {
       </DndProvider>
     );
 
-    expect(screen.getByRole('gridcell')).toHaveAttribute('aria-label', 'Formation tile row 7 column 7');
+    expect(screen.getByRole('gridcell')).toHaveAttribute('aria-label', 'Empty tile at row 7 column 7');
   });
 
   it('should apply isOver styling when dragging over', () => {
@@ -421,4 +421,3 @@ describe('FormationTile', () => {
     }
   });
 });
-

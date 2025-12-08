@@ -115,8 +115,8 @@ function FormationPlannerContent() {
   }
 
   return (
-    <div
-      ref={dropOutside as unknown as React.Ref<HTMLDivElement>}
+    <main
+      ref={dropOutside as unknown as React.Ref<HTMLElement>}
       className="min-h-screen bg-gray-900 flex flex-col text-white"
     >
       <FormationHeader />
@@ -129,7 +129,7 @@ function FormationPlannerContent() {
         />
       </div>
       <UnitList />
-    </div>
+    </main>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect, useRef } from 'react';
 import { useDrag } from 'react-dnd';
 import { Tooltip } from '@mui/material';
 import type { Unit } from '../../../types';
@@ -24,7 +24,7 @@ const rarityColors: Record<UnitRarity, string> = {
   [UnitRarity.Legendary]: 'border-yellow-500 bg-yellow-900',
 };
 
-export default function UnitCard({ unit, isInFormation = false, sourceRow, sourceCol, onDoubleClick, size, showLevelBadge = true }: UnitCardProps) {
+function UnitCardComponent({ unit, isInFormation = false, sourceRow, sourceCol, onDoubleClick, size, showLevelBadge = true }: UnitCardProps) {
   const [{ isDragging }, drag] = useDrag({
     type: 'unit',
     item: { unit, isInFormation, sourceRow, sourceCol },
@@ -116,7 +116,7 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
       }}
       role="button"
       tabIndex={0}
-      aria-label={`${unit.name} level ${unit.level}`}
+      aria-label={`${unit.level} ${unit.name}`}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
       onDoubleClick={(e) => {
@@ -169,6 +169,10 @@ export default function UnitCard({ unit, isInFormation = false, sourceRow, sourc
     </Tooltip>
   );
 }
+
+const UnitCard = memo(UnitCardComponent);
+
+export default UnitCard;
 
 function getRarityBorderColor(rarity: UnitRarity): string {
   switch (rarity) {

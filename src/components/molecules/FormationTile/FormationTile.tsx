@@ -61,6 +61,10 @@ export default function FormationTile({
     onRemoveUnit(row, col, unit);
   };
 
+  const ariaLabel = unit
+    ? `${unit.level} ${unit.name} at row ${row + 1} column ${col + 1}`
+    : `Empty tile at row ${row + 1} column ${col + 1}`;
+
   return (
     <div
       ref={drop as unknown as React.Ref<HTMLDivElement>}
@@ -70,7 +74,7 @@ export default function FormationTile({
         ${isOver ? 'bg-blue-500 bg-opacity-30 border-blue-400' : 'bg-gray-800'}
       `}
       role="gridcell"
-      aria-label={`Formation tile row ${row + 1} column ${col + 1}`}
+      aria-label={ariaLabel}
     >
       {unit ? (
         <UnitCard 

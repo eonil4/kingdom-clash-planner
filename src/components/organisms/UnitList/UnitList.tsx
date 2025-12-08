@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import { Box } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
@@ -8,9 +8,10 @@ import { removeUnit as removeUnitFromFormation, placeUnit } from '../../../store
 import { removeUnit } from '../../../store/reducers/formationSlice';
 import type { SortOption, Unit } from '../../../types';
 import { SearchInput, SortControls, UnitListActions } from '../../molecules';
-import { ManageUnitsModal } from '../ManageUnitsModal';
 import { AvailableUnitsGrid } from '../AvailableUnitsGrid';
 import { UnitCountBadge } from '../../atoms';
+
+const ManageUnitsModal = lazy(() => import('../ManageUnitsModal/ManageUnitsModal'));
 
 export default function UnitList() {
   const dispatch = useAppDispatch();
@@ -135,11 +136,14 @@ export default function UnitList() {
         units={availableUnits}
         onUnitDoubleClick={handleUnitDoubleClick}
       />
-      <ManageUnitsModal
-        open={isManageUnitsOpen}
-        onClose={() => setIsManageUnitsOpen(false)}
-      />
+      {isManageUnitsOpen && (
+        <Suspense fallback={null}>
+          <ManageUnitsModal
+            open={isManageUnitsOpen}
+            onClose={() => setIsManageUnitsOpen(false)}
+          />
+        </Suspense>
+      )}
     </Box>
   );
 }
-

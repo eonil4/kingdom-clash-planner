@@ -305,7 +305,7 @@ describe('FormationHeader', () => {
     const helpButton = screen.getByLabelText('Open help overlay');
     await user.click(helpButton);
 
-    expect(screen.getByText('Application Guide')).toBeInTheDocument();
+    expect(await screen.findByText('Application Guide')).toBeInTheDocument();
   });
 
   it('should not show help icon when editing formation name', async () => {
