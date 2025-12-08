@@ -1,0 +1,39 @@
+# Dependencies - installed fresh in container
+node_modules
+
+# Build outputs
+dist
+build
+
+# Git
+.git
+.gitignore
+
+# IDE and editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# Test outputs
+coverage
+playwright-report
+tests/e2e/reports
+tests/unit/coverage
+
+# Docker files (avoid recursive copy)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+doc
+*.md
+
+# Environment files
+.env*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db

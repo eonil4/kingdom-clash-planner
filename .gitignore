@@ -13,8 +13,9 @@ dist-ssr
 *.local
 
 # Editor directories and files
-.vscode/*
+.vscode/
 !.vscode/extensions.json
+!.vscode/tasks.json
 .idea
 .DS_Store
 *.suo
@@ -24,3 +25,9 @@ dist-ssr
 *.sw?
 coverage*.txt
 coverage/
+playwright-report/
+
+# Docker
+.docker/
+.pnpm-store/
+.devcontainer/
