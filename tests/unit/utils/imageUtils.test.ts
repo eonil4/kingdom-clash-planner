@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getUnitImagePath, getPlaceholderImageUrl, checkImageExists } from '../../../src/utils/imageUtils';
+import { getUnitImagePath, getPlaceholderImageUrl, checkImageExists, preloadUnitImage } from '../../../src/utils/imageUtils';
 
 vi.mock('../../../src/types/unitNames', () => ({
   getUnitDataByName: (name: string) => {
@@ -48,6 +48,58 @@ describe('imageUtils', () => {
 
     it('should handle unit names with special characters', () => {
       const result = getUnitImagePath("SORCERER'S APPRENTICE");
+      expect(typeof result).toBe('string');
+      expect(result).toContain('sorcerers_apprentice');
+    });
+
+    it('should return cached value on subsequent calls', () => {
+      const result1 = getUnitImagePath('ARCHERS');
+      const result2 = getUnitImagePath('ARCHERS');
+      expect(result1).toBe(result2);
+    });
+
+    it('should return cached URL after async load completes', async () => {
+      getUnitImagePath('PALADIN');
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const cachedResult = getUnitImagePath('PALADIN');
+      
+      expect(typeof cachedResult).toBe('string');
+      expect(cachedResult).toContain('paladin');
+    });
+  });
+
+  describe('preloadUnitImage', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it('should return image path for known unit', async () => {
+      const result = await preloadUnitImage('ARCHERS');
+      expect(typeof result).toBe('string');
+      expect(result).toContain('archers');
+    });
+
+    it('should return fallback path for unknown unit', async () => {
+      const result = await preloadUnitImage('UNKNOWN UNIT');
+      expect(typeof result).toBe('string');
+      expect(result).toContain('/assets/units/');
+    });
+
+    it('should return cached value on subsequent calls', async () => {
+      const result1 = await preloadUnitImage('PALADIN');
+      const result2 = await preloadUnitImage('PALADIN');
+      expect(result1).toBe(result2);
+    });
+
+    it('should handle unit with explicit imageName', async () => {
+      const result = await preloadUnitImage('BONE WARRIOR');
+      expect(typeof result).toBe('string');
+    });
+
+    it('should handle unit names with special characters', async () => {
+      const result = await preloadUnitImage("SORCERER'S APPRENTICE");
       expect(typeof result).toBe('string');
       expect(result).toContain('sorcerers_apprentice');
     });
@@ -286,4 +338,3 @@ describe('imageUtils', () => {
     });
   });
 });
-

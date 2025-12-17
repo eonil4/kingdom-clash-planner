@@ -1,5 +1,6 @@
-import { MenuItem, FormControl } from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material';
+import FormControl from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
+import type { SelectChangeEvent } from '@mui/material/Select';
 import { Select } from '../../atoms';
 import type { SortOption } from '../../../types';
 
@@ -92,4 +93,3 @@ export default function SortControls({
     </>
   );
 }
-

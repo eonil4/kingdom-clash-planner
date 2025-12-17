@@ -1,13 +1,11 @@
-import {
-    Box,
-    Typography,
-    MenuItem,
-    Button,
-    Checkbox,
-    FormControlLabel,
-    FormControl,
-    InputLabel,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Typography from '@mui/material/Typography';
 import type { Unit } from '../../../types';
 import { UnitRarity } from '../../../types';
 import { UNIT_NAMES_ARRAY, getUnitDataByName } from '../../../types/unitNames';

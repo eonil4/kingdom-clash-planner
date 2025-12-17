@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { InputAdornment } from '@mui/material';
+import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { IconButton } from '../../atoms';

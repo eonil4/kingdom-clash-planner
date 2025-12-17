@@ -19,6 +19,7 @@ vi.mock('../../../../../src/components/molecules/UnitCard', () => ({
 
 vi.mock('../../../../../src/utils/imageUtils', () => ({
   getUnitImagePath: vi.fn((name) => (name ? `/images/${name}.png` : undefined)),
+  preloadUnitImage: vi.fn((name) => Promise.resolve(name ? `/images/${name}.png` : undefined)),
 }));
 
 vi.mock('../../../../../src/types/unitNames', () => ({

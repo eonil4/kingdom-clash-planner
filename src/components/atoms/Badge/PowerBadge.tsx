@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 import Badge from './Badge';
 import { formatNumber } from '../../../utils/powerUtils';
 

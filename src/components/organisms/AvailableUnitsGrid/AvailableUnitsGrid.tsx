@@ -1,5 +1,5 @@
 import { memo, useCallback } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 import type { Unit } from '../../../types';
 import { UnitCard } from '../../molecules';
 

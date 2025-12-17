@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { UnitList } from '../../../../../src/components/organisms';
+import UnitList from '../../../../../src/components/organisms/UnitList/UnitList';
 import { UnitRarity } from '../../../../../src/types';
 import unitReducer from '../../../../../src/store/reducers/unitSlice';
 import formationReducer from '../../../../../src/store/reducers/formationSlice';

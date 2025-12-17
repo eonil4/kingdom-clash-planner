@@ -1,4 +1,4 @@
-import { TableCell } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import type { SortColumn, SortDirection } from '../../../hooks/useManageUnits';
@@ -47,4 +47,3 @@ export default function SortableTableHeader({
     </TableCell>
   );
 }
-

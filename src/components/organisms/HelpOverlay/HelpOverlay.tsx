@@ -1,11 +1,9 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Typography,
-  Box,
-  Divider,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
 import HelpIcon from '@mui/icons-material/Help';
 import { IconButton } from '../../atoms';

@@ -31,3 +31,4 @@ playwright-report/
 .docker/
 .pnpm-store/
 .devcontainer/
+.lighthouseci/flags-0554b1b1-a2cc-4159-a4c3-174f0f19d3ff.json

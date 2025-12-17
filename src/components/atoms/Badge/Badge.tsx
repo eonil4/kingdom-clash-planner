@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 import type { ReactNode } from 'react';
 
 interface BadgeProps {
@@ -14,4 +14,3 @@ export default function Badge({ children, className = '', style }: BadgeProps) {
     </Box>
   );
 }
-

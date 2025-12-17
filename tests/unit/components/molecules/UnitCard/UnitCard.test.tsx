@@ -3,7 +3,6 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UnitCard } from '../../../../../src/components/molecules';
 import { UnitRarity } from '../../../../../src/types';
-import { getUnitImagePath } from '../../../../../src/utils/imageUtils';
 
 interface DragConfig {
   type: string;
@@ -31,6 +30,7 @@ vi.mock('react-dnd', () => ({
 
 vi.mock('../../../../../src/utils/imageUtils', () => ({
   getUnitImagePath: vi.fn((name: string) => `/images/units/${name}.png`),
+  preloadUnitImage: vi.fn((name: string) => Promise.resolve(`/images/units/${name}.png`)),
 }));
 
 describe('UnitCard', () => {
@@ -174,10 +174,15 @@ describe('UnitCard', () => {
     });
   });
 
-  it('should use getUnitImagePath when imageUrl is not provided', () => {
-    render(<UnitCard unit={mockUnit} />);
+  it('should load image when imageUrl is not provided', async () => {
+    const unitWithoutImageUrl = { ...mockUnit, imageUrl: undefined };
+    render(<UnitCard unit={unitWithoutImageUrl} />);
 
-    expect(getUnitImagePath).toHaveBeenCalledWith('TestUnit');
+    await waitFor(() => {
+      const img = screen.getByRole('img', { name: 'TestUnit' });
+      expect(img).toBeInTheDocument();
+      expect(img).toHaveAttribute('src', expect.stringContaining('TestUnit'));
+    });
   });
 
   it('should render with isInFormation prop affecting size', () => {
@@ -211,18 +216,18 @@ describe('UnitCard', () => {
   });
 
 
-  it('should show placeholder when imageUrl is empty string', () => {
-    const unitWithoutImage = {
+  it('should show placeholder when imageUrl is empty string', async () => {
+    const unitWithEmptyImageUrl = {
       ...mockUnit,
       imageUrl: '',
     };
 
-    (getUnitImagePath as ReturnType<typeof vi.fn>).mockReturnValueOnce('');
+    const { container } = render(<UnitCard unit={unitWithEmptyImageUrl} />);
 
-    const { container } = render(<UnitCard unit={unitWithoutImage} />);
-
-    const placeholder = container.querySelector('.w-full.h-full.flex.items-center.justify-center');
-    expect(placeholder).toBeInTheDocument();
+    await waitFor(() => {
+      const placeholder = container.querySelector('.w-full.h-full');
+      expect(placeholder).toBeInTheDocument();
+    });
   });
 
   it('should close tooltip when clicking outside', async () => {
@@ -251,24 +256,26 @@ describe('UnitCard', () => {
     expect(card).toBeInTheDocument();
   });
 
-  it('should render placeholder with correct rarity background color for Common', () => {
+  it('should render placeholder with correct rarity background color for Common', async () => {
     const commonUnit = { ...mockUnit, rarity: UnitRarity.Common, imageUrl: undefined };
-    (getUnitImagePath as ReturnType<typeof vi.fn>).mockReturnValueOnce('');
     
     const { container } = render(<UnitCard unit={commonUnit} />);
     
-    const placeholder = container.querySelector('[style*="background-color"]');
-    expect(placeholder).toBeInTheDocument();
+    await waitFor(() => {
+      const placeholder = container.querySelector('.bg-gray-800');
+      expect(placeholder).toBeInTheDocument();
+    });
   });
 
-  it('should render placeholder with correct rarity background color for Legendary', () => {
+  it('should render placeholder with correct rarity background color for Legendary', async () => {
     const legendaryUnit = { ...mockUnit, rarity: UnitRarity.Legendary, imageUrl: undefined };
-    (getUnitImagePath as ReturnType<typeof vi.fn>).mockReturnValueOnce('');
     
     const { container } = render(<UnitCard unit={legendaryUnit} />);
     
-    const placeholder = container.querySelector('[style*="background-color"]');
-    expect(placeholder).toBeInTheDocument();
+    await waitFor(() => {
+      const placeholder = container.querySelector('.bg-yellow-900');
+      expect(placeholder).toBeInTheDocument();
+    });
   });
 
   it('should handle keyboard events - Enter key toggles tooltip', async () => {

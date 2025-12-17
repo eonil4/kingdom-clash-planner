@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { Button } from '../../atoms';
@@ -52,4 +52,3 @@ export default function UnitListActions({ onManageUnits, onWithdrawAll }: UnitLi
     </Box>
   );
 }
-

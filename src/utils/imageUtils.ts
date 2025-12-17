@@ -5,18 +5,22 @@
 import { getUnitDataByName } from '../types/unitNames';
 
 // Preload all unit images from src/assets/units using Vite's glob import
-// This allows dynamic access to images at runtime
-const unitImages = import.meta.glob<string>('../assets/units/*.png', { 
+// This allows dynamic access to images at runtime with WebP support
+const unitImages = import.meta.glob<string>('../assets/units/*.{png,webp}', { 
   eager: true,
   import: 'default'
 });
 
 // Create a lookup map by filename for easier access
+// Prefers WebP over PNG when both exist
 const imagesByName: Record<string, string> = {};
+/* istanbul ignore next -- @preserve Vite glob imports empty in unit tests */
 for (const [path, url] of Object.entries(unitImages)) {
   const parts = path.split('/');
-  const filename = parts[parts.length - 1].replace('.png', '');
-  imagesByName[filename] = url;
+  const filename = parts[parts.length - 1].replace(/\.(png|webp)$/, '');
+  if (!imagesByName[filename] || path.endsWith('.webp')) {
+    imagesByName[filename] = url;
+  }
 }
 
 /**
@@ -25,31 +29,33 @@ for (const [path, url] of Object.entries(unitImages)) {
  * Uses imageName from UnitData if available, otherwise converts unit name
  */
 export function getUnitImagePath(unitName: string): string {
-  // Try to get unit data first to use the explicit imageName
   const unitData = getUnitDataByName(unitName);
   let imageName: string;
   
   if (unitData?.imageName) {
-    // Use the explicit imageName from UnitData
     imageName = unitData.imageName;
   } else {
-    // Fallback: Convert unit name to match image filename format (lowercase with underscores)
     imageName = unitName
       .toLowerCase()
-      .replace(/\s+/g, '_')  // Replace spaces with underscores to match image filenames
-      .replace(/'/g, '')     // Remove apostrophes
-      .replace(/[^a-z0-9_]/g, '');  // Remove any other non-alphanumeric characters except underscores
+      .replace(/\s+/g, '_')
+      .replace(/'/g, '')
+      .replace(/[^a-z0-9_]/g, '');
   }
   
-  // Look up in the filename map
   const image = imagesByName[imageName];
   
   if (image) {
     return image;
   }
   
-  // Fallback to public assets if not found in src/assets/units
   return `/assets/units/${imageName}.png`;
+}
+
+/**
+ * Preloads a specific unit image (returns immediately since images are eager-loaded)
+ */
+export async function preloadUnitImage(unitName: string): Promise<string> {
+  return getUnitImagePath(unitName);
 }
 
 /**
@@ -92,4 +98,3 @@ export async function checkImageExists(url: string): Promise<boolean> {
     img.src = url;
   });
 }
-

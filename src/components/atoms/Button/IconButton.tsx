@@ -1,5 +1,5 @@
-import { IconButton as MuiIconButton } from '@mui/material';
-import type { IconButtonProps as MuiIconButtonProps } from '@mui/material';
+import MuiIconButton from '@mui/material/IconButton';
+import type { IconButtonProps as MuiIconButtonProps } from '@mui/material/IconButton';
 
 interface IconButtonProps extends Omit<MuiIconButtonProps, 'children'> {
   icon: React.ReactNode;
@@ -13,4 +13,3 @@ export default function IconButton({ icon, className = '', sx, ...props }: IconB
     </MuiIconButton>
   );
 }
-

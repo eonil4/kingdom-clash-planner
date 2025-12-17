@@ -1,6 +1,6 @@
 import { memo, useState, useEffect, useRef } from 'react';
 import { useDrag } from 'react-dnd';
-import { Tooltip } from '@mui/material';
+import Tooltip from '@mui/material/Tooltip';
 import type { Unit } from '../../../types';
 import { UnitRarity } from '../../../types';
 import { UnitLevelBadge } from '../../atoms';

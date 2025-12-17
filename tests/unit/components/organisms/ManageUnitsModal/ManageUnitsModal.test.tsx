@@ -27,6 +27,7 @@ import unitReducer from '../../../../../src/store/reducers/unitSlice';
 
 vi.mock('../../../../../src/utils/imageUtils', () => ({
   getUnitImagePath: vi.fn((name) => `/images/${name}.png`),
+  preloadUnitImage: vi.fn((name) => Promise.resolve(`/images/${name}.png`)),
 }));
 
 const mockNormalizeUnitName = vi.hoisted(() => vi.fn((name: string) => name.trim()));

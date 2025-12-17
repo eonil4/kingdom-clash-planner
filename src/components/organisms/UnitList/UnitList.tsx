@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { useDrop } from 'react-dnd';
-import { Box } from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material';
+import Box from '@mui/material/Box';
+import type { SelectChangeEvent } from '@mui/material/Select';
 import { useAppSelector, useAppDispatch } from '../../../store/hooks';
 import { setSortOption, setSortOption2, setSortOption3, setSearchTerm } from '../../../store/reducers/unitSlice';
 import { removeUnit as removeUnitFromFormation, placeUnit } from '../../../store/reducers/formationSlice';

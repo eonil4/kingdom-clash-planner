@@ -23,6 +23,7 @@
     "test:e2e:watch": "playwright test --reporter=line --ui",
     "test:e2e:show-report": "playwright show-report",
     "extract:unit-images": "node scripts/extract-unit-images/extract-unit-images.js",
+    "convert:images-to-webp": "node scripts/convert-to-webp.js",
     "lighthouse": "lhci autorun",
     "lighthouse:ci": "pnpm build && pnpm lighthouse"
   },

@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Grid } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import type { Unit } from '../../../types';
 import { FormationTile } from '../../molecules';
 

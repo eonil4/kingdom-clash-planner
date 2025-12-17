@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Typography, Box } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import EditIcon from '@mui/icons-material/Edit';
 import { IconButton } from '../../atoms';
 import { TextField } from '../../atoms';
@@ -133,4 +134,3 @@ export default function EditableText({
     </Box>
   );
 }
-

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../../../store/hooks';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 import { updateFormationName } from '../../../store/reducers/formationSlice';
 import { FormationNameEditor } from '../../molecules';
 import { PowerBadge } from '../../atoms';

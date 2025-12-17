@@ -17,6 +17,7 @@ vi.mock('../../../src/utils/powerUtils', () => ({
 
 vi.mock('../../../src/utils/imageUtils', () => ({
   getUnitImagePath: (name: string) => `/assets/units/${name.toLowerCase().replace(/\s+/g, '_')}.png`,
+  preloadUnitImage: (name: string) => Promise.resolve(`/assets/units/${name.toLowerCase().replace(/\s+/g, '_')}.png`),
 }));
 
 describe('urlSerialization', () => {
@@ -485,4 +486,3 @@ describe('urlSerialization', () => {
     });
   });
 });
-

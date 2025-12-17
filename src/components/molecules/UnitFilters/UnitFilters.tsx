@@ -1,4 +1,6 @@
-import { MenuItem, Box, InputAdornment } from '@mui/material';
+import Box from '@mui/material/Box';
+import InputAdornment from '@mui/material/InputAdornment';
+import MenuItem from '@mui/material/MenuItem';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { UnitRarity } from '../../../types';
 import type { UnitFilters as UnitFiltersType } from '../../../hooks/useManageUnits';
@@ -150,4 +152,3 @@ export default function UnitFilters({ filters, onFilterChange }: UnitFiltersProp
     </Box>
   );
 }
-
