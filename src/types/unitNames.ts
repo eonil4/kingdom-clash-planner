@@ -86,6 +86,7 @@ export const UnitDataMap: Record<string, UnitData> = {
   STONE_GOLEM: createUnitData('Stone Golem', 33, UnitRarityEnum.Legendary),
   STORM_MISTRESSES: createUnitData('Storm Mistresses', 34, UnitRarityEnum.Epic),
   UNDEAD_MAGE: createUnitData('Undead Mage', 35, UnitRarityEnum.Rare),
+  AXE_THROWERS: createUnitData('Axe Throwers', 36, UnitRarityEnum.Legendary),
 };
 
 /**
@@ -129,6 +130,7 @@ export const UnitName = {
   STONE_GOLEM: UnitDataMap.STONE_GOLEM.name,
   STORM_MISTRESSES: UnitDataMap.STORM_MISTRESSES.name,
   UNDEAD_MAGE: UnitDataMap.UNDEAD_MAGE.name,
+  AXE_THROWERS: UnitDataMap.AXE_THROWERS.name,
 } as const;
 
 export type UnitName = typeof UnitName[keyof typeof UnitName];

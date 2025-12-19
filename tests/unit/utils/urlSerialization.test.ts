@@ -215,7 +215,7 @@ describe('urlSerialization', () => {
     it('should respect maxRosterSize limit (1000)', () => {
       const entries: string[] = [];
       for (let i = 0; i < 2000; i++) {
-        const unitIndex = i % 36;
+        const unitIndex = i % 37;
         entries.push(`${unitIndex},5,1`);
       }
       const result = deserializeUnits(entries.join(';'));

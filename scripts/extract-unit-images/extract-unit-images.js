@@ -49,6 +49,9 @@ const units = [
   { name: 'air_elemental', src: 'screenshot3.jpg', left: 35, top: 1672, width: 320, height: 320 },
   { name: 'giant_toad', src: 'screenshot3.jpg', left: 380, top: 1672, width: 320, height: 320 },
   { name: 'phoenix', src: 'screenshot3.jpg', left: 725, top: 1672, width: 320, height: 320 },
+
+  // screenshot4.jpg
+  { name: 'axe_throwers', src: 'screenshot4.jpg', left: 35, top: 1386, width: 320, height: 320 },
 ];
 
 async function extractUnit(unit) {
@@ -78,4 +81,3 @@ async function extractUnit(unit) {
     }
   }
 })();
-
