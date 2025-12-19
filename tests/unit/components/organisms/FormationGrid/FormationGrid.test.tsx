@@ -87,7 +87,7 @@ describe('FormationGrid', () => {
     );
 
     const grid = screen.getByRole('grid');
-    expect(grid).toHaveAttribute('aria-label', 'Formation grid');
+    expect(grid).toHaveAttribute('aria-label', 'Formation grid. Drag units here to place them. Double-click to remove.');
   });
 
   it('should pass correct props to FormationTile', () => {
@@ -109,4 +109,3 @@ describe('FormationGrid', () => {
     expect(tile).toHaveAttribute('data-unit', 'TestUnit');
   });
 });
-

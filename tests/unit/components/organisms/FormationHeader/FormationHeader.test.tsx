@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { FormationHeader } from '../../../../../src/components/organisms';
+import FormationHeader from '../../../../../src/components/organisms/FormationHeader/FormationHeader';
 import unitReducer from '../../../../../src/store/reducers/unitSlice';
 import formationReducer from '../../../../../src/store/reducers/formationSlice';
 
@@ -60,6 +60,41 @@ describe('FormationHeader', () => {
     expect(screen.getByText('0')).toBeInTheDocument();
   });
 
+  it('should handle null currentFormation gracefully for unitsInFormation', () => {
+    const store = configureStore({
+      reducer: {
+        unit: unitReducer,
+        formation: formationReducer,
+      },
+      preloadedState: {
+        unit: {
+          units: [],
+          filteredUnits: [],
+          sortOption: 'level' as const,
+          sortOption2: null,
+          sortOption3: null,
+          searchTerm: '',
+        },
+        formation: {
+          currentFormation: null,
+        },
+      },
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: false,
+          immutableCheck: false,
+        }),
+    });
+
+    render(
+      <Provider store={store}>
+        <FormationHeader />
+      </Provider>
+    );
+
+    expect(screen.getByText('0')).toBeInTheDocument();
+  });
+
   it('should render formation name and power when currentFormation exists', () => {
     const mockFormation = {
       id: '1',
@@ -88,7 +123,7 @@ describe('FormationHeader', () => {
     );
     const header = container.querySelector('header');
 
-    expect(header).toHaveClass('w-full', 'p-4', 'bg-gray-800');
+    expect(header).toHaveClass('w-full', 'p-3', 'bg-gray-800');
   });
 
   it('should render power badge with correct styling', () => {
@@ -375,5 +410,271 @@ describe('FormationHeader', () => {
     );
 
     expect(screen.getByText('Formation')).toBeInTheDocument();
+  });
+
+  it('should render auto-fill button', () => {
+    const store = createMockStore(null);
+    render(
+      <Provider store={store}>
+        <FormationHeader />
+      </Provider>
+    );
+
+    const autoFillButton = screen.getByLabelText('Auto-fill formation with available units');
+    expect(autoFillButton).toBeInTheDocument();
+  });
+
+  it('should auto-fill empty tiles when auto-fill button is clicked', async () => {
+    const user = userEvent.setup();
+    const mockUnits = [
+      { id: '1', name: 'Unit1', level: 5, rarity: 'Common' as const, power: 100 },
+      { id: '2', name: 'Unit2', level: 3, rarity: 'Rare' as const, power: 200 },
+    ];
+    const mockFormation = {
+      id: '1',
+      name: 'Test Formation',
+      power: 0,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+
+    const store = configureStore({
+      reducer: {
+        unit: unitReducer,
+        formation: formationReducer,
+      },
+      preloadedState: {
+        unit: {
+          units: mockUnits,
+          filteredUnits: mockUnits,
+          sortOption: 'level' as const,
+          sortOption2: null,
+          sortOption3: null,
+          searchTerm: '',
+        },
+        formation: {
+          currentFormation: mockFormation,
+        },
+      },
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: false,
+          immutableCheck: false,
+        }),
+    });
+
+    render(
+      <Provider store={store}>
+        <FormationHeader />
+      </Provider>
+    );
+
+    const autoFillButton = screen.getByLabelText('Auto-fill formation with available units');
+    await user.click(autoFillButton);
+
+    const state = store.getState();
+    expect(state.formation.currentFormation?.tiles[0][0]).toEqual(mockUnits[0]);
+    expect(state.formation.currentFormation?.tiles[0][1]).toEqual(mockUnits[1]);
+  });
+
+  it('should not auto-fill when formation is full', () => {
+    const mockUnits = [
+      { id: 'new', name: 'NewUnit', level: 1, rarity: 'Common' as const, power: 50 },
+    ];
+    const existingUnit = { id: 'existing', name: 'Existing', level: 5, rarity: 'Rare' as const, power: 100 };
+    const mockFormation = {
+      id: '1',
+      name: 'Full Formation',
+      power: 4900,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(existingUnit)),
+    };
+
+    const store = configureStore({
+      reducer: {
+        unit: unitReducer,
+        formation: formationReducer,
+      },
+      preloadedState: {
+        unit: {
+          units: mockUnits,
+          filteredUnits: mockUnits,
+          sortOption: 'level' as const,
+          sortOption2: null,
+          sortOption3: null,
+          searchTerm: '',
+        },
+        formation: {
+          currentFormation: mockFormation,
+        },
+      },
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: false,
+          immutableCheck: false,
+        }),
+    });
+
+    render(
+      <Provider store={store}>
+        <FormationHeader />
+      </Provider>
+    );
+
+    const autoFillButton = screen.getByLabelText('Auto-fill formation with available units');
+    expect(autoFillButton).toBeDisabled();
+  });
+
+  it('should filter out units already in formation from available units for auto-fill', async () => {
+    const user = userEvent.setup();
+    const unitInFormation = { id: '1', name: 'Unit1', level: 5, rarity: 'Common' as const, power: 100 };
+    const availableUnit = { id: '2', name: 'Unit2', level: 3, rarity: 'Rare' as const, power: 200 };
+    const mockUnits = [unitInFormation, availableUnit];
+    const mockFormation = {
+      id: '1',
+      name: 'Test Formation',
+      power: 100,
+      tiles: [
+        [unitInFormation, ...Array(6).fill(null)],
+        ...Array(6).fill(null).map(() => Array(7).fill(null)),
+      ],
+    };
+
+    const store = configureStore({
+      reducer: {
+        unit: unitReducer,
+        formation: formationReducer,
+      },
+      preloadedState: {
+        unit: {
+          units: mockUnits,
+          filteredUnits: mockUnits,
+          sortOption: 'level' as const,
+          sortOption2: null,
+          sortOption3: null,
+          searchTerm: '',
+        },
+        formation: {
+          currentFormation: mockFormation,
+        },
+      },
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: false,
+          immutableCheck: false,
+        }),
+    });
+
+    render(
+      <Provider store={store}>
+        <FormationHeader />
+      </Provider>
+    );
+
+    const autoFillButton = screen.getByLabelText('Auto-fill formation with available units');
+    await user.click(autoFillButton);
+
+    const state = store.getState();
+    expect(state.formation.currentFormation?.tiles[0][1]).toEqual(availableUnit);
+  });
+
+  it('should not auto-fill when no available units', () => {
+    const unitInFormation = { id: '1', name: 'Unit1', level: 5, rarity: 'Common' as const, power: 100 };
+    const mockUnits = [unitInFormation];
+    const mockFormation = {
+      id: '1',
+      name: 'Test Formation',
+      power: 100,
+      tiles: [
+        [unitInFormation, ...Array(6).fill(null)],
+        ...Array(6).fill(null).map(() => Array(7).fill(null)),
+      ],
+    };
+
+    const store = configureStore({
+      reducer: {
+        unit: unitReducer,
+        formation: formationReducer,
+      },
+      preloadedState: {
+        unit: {
+          units: mockUnits,
+          filteredUnits: mockUnits,
+          sortOption: 'level' as const,
+          sortOption2: null,
+          sortOption3: null,
+          searchTerm: '',
+        },
+        formation: {
+          currentFormation: mockFormation,
+        },
+      },
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: false,
+          immutableCheck: false,
+        }),
+    });
+
+    render(
+      <Provider store={store}>
+        <FormationHeader />
+      </Provider>
+    );
+
+    const autoFillButton = screen.getByLabelText('Auto-fill formation with available units');
+    expect(autoFillButton).toBeDisabled();
+  });
+
+  it('should count empty tiles correctly with multiple units in formation', () => {
+    const unit1 = { id: '1', name: 'Unit1', level: 5, rarity: 'Common' as const, power: 100 };
+    const unit2 = { id: '2', name: 'Unit2', level: 3, rarity: 'Rare' as const, power: 200 };
+    const unit3 = { id: '3', name: 'Unit3', level: 7, rarity: 'Epic' as const, power: 500 };
+    const mockFormation = {
+      id: '1',
+      name: 'Test Formation',
+      power: 800,
+      tiles: [
+        [unit1, unit2, unit3, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+      ],
+    };
+
+    const store = configureStore({
+      reducer: {
+        unit: unitReducer,
+        formation: formationReducer,
+      },
+      preloadedState: {
+        unit: {
+          units: [],
+          filteredUnits: [],
+          sortOption: 'level' as const,
+          sortOption2: null,
+          sortOption3: null,
+          searchTerm: '',
+        },
+        formation: {
+          currentFormation: mockFormation,
+        },
+      },
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: false,
+          immutableCheck: false,
+        }),
+    });
+
+    render(
+      <Provider store={store}>
+        <FormationHeader />
+      </Provider>
+    );
+
+    const autoFillButton = screen.getByLabelText('Auto-fill formation with available units');
+    expect(autoFillButton).toBeDisabled();
   });
 });

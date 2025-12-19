@@ -15,6 +15,7 @@ interface FormationGridProps {
     sourceUnit: Unit,
     targetUnit: Unit
   ) => void;
+  onEditUnit?: (row: number, col: number, unit: Unit) => void;
 }
 
 function FormationGridComponent({
@@ -22,19 +23,18 @@ function FormationGridComponent({
   onPlaceUnit,
   onRemoveUnit,
   onSwapUnits,
+  onEditUnit,
 }: FormationGridProps) {
   return (
-    <div className="w-full p-4 bg-gray-700">
+    <div className="w-full bg-gray-700 rounded-lg shadow-lg">
       <Grid
         container
         spacing={0.5}
         sx={{
-          maxWidth: '672px',
-          margin: '0 auto',
           width: '100%',
         }}
         role="grid"
-        aria-label="Formation grid"
+        aria-label="Formation grid. Drag units here to place them. Double-click to remove."
       >
         {tiles.map((row, rowIndex) =>
           row.map((unit, colIndex) => (
@@ -47,6 +47,7 @@ function FormationGridComponent({
                   onPlaceUnit={onPlaceUnit}
                   onRemoveUnit={onRemoveUnit}
                   onSwapUnits={onSwapUnits}
+                  onEditUnit={onEditUnit}
                 />
               </div>
             </Grid>

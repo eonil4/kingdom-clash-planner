@@ -90,6 +90,15 @@ const formationSlice = createSlice({
         state.currentFormation.name = action.payload;
       }
     },
+    updateUnitInFormation: (
+      state,
+      action: PayloadAction<{ row: number; col: number; unit: Unit }>
+    ) => {
+      if (state.currentFormation) {
+        state.currentFormation.tiles[action.payload.row][action.payload.col] = action.payload.unit;
+        state.currentFormation.power = calculateFormationPower(state.currentFormation.tiles);
+      }
+    },
   },
 });
 
@@ -99,6 +108,7 @@ export const {
   removeUnit,
   swapUnits,
   updateFormationName,
+  updateUnitInFormation,
 } = formationSlice.actions;
 
 export default formationSlice.reducer;

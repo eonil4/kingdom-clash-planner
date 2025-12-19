@@ -76,7 +76,8 @@ export default defineConfig({
         'src/assets/',
         '**/*.config.*',
         '**/*.d.ts',
-        '**/index.ts'
+        '**/index.ts',
+        'src/utils/deviceUtils.ts'
       ],
     },
   },

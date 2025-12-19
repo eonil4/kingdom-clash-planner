@@ -3,7 +3,7 @@ import { useDrop } from 'react-dnd';
 import Box from '@mui/material/Box';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import { useAppSelector, useAppDispatch } from '../../../store/hooks';
-import { setSortOption, setSortOption2, setSortOption3, setSearchTerm } from '../../../store/reducers/unitSlice';
+import { setSortOption, setSortOption2, setSortOption3, setSearchTerm, updateUnit } from '../../../store/reducers/unitSlice';
 import { removeUnit as removeUnitFromFormation, placeUnit } from '../../../store/reducers/formationSlice';
 import { removeUnit } from '../../../store/reducers/formationSlice';
 import type { SortOption, Unit } from '../../../types';
@@ -102,18 +102,23 @@ export default function UnitList() {
     }
   }, [currentFormation, dispatch]);
 
+  const handleUnitEdit = useCallback((_originalUnit: Unit, updatedUnit: Unit) => {
+    dispatch(updateUnit(updatedUnit));
+  }, [dispatch]);
+
   return (
     <Box
       ref={drop as unknown as React.Ref<HTMLElement>}
       className={`
-          w-full bg-gray-800 p-2 sm:p-4
+          w-full bg-gray-800 px-2 pb-2 pt-0 sm:px-4 sm:pb-4 flex flex-col h-full min-h-0
           ${isOver ? 'bg-blue-900 bg-opacity-50' : ''}
           transition-colors
         `}
       component="section"
-      aria-label="Unit list"
+      aria-label="Unit roster. Double-click units to add to formation."
     >
-      <Box className="mb-4">
+      {/* Header with controls - stays fixed */}
+      <Box className="flex-shrink-0 mb-3">
         <Box className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
           <Box className="flex flex-wrap items-center gap-2">
             <SortControls
@@ -131,14 +136,52 @@ export default function UnitList() {
             onWithdrawAll={handleWithdrawAll}
           />
         </Box>
-        <Box className="mb-2">
-          <SearchInput onSearchChange={handleSearchChange} placeholder="Search units..." />
-        </Box>
+        <SearchInput onSearchChange={handleSearchChange} placeholder="Search units..." />
       </Box>
-      <AvailableUnitsGrid
-        units={availableUnits}
-        onUnitDoubleClick={handleUnitDoubleClick}
-      />
+      
+      {/* Scrollable unit grid area */}
+      <Box 
+        className="flex-1 overflow-auto min-h-0 rounded-lg"
+        sx={{
+          '&::-webkit-scrollbar': {
+            width: '8px',
+            height: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'rgba(255,255,255,0.05)',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgba(255,255,255,0.2)',
+            borderRadius: '4px',
+            '&:hover': {
+              background: 'rgba(255,255,255,0.3)',
+            },
+          },
+        }}
+      >
+        {availableUnits.length === 0 ? (
+          <Box className="flex flex-col items-center justify-center h-full min-h-32 text-gray-500">
+            <Box className="text-4xl mb-2">📦</Box>
+            <Box className="text-center">
+              No units available.<br />
+              <span className="text-sm">Add units via "Manage Units" or withdraw from formation.</span>
+            </Box>
+          </Box>
+        ) : (
+          <AvailableUnitsGrid
+            units={availableUnits}
+            onUnitDoubleClick={handleUnitDoubleClick}
+            onUnitEdit={handleUnitEdit}
+          />
+        )}
+      </Box>
+      
+      {/* Hint text */}
+      <Box className="flex-shrink-0 mt-2 text-xs text-gray-500 text-center">
+        💡 Double-click to add to formation • Drag to specific tile • Hover for actions
+      </Box>
+      
       {isManageUnitsOpen && (
         <Suspense fallback={null}>
           <ManageUnitsModal

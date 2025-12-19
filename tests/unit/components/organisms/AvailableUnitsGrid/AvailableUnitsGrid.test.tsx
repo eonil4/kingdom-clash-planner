@@ -6,7 +6,7 @@ import { UnitRarity } from '../../../../../src/types';
 import type { Unit } from '../../../../../src/types';
 
 vi.mock('../../../../../src/components/molecules', () => ({
-  UnitCard: ({ unit, onDoubleClick }: { unit: { id: string; name: string; level: number }; onDoubleClick?: () => void }) => (
+  UnitCard: ({ unit, onDoubleClick, onEdit }: { unit: { id: string; name: string; level: number; rarity?: string; power?: number }; onDoubleClick?: () => void; onEdit?: (updatedUnit: { id: string; name: string; level: number }) => void }) => (
     <div
       data-testid={`unit-card-${unit.id}`}
       onDoubleClick={onDoubleClick}
@@ -14,6 +14,14 @@ vi.mock('../../../../../src/components/molecules', () => ({
       tabIndex={0}
     >
       {unit.name} Lv{unit.level}
+      {onEdit && (
+        <button
+          data-testid={`edit-btn-${unit.id}`}
+          onClick={() => onEdit({ ...unit, level: unit.level + 1 })}
+        >
+          Edit
+        </button>
+      )}
     </div>
   ),
 }));
@@ -85,10 +93,10 @@ describe('AvailableUnitsGrid', () => {
     expect(screen.queryByTestId('unit-card-1')).not.toBeInTheDocument();
   });
 
-  it('should render with flex wrap layout', () => {
+  it('should render with grid layout', () => {
     const { container } = render(<AvailableUnitsGrid units={mockUnits} onUnitDoubleClick={mockOnUnitDoubleClick} />);
 
-    const grid = container.querySelector('.flex.flex-wrap.gap-2');
+    const grid = container.querySelector('.grid');
     expect(grid).toBeInTheDocument();
   });
 
@@ -113,5 +121,22 @@ describe('AvailableUnitsGrid', () => {
 
     expect(screen.getByTestId('unit-card-1')).toBeInTheDocument();
     expect(screen.getByTestId('unit-card-50')).toBeInTheDocument();
+  });
+
+  it('should call onUnitEdit when unit is edited', async () => {
+    const user = userEvent.setup();
+    const mockOnUnitEdit = vi.fn();
+    render(
+      <AvailableUnitsGrid
+        units={mockUnits}
+        onUnitDoubleClick={mockOnUnitDoubleClick}
+        onUnitEdit={mockOnUnitEdit}
+      />
+    );
+
+    const editButton = screen.getByTestId('edit-btn-1');
+    await user.click(editButton);
+
+    expect(mockOnUnitEdit).toHaveBeenCalledWith(mockUnits[0], expect.objectContaining({ level: 6 }));
   });
 });

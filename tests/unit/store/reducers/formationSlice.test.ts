@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import formationReducer, { setCurrentFormation, placeUnit, removeUnit, swapUnits, updateFormationName } from '../../../../src/store/reducers/formationSlice';
+import formationReducer, { setCurrentFormation, placeUnit, removeUnit, swapUnits, updateFormationName, updateUnitInFormation } from '../../../../src/store/reducers/formationSlice';
 import type { Formation, Unit } from '../../../../src/types';
 import { UnitRarity } from '../../../../src/types';
 
@@ -284,5 +284,80 @@ describe('formationSlice', () => {
       expect(state.currentFormation).toBeNull();
     });
   });
-});
 
+  describe('updateUnitInFormation', () => {
+    it('should update unit at specified position', () => {
+      const stateWithUnit = formationReducer(
+        initialState,
+        placeUnit({ row: 0, col: 0, unit: mockUnit })
+      );
+      
+      const updatedUnit: Unit = {
+        ...mockUnit,
+        level: 10,
+        power: 5000,
+      };
+      
+      const state = formationReducer(
+        stateWithUnit,
+        updateUnitInFormation({ row: 0, col: 0, unit: updatedUnit })
+      );
+      
+      expect(state.currentFormation?.tiles[0][0]).toEqual(updatedUnit);
+      expect(state.currentFormation?.power).toBe(5000);
+    });
+
+    it('should update formation power when unit is updated', () => {
+      const unit1: Unit = {
+        id: 'unit-1',
+        name: 'Archers',
+        level: 5,
+        rarity: UnitRarity.Common,
+        power: 1000,
+      };
+      const unit2: Unit = {
+        id: 'unit-2',
+        name: 'Paladin',
+        level: 10,
+        rarity: UnitRarity.Epic,
+        power: 2000,
+      };
+      
+      const stateWithUnits = formationReducer(
+        initialState,
+        placeUnit({ row: 0, col: 0, unit: unit1 })
+      );
+      const stateWithBothUnits = formationReducer(
+        stateWithUnits,
+        placeUnit({ row: 1, col: 1, unit: unit2 })
+      );
+      
+      const updatedUnit1: Unit = {
+        ...unit1,
+        power: 3000,
+      };
+      
+      const state = formationReducer(
+        stateWithBothUnits,
+        updateUnitInFormation({ row: 0, col: 0, unit: updatedUnit1 })
+      );
+      
+      expect(state.currentFormation?.power).toBe(3000 + 2000);
+    });
+
+    it('should handle null currentFormation', () => {
+      const nullState = { currentFormation: null };
+      const updatedUnit: Unit = {
+        ...mockUnit,
+        level: 10,
+      };
+      
+      const state = formationReducer(
+        nullState,
+        updateUnitInFormation({ row: 0, col: 0, unit: updatedUnit })
+      );
+      
+      expect(state.currentFormation).toBeNull();
+    });
+  });
+});

@@ -21,7 +21,7 @@ export default function SortControls({
   onSecondaryChange,
   onTertiaryChange,
 }: SortControlsProps) {
-  const availableOptions: SortOption[] = ['level', 'rarity', 'name'];
+  const availableOptions: SortOption[] = ['rarity', 'level', 'name'];
   
   const getAvailableSecondaryOptions = () => {
     return availableOptions.filter((option) => option !== primarySort);
@@ -33,10 +33,10 @@ export default function SortControls({
 
   const getOptionLabel = (option: SortOption): string => {
     switch (option) {
-      case 'level':
-        return 'By Level';
       case 'rarity':
         return 'By Rarity';
+      case 'level':
+        return 'By Level';
       case 'name':
         return 'By Name';
     }

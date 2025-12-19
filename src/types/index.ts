@@ -29,5 +29,4 @@ export interface Formation {
   power: number;
 }
 
-export type SortOption = 'level' | 'rarity' | 'name';
-
+export type SortOption = 'rarity' | 'level' | 'name';

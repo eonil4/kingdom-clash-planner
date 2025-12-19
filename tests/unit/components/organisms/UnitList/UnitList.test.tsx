@@ -125,16 +125,29 @@ vi.mock('../../../../../src/components/atoms', async (importOriginal) => {
 });
 
 const mockAvailableUnitsGrid = vi.hoisted(() => {
-  const UnitCardMock = ({ unit, onDoubleClick }: { unit: { id: string; name: string; level: number }; onDoubleClick?: () => void }) => (
+  const UnitCardMock = ({ unit, onDoubleClick, onEdit }: { unit: { id: string; name: string; level: number; rarity?: string; power?: number }; onDoubleClick?: () => void; onEdit?: (updatedUnit: { id: string; name: string; level: number }) => void }) => (
     <div data-testid={`unit-card-${unit.id}`} onDoubleClick={onDoubleClick} role="button" tabIndex={0}>
       {unit.name} - Level {unit.level}
+      {onEdit && (
+        <button
+          data-testid={`edit-unit-${unit.id}`}
+          onClick={() => onEdit({ ...unit, level: unit.level + 1 })}
+        >
+          Edit
+        </button>
+      )}
     </div>
   );
   
-  return vi.fn(({ units, onUnitDoubleClick }: { units: { id: string; name: string; level: number }[]; onUnitDoubleClick: (unit: { id: string; name: string; level: number }) => void }) => (
+  return vi.fn(({ units, onUnitDoubleClick, onUnitEdit }: { units: { id: string; name: string; level: number; rarity?: string; power?: number }[]; onUnitDoubleClick: (unit: { id: string; name: string; level: number }) => void; onUnitEdit?: (originalUnit: { id: string; name: string; level: number }, updatedUnit: { id: string; name: string; level: number }) => void }) => (
     <div data-testid="available-units-grid">
       {units.map((unit) => (
-        <UnitCardMock key={unit.id} unit={unit} onDoubleClick={() => onUnitDoubleClick(unit)} />
+        <UnitCardMock
+          key={unit.id}
+          unit={unit}
+          onDoubleClick={() => onUnitDoubleClick(unit)}
+          onEdit={onUnitEdit ? (updatedUnit) => onUnitEdit(unit, updatedUnit) : undefined}
+        />
       ))}
     </div>
   ));
@@ -754,5 +767,24 @@ describe('UnitList', () => {
       const resultFalse = capturedCollectFn({ isOver: () => false });
       expect(resultFalse).toEqual({ isOver: false });
     }
+  });
+
+  it('should handle unit edit - update unit in roster', async () => {
+    const user = userEvent.setup();
+    const store = createMockStore(mockUnits);
+    render(
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <UnitList />
+        </Provider>
+      </DndProvider>
+    );
+
+    const editButton = screen.getByTestId('edit-unit-1');
+    await user.click(editButton);
+
+    const state = store.getState();
+    const updatedUnit = state.unit.units.find((u: { id: string }) => u.id === '1');
+    expect(updatedUnit?.level).toBe(2);
   });
 });

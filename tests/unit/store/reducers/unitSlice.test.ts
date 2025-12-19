@@ -51,8 +51,8 @@ describe('unitSlice', () => {
     it('should return initial state', () => {
       const state = unitReducer(undefined, { type: 'unknown' });
       expect(state.units).toEqual([]);
-      expect(state.sortOption).toBe('level');
-      expect(state.sortOption2).toBe('rarity');
+      expect(state.sortOption).toBe('rarity');
+      expect(state.sortOption2).toBe('level');
       expect(state.sortOption3).toBe('name');
       expect(state.filteredUnits).toEqual([]);
       expect(state.searchTerm).toBe('');
@@ -346,4 +346,3 @@ describe('unitSlice', () => {
     });
   });
 });
-

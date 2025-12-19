@@ -48,9 +48,17 @@ vi.mock('react-dnd', async (importOriginal) => {
   };
 });
 
-const mockUnitCard = vi.hoisted(() => ({ unit, onDoubleClick }: { unit: { name: string; level: number }; onDoubleClick?: () => void }) => (
+const mockUnitCard = vi.hoisted(() => ({ unit, onDoubleClick, onEdit }: { unit: { name: string; level: number; id?: string; rarity?: string; power?: number }; onDoubleClick?: () => void; onEdit?: (updatedUnit: { name: string; level: number; id?: string; rarity?: string; power?: number }) => void }) => (
   <div data-testid="unit-card" onDoubleClick={onDoubleClick} role="button" tabIndex={0}>
     {unit.name} - Level {unit.level}
+    {onEdit && (
+      <button
+        data-testid="edit-unit-btn"
+        onClick={() => onEdit({ ...unit, level: unit.level + 1 })}
+      >
+        Edit
+      </button>
+    )}
   </div>
 ));
 
@@ -110,7 +118,7 @@ describe('FormationTile', () => {
 
     const tile = screen.getByRole('gridcell');
     expect(tile).toBeInTheDocument();
-    expect(tile).toHaveAttribute('aria-label', 'Empty tile at row 1 column 1');
+    expect(tile).toHaveAttribute('aria-label', 'Empty tile at row 1 column 1. Drag a unit here to place it.');
   });
 
   it('should render UnitCard when unit exists', () => {
@@ -175,7 +183,7 @@ describe('FormationTile', () => {
       />
     );
 
-    expect(screen.getByRole('gridcell')).toHaveAttribute('aria-label', 'Empty tile at row 1 column 1');
+    expect(screen.getByRole('gridcell')).toHaveAttribute('aria-label', 'Empty tile at row 1 column 1. Drag a unit here to place it.');
 
     rerender(
       <DndProvider backend={HTML5Backend}>
@@ -189,7 +197,7 @@ describe('FormationTile', () => {
       </DndProvider>
     );
 
-    expect(screen.getByRole('gridcell')).toHaveAttribute('aria-label', 'Empty tile at row 7 column 7');
+    expect(screen.getByRole('gridcell')).toHaveAttribute('aria-label', 'Empty tile at row 7 column 7. Drag a unit here to place it.');
   });
 
   it('should apply isOver styling when dragging over', () => {
@@ -419,5 +427,44 @@ describe('FormationTile', () => {
       const resultFalse = capturedCollectFn({ isOver: () => false });
       expect(resultFalse).toEqual({ isOver: false });
     }
+  });
+
+  it('should call onEditUnit when unit is edited', async () => {
+    const user = userEvent.setup();
+    const mockOnEditUnit = vi.fn();
+    renderWithDndProvider(
+      <FormationTile
+        row={2}
+        col={3}
+        unit={mockUnit}
+        onPlaceUnit={mockOnPlaceUnit}
+        onRemoveUnit={mockOnRemoveUnit}
+        onEditUnit={mockOnEditUnit}
+      />
+    );
+
+    const editButton = screen.getByTestId('edit-unit-btn');
+    await user.click(editButton);
+
+    expect(mockOnEditUnit).toHaveBeenCalledWith(2, 3, expect.objectContaining({ level: 6 }));
+  });
+
+  it('should handle mouse leave event on empty tile', async () => {
+    const user = userEvent.setup();
+    renderWithDndProvider(
+      <FormationTile
+        row={0}
+        col={0}
+        unit={null}
+        onPlaceUnit={mockOnPlaceUnit}
+        onRemoveUnit={mockOnRemoveUnit}
+      />
+    );
+
+    const tile = screen.getByRole('gridcell');
+    await user.hover(tile);
+    await user.unhover(tile);
+
+    expect(tile).toBeInTheDocument();
   });
 });

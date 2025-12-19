@@ -16,8 +16,8 @@ interface UnitState {
 
 const initialState: UnitState = {
   units: [],
-  sortOption: 'level',
-  sortOption2: 'rarity',
+  sortOption: 'rarity',
+  sortOption2: 'level',
   sortOption3: 'name',
   filteredUnits: [],
   searchTerm: '',
@@ -226,5 +226,3 @@ export const {
 } = unitSlice.actions;
 
 export default unitSlice.reducer;
-
-

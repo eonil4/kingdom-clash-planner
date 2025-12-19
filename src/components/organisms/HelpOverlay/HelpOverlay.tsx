@@ -78,16 +78,19 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
                 • A 7x7 grid where you can place units to create your formation.
               </Typography>
               <Typography variant="body2" className="mb-1">
-                • <strong>Place Units:</strong> Drag units from the available units list or double-click to place them in the first empty tile.
+                • <strong>Resize Grid:</strong> Use the zoom slider to adjust the grid size (10-100%).
               </Typography>
               <Typography variant="body2" className="mb-1">
-                • <strong>Remove Units:</strong> Double-click a unit in the grid or drag it back to the available units area.
+                • <strong>Place Units:</strong> Drag units from the roster or double-click to auto-place.
               </Typography>
               <Typography variant="body2" className="mb-1">
-                • <strong>Swap Units:</strong> Drag a unit from one position in the formation onto another unit in the formation to swap their positions.
+                • <strong>Remove Units:</strong> Hover and click the red button, double-click, or drag back to roster.
               </Typography>
               <Typography variant="body2" className="mb-1">
-                • <strong>Replace Units:</strong> Drag a unit from the available units list onto an occupied tile in the formation to replace it. The replaced unit will be moved back to available units.
+                • <strong>Swap Units:</strong> Drag a unit onto another unit in the formation to swap positions.
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Replace Units:</strong> Drag a roster unit onto an occupied tile to replace it.
               </Typography>
             </Box>
 
@@ -130,6 +133,9 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
               <Typography variant="body2" className="mb-1">
                 • <strong>Double-Click:</strong> Double-click a unit in the available units list to place it in the first empty tile.
               </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Auto-Fill:</strong> Click the <span className="text-green-400">✨</span> button in the header to fill all empty tiles with roster units.
+              </Typography>
             </Box>
 
             <Box className="mb-4">
@@ -137,10 +143,16 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
                 Removing Units from Formation
               </Typography>
               <Typography variant="body2" className="mb-1">
+                • <strong>Hover + Click:</strong> Hover over a unit in the formation to reveal action buttons. Click the red <span className="text-red-400">⊖</span> button to remove.
+              </Typography>
+              <Typography variant="body2" className="mb-1">
                 • <strong>Double-Click:</strong> Double-click a unit in the formation grid to remove it.
               </Typography>
               <Typography variant="body2" className="mb-1">
-                • <strong>Drag Back:</strong> Drag a unit from the formation grid back to the available units area.
+                • <strong>Drag Back:</strong> Drag a unit from the formation grid back to the roster area.
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Withdraw All:</strong> Click "Withdraw All" in the roster panel to remove all units from the formation.
               </Typography>
             </Box>
 
@@ -194,7 +206,13 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
                 Unit Information
               </Typography>
               <Typography variant="body2" className="mb-1">
-                • <strong>Unit Card:</strong> Click on a unit card to see detailed information (name, level, rarity, power).
+                • <strong>Hover Actions:</strong> Hover over any unit to reveal action buttons (edit, remove, drag indicator).
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Edit Unit:</strong> Click the yellow <span className="text-yellow-400">✏️</span> edit button to change the unit's type and level.
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Info Tooltip:</strong> Click the card to see unit details (name, level, rarity, power).
               </Typography>
               <Typography variant="body2" className="mb-1">
                 • <strong>Rarity Colors:</strong> Units are color-coded by rarity (Common: Gray, Rare: Blue, Epic: Purple, Legendary: Yellow).

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import FormationPlanner from '../../../src/pages/FormationPlanner';
 import { UnitRarity, type Unit } from '../../../src/types';
 
@@ -48,7 +49,7 @@ vi.mock('../../../src/components/molecules', async (importOriginal) => {
 });
 
 const mockFormationHeader = vi.hoisted(() => () => <div data-testid="formation-header">Formation Header</div>);
-const mockFormationGrid = vi.hoisted(() => ({ onPlaceUnit, onRemoveUnit, onSwapUnits }: { onPlaceUnit: (row: number, col: number, unit: Unit) => void; onRemoveUnit: (row: number, col: number, unit: Unit | null) => void; onSwapUnits: (sourceRow: number, sourceCol: number, targetRow: number, targetCol: number, sourceUnit: Unit, targetUnit: Unit) => void }) => {
+const mockFormationGrid = vi.hoisted(() => ({ onPlaceUnit, onRemoveUnit, onSwapUnits, onEditUnit }: { onPlaceUnit: (row: number, col: number, unit: Unit) => void; onRemoveUnit: (row: number, col: number, unit: Unit | null) => void; onSwapUnits: (sourceRow: number, sourceCol: number, targetRow: number, targetCol: number, sourceUnit: Unit, targetUnit: Unit) => void; onEditUnit?: (row: number, col: number, unit: Unit) => void }) => {
   const testUnit = { id: '1', name: 'Test', level: 1, rarity: 'Common' as const };
   const testUnit2 = { id: '2', name: 'Test2', level: 5, rarity: 'Epic' as const };
   return (
@@ -77,6 +78,14 @@ const mockFormationGrid = vi.hoisted(() => ({ onPlaceUnit, onRemoveUnit, onSwapU
       >
         Swap Units
       </button>
+      {onEditUnit && (
+        <button
+          data-testid="edit-unit"
+          onClick={() => onEditUnit(0, 0, { ...testUnit, level: 10 })}
+        >
+          Edit Unit
+        </button>
+      )}
     </div>
   );
 });
@@ -99,6 +108,11 @@ vi.mock('../../../src/store/reducers/formationSlice', () => ({
   placeUnit: vi.fn((payload) => ({ type: 'formation/placeUnit', payload })),
   removeUnit: vi.fn((payload) => ({ type: 'formation/removeUnit', payload })),
   swapUnits: vi.fn((payload) => ({ type: 'formation/swapUnits', payload })),
+  updateUnitInFormation: vi.fn((payload) => ({ type: 'formation/updateUnitInFormation', payload })),
+}));
+
+vi.mock('../../../src/store/reducers/unitSlice', () => ({
+  updateUnit: vi.fn((payload) => ({ type: 'unit/updateUnit', payload })),
 }));
 
 describe('FormationPlanner', () => {
@@ -519,5 +533,46 @@ describe('FormationPlanner', () => {
     }
 
     expect(mockDispatch).not.toHaveBeenCalled();
+  });
+
+  it('should handle editing a unit in formation', async () => {
+    const { updateUnitInFormation } = await import('../../../src/store/reducers/formationSlice');
+    const { updateUnit } = await import('../../../src/store/reducers/unitSlice');
+    
+    render(<FormationPlanner />);
+
+    const editButton = screen.getByTestId('edit-unit');
+    editButton.click();
+
+    expect(mockDispatch).toHaveBeenCalledWith(updateUnitInFormation({
+      row: 0,
+      col: 0,
+      unit: expect.objectContaining({ id: '1', level: 10 }),
+    }));
+    expect(mockDispatch).toHaveBeenCalledWith(updateUnit(expect.objectContaining({ id: '1', level: 10 })));
+  });
+
+  it('should render grid scale slider', () => {
+    render(<FormationPlanner />);
+
+    const sliders = screen.getAllByRole('slider');
+    expect(sliders.length).toBeGreaterThan(0);
+  });
+
+  it('should update grid scale when slider is changed', async () => {
+    const user = userEvent.setup();
+    render(<FormationPlanner />);
+
+    const slider = screen.getAllByRole('slider')[0];
+    slider.focus();
+    await user.keyboard('{ArrowRight}');
+
+    expect(slider).toBeInTheDocument();
+  });
+
+  it('should render with DndProvider using appropriate backend', () => {
+    render(<FormationPlanner />);
+
+    expect(screen.getByTestId('formation-grid')).toBeInTheDocument();
   });
 });

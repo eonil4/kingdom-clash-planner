@@ -107,7 +107,7 @@ describe('UnitCard', () => {
     const user = userEvent.setup();
     render(<UnitCard unit={mockUnit} />);
 
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /TestUnit/i });
     await user.click(card);
 
     expect(card).toBeInTheDocument();
@@ -117,7 +117,7 @@ describe('UnitCard', () => {
     const user = userEvent.setup();
     render(<UnitCard unit={mockUnit} />);
 
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /TestUnit/i });
     await user.click(card);
 
     await waitFor(() => {
@@ -134,7 +134,7 @@ describe('UnitCard', () => {
     const mockOnDoubleClick = vi.fn();
     render(<UnitCard unit={mockUnit} onDoubleClick={mockOnDoubleClick} />);
 
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /TestUnit/i });
     await user.dblClick(card);
 
     expect(mockOnDoubleClick).toHaveBeenCalledTimes(1);
@@ -199,7 +199,8 @@ describe('UnitCard', () => {
   it('should have correct aria-label', () => {
     render(<UnitCard unit={mockUnit} />);
 
-    const card = screen.getByLabelText('5 TestUnit');
+    // aria-label now includes additional context for accessibility
+    const card = screen.getByLabelText(/5 TestUnit\. Double-click to add to formation/i);
     expect(card).toBeInTheDocument();
   });
 
@@ -234,7 +235,7 @@ describe('UnitCard', () => {
     const user = userEvent.setup();
     render(<UnitCard unit={mockUnit} />);
 
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /TestUnit/i });
     await user.click(card);
 
     expect(card).toBeInTheDocument();
@@ -248,7 +249,7 @@ describe('UnitCard', () => {
     const user = userEvent.setup();
     render(<UnitCard unit={mockUnit} />);
 
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /TestUnit/i });
     await user.click(card);
 
     await user.click(card);
@@ -282,7 +283,7 @@ describe('UnitCard', () => {
     const user = userEvent.setup();
     render(<UnitCard unit={mockUnit} />);
     
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /TestUnit/i });
     card.focus();
     
     await user.keyboard('{Enter}');
@@ -294,7 +295,7 @@ describe('UnitCard', () => {
     const user = userEvent.setup();
     render(<UnitCard unit={mockUnit} />);
     
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /TestUnit/i });
     card.focus();
     
     await user.keyboard(' ');
@@ -306,7 +307,7 @@ describe('UnitCard', () => {
     const user = userEvent.setup();
     render(<UnitCard unit={mockUnit} />);
     
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /TestUnit/i });
     await user.click(card);
     
     await waitFor(() => {
@@ -369,7 +370,7 @@ describe('UnitCard', () => {
     const user = userEvent.setup();
     render(<UnitCard unit={mockUnit} />);
     
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /TestUnit/i });
     await user.click(card);
     
     expect(card).toBeInTheDocument();
@@ -384,7 +385,7 @@ describe('UnitCard', () => {
     const user = userEvent.setup();
     render(<UnitCard unit={mockUnit} />);
     
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /TestUnit/i });
     card.focus();
     
     await user.keyboard('{Enter}');
@@ -397,7 +398,7 @@ describe('UnitCard', () => {
     const mockOnDoubleClick = vi.fn();
     render(<UnitCard unit={mockUnit} onDoubleClick={mockOnDoubleClick} />);
     
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /TestUnit/i });
     await user.click(card);
     
     await waitFor(() => {
@@ -447,7 +448,8 @@ describe('UnitCard', () => {
     const user = userEvent.setup();
     render(<UnitCard unit={mockUnit} />);
     
-    const card = screen.getByRole('button');
+    // Get the main card button by its aria-label (there are now multiple buttons due to hover overlay)
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
     await user.click(card);
     
     await waitFor(() => {
@@ -467,7 +469,8 @@ describe('UnitCard', () => {
     const user = userEvent.setup();
     render(<UnitCard unit={mockUnit} />);
     
-    const card = screen.getByRole('button');
+    // Get the main card button by its aria-label (there are now multiple buttons due to hover overlay)
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
     await user.dblClick(card);
     
     expect(card).toBeInTheDocument();
@@ -478,7 +481,8 @@ describe('UnitCard', () => {
     const unitWithoutPower = { ...mockUnit, power: undefined };
     render(<UnitCard unit={unitWithoutPower} />);
     
-    const card = screen.getByRole('button');
+    // Get the main card button by its aria-label (there are now multiple buttons due to hover overlay)
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
     await user.click(card);
     
     await waitFor(() => {
@@ -488,4 +492,255 @@ describe('UnitCard', () => {
       expect(tooltip?.textContent).toContain('0');
     });
   });
+
+  it('should show remove button on hover when isInFormation', async () => {
+    const user = userEvent.setup();
+    const mockOnDoubleClick = vi.fn();
+    render(<UnitCard unit={mockUnit} isInFormation onDoubleClick={mockOnDoubleClick} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const removeButton = await screen.findByLabelText('Remove from formation');
+    expect(removeButton).toBeInTheDocument();
+  });
+
+  it('should call onDoubleClick when remove button is clicked', async () => {
+    const user = userEvent.setup();
+    const mockOnDoubleClick = vi.fn();
+    render(<UnitCard unit={mockUnit} isInFormation onDoubleClick={mockOnDoubleClick} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const removeButton = await screen.findByLabelText('Remove from formation');
+    await user.click(removeButton);
+    
+    expect(mockOnDoubleClick).toHaveBeenCalled();
+  });
+
+  it('should show edit button on hover when onEdit is provided', async () => {
+    const user = userEvent.setup();
+    const mockOnEdit = vi.fn();
+    render(<UnitCard unit={mockUnit} isInFormation onEdit={mockOnEdit} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const editButton = await screen.findByLabelText('Edit unit');
+    expect(editButton).toBeInTheDocument();
+  });
+
+  it('should open edit popover when edit button is clicked', async () => {
+    const user = userEvent.setup();
+    const mockOnEdit = vi.fn();
+    render(<UnitCard unit={mockUnit} isInFormation onEdit={mockOnEdit} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const editButton = await screen.findByLabelText('Edit unit');
+    await user.click(editButton);
+    
+    expect(await screen.findByText('Edit Unit')).toBeInTheDocument();
+  });
+
+  it('should close edit popover when cancel is clicked', async () => {
+    const user = userEvent.setup();
+    const mockOnEdit = vi.fn();
+    render(<UnitCard unit={mockUnit} isInFormation onEdit={mockOnEdit} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const editButton = await screen.findByLabelText('Edit unit');
+    await user.click(editButton);
+    
+    expect(await screen.findByText('Edit Unit')).toBeInTheDocument();
+    
+    const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+    await user.click(cancelButton);
+    
+    await waitFor(() => {
+      expect(screen.queryByText('Edit Unit')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should call onEdit with updated unit when save is clicked', async () => {
+    const user = userEvent.setup();
+    const mockOnEdit = vi.fn();
+    render(<UnitCard unit={mockUnit} isInFormation onEdit={mockOnEdit} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const editButton = await screen.findByLabelText('Edit unit');
+    await user.click(editButton);
+    
+    expect(await screen.findByText('Edit Unit')).toBeInTheDocument();
+    
+    const saveButton = screen.getByRole('button', { name: 'Save' });
+    await user.click(saveButton);
+    
+    expect(mockOnEdit).toHaveBeenCalledWith(expect.objectContaining({
+      name: mockUnit.name,
+      level: mockUnit.level,
+    }));
+  });
+
+  it('should show drag icon when not in formation', async () => {
+    const user = userEvent.setup();
+    render(<UnitCard unit={mockUnit} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const dragIcon = await screen.findByLabelText('Drag to place in formation');
+    expect(dragIcon).toBeInTheDocument();
+  });
+
+  it('should show edit button for non-formation card when onEdit is provided', async () => {
+    const user = userEvent.setup();
+    const mockOnEdit = vi.fn();
+    render(<UnitCard unit={mockUnit} onEdit={mockOnEdit} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const editButton = await screen.findByLabelText('Edit unit');
+    expect(editButton).toBeInTheDocument();
+  });
+
+  it('should hide level badge when showLevelBadge is false', () => {
+    render(<UnitCard unit={mockUnit} showLevelBadge={false} />);
+    
+    expect(screen.queryByText('5')).not.toBeInTheDocument();
+  });
+
+  it('should update edit name when unit type is changed in edit popover', async () => {
+    const user = userEvent.setup();
+    const mockOnEdit = vi.fn();
+    render(<UnitCard unit={mockUnit} isInFormation onEdit={mockOnEdit} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const editButton = await screen.findByLabelText('Edit unit');
+    await user.click(editButton);
+    
+    expect(await screen.findByText('Edit Unit')).toBeInTheDocument();
+    
+    const unitTypeSelect = screen.getByRole('combobox');
+    await user.click(unitTypeSelect);
+    
+    const option = await screen.findByRole('option', { name: 'Archers' });
+    await user.click(option);
+    
+    const saveButton = screen.getByRole('button', { name: 'Save' });
+    await user.click(saveButton);
+    
+    expect(mockOnEdit).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Archers',
+    }));
+  });
+
+  it('should update edit level when slider is changed in edit popover', async () => {
+    const user = userEvent.setup();
+    const mockOnEdit = vi.fn();
+    render(<UnitCard unit={mockUnit} isInFormation onEdit={mockOnEdit} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const editButton = await screen.findByLabelText('Edit unit');
+    await user.click(editButton);
+    
+    expect(await screen.findByText('Edit Unit')).toBeInTheDocument();
+    
+    const slider = screen.getByRole('slider');
+    
+    await act(async () => {
+      slider.focus();
+      await user.keyboard('{ArrowRight}');
+    });
+    
+    const saveButton = screen.getByRole('button', { name: 'Save' });
+    await user.click(saveButton);
+    
+    expect(mockOnEdit).toHaveBeenCalledWith(expect.objectContaining({
+      level: 6,
+    }));
+  });
+
+  it('should handle remove button click when onDoubleClick is not provided', async () => {
+    const user = userEvent.setup();
+    render(<UnitCard unit={mockUnit} isInFormation />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const removeButton = await screen.findByLabelText('Remove from formation');
+    await user.click(removeButton);
+    
+    expect(card).toBeInTheDocument();
+  });
+
+  it('should render correct icon sizes when not in formation with hover', async () => {
+    const user = userEvent.setup();
+    const mockOnEdit = vi.fn();
+    render(<UnitCard unit={mockUnit} isInFormation={false} onEdit={mockOnEdit} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const dragIcon = await screen.findByLabelText('Drag to place in formation');
+    expect(dragIcon).toBeInTheDocument();
+    
+    const editButton = await screen.findByLabelText('Edit unit');
+    expect(editButton).toBeInTheDocument();
+  });
+
+  it('should not toggle tooltip when clicking while dragging', async () => {
+    mockUseDrag.mockReturnValue([
+      { isDragging: true },
+      vi.fn(),
+    ]);
+    
+    const user = userEvent.setup();
+    render(<UnitCard unit={mockUnit} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.click(card);
+    
+    const tooltip = document.body.querySelector('[role="tooltip"]');
+    expect(tooltip).not.toBeInTheDocument();
+  });
+
+  it('should render icons with 18px font size when not in formation', async () => {
+    const user = userEvent.setup();
+    render(<UnitCard unit={mockUnit} isInFormation={false} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const dragIcon = await screen.findByLabelText('Drag to place in formation');
+    expect(dragIcon).toBeInTheDocument();
+    
+    expect(dragIcon.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('should render icons with clamp font size when in formation', async () => {
+    const user = userEvent.setup();
+    const mockOnDoubleClick = vi.fn();
+    render(<UnitCard unit={mockUnit} isInFormation onDoubleClick={mockOnDoubleClick} />);
+    
+    const card = screen.getByRole('button', { name: /5 TestUnit/i });
+    await user.hover(card);
+    
+    const removeIcon = await screen.findByLabelText('Remove from formation');
+    expect(removeIcon).toBeInTheDocument();
+    
+    expect(removeIcon.querySelector('svg')).toBeInTheDocument();
+  });
+
 });

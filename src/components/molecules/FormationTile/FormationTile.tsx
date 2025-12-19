@@ -1,5 +1,6 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { useDrop } from 'react-dnd';
+import AddIcon from '@mui/icons-material/Add';
 import type { Unit } from '../../../types';
 import { UnitCard } from '../UnitCard';
 
@@ -17,6 +18,7 @@ interface FormationTileProps {
     sourceUnit: Unit,
     targetUnit: Unit
   ) => void;
+  onEditUnit?: (row: number, col: number, unit: Unit) => void;
 }
 
 function FormationTileComponent({
@@ -26,7 +28,14 @@ function FormationTileComponent({
   onPlaceUnit,
   onRemoveUnit,
   onSwapUnits,
+  onEditUnit,
 }: FormationTileProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  const handleEditUnit = useCallback((updatedUnit: Unit) => {
+    onEditUnit?.(row, col, updatedUnit);
+  }, [onEditUnit, row, col]);
+  
   const [{ isOver }, drop] = useDrop({
     accept: 'unit',
     drop: (item: { unit: Unit; isInFormation?: boolean; sourceRow?: number; sourceCol?: number }) => {
@@ -63,20 +72,27 @@ function FormationTileComponent({
   }, [onRemoveUnit, row, col, unit]);
 
   const ariaLabel = unit
-    ? `${unit.level} ${unit.name} at row ${row + 1} column ${col + 1}`
-    : `Empty tile at row ${row + 1} column ${col + 1}`;
+    ? `${unit.level} ${unit.name} at row ${row + 1} column ${col + 1}. Double-click or hover and click remove to withdraw.`
+    : `Empty tile at row ${row + 1} column ${col + 1}. Drag a unit here to place it.`;
 
   return (
     <div
       ref={drop as unknown as React.Ref<HTMLDivElement>}
       className={`
-        w-full h-full border border-gray-500 rounded-sm
+        w-full h-full border rounded-sm
         flex items-center justify-center
-        ${isOver ? 'bg-blue-500 bg-opacity-30 border-blue-400' : 'bg-gray-800'}
-        focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-offset-1 focus-within:ring-offset-gray-900
+        transition-all duration-150
+        ${isOver ? 'bg-blue-500/40 border-blue-400 border-2 scale-105' : ''}
+        ${!unit && isHovered && !isOver ? 'bg-gray-700 border-gray-400 border-dashed' : ''}
+        ${!unit && !isHovered && !isOver ? 'bg-gray-800 border-gray-600' : ''}
+        ${unit && !isOver ? 'bg-gray-800 border-gray-500' : ''}
+        focus:ring-2 focus:ring-blue-400 focus:ring-offset-1 focus:ring-offset-gray-900 focus:outline-none
       `}
       role="gridcell"
+      tabIndex={0}
       aria-label={ariaLabel}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {unit ? (
         <UnitCard 
@@ -85,9 +101,20 @@ function FormationTileComponent({
           sourceRow={row} 
           sourceCol={col}
           onDoubleClick={handleDoubleClick}
+          onEdit={onEditUnit ? handleEditUnit : undefined}
         />
       ) : (
-        <div className="w-full h-full" />
+        <div className="w-full h-full flex items-center justify-center">
+          {(isHovered || isOver) && (
+            <AddIcon 
+              sx={{ 
+                fontSize: 'clamp(16px, 4vw, 28px)',
+                color: isOver ? '#60a5fa' : '#6b7280',
+                opacity: isOver ? 1 : 0.5,
+              }} 
+            />
+          )}
+        </div>
       )}
     </div>
   );
