@@ -8,6 +8,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import HelpIcon from '@mui/icons-material/Help';
 import { IconButton } from '../../atoms';
 
+const appVersion = import.meta.env.VITE_APP_VERSION;
+
 interface HelpOverlayProps {
   open: boolean;
   onClose: () => void;
@@ -41,7 +43,7 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
         <Box className="space-y-6">
           <Box>
             <Typography variant="h5" className="text-yellow-400 font-bold mb-3">
-              Overview
+              Overview (v{appVersion})
             </Typography>
             <Typography variant="body1" className="mb-2">
               The Kingdom Clash Planner is a formation planning tool that allows you to organize and manage your units for strategic battles.

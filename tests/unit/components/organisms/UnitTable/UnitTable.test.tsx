@@ -153,5 +153,12 @@ describe('UnitTable', () => {
     await user.click(screen.getByTestId('header-actions'));
     expect(mockProps.onSort).not.toHaveBeenCalled();
   });
-});
 
+  it('should call onSort with null for Roles column', async () => {
+    const user = userEvent.setup();
+    render(<UnitTable {...mockProps} />);
+
+    await user.click(screen.getByTestId('header-roles'));
+    expect(mockProps.onSort).not.toHaveBeenCalled();
+  });
+});

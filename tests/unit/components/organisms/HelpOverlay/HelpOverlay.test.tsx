@@ -63,7 +63,7 @@ describe('HelpOverlay', () => {
   it('should display all main sections', () => {
     render(<HelpOverlay open={true} onClose={mockOnClose} />);
     
-    expect(screen.getByText('Overview')).toBeInTheDocument();
+    expect(screen.getByText(`Overview (v${import.meta.env.VITE_APP_VERSION})`)).toBeInTheDocument();
     expect(screen.getByText('Visual Structure')).toBeInTheDocument();
     expect(screen.getByText('Usage Guide')).toBeInTheDocument();
     expect(screen.getByText('Keyboard Shortcuts')).toBeInTheDocument();

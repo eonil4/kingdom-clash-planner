@@ -743,4 +743,24 @@ describe('UnitCard', () => {
     expect(removeIcon.querySelector('svg')).toBeInTheDocument();
   });
 
+  it('should display roles in tooltip when unit has roles', async () => {
+    const user = userEvent.setup();
+    const unitWithRoles = {
+      ...mockUnit,
+      name: 'Archers',
+    };
+    render(<UnitCard unit={unitWithRoles} />);
+    
+    const card = screen.getByRole('button', { name: /5 Archers/i });
+    await user.click(card);
+    
+    await waitFor(() => {
+      const tooltip = document.body.querySelector('[role="tooltip"]');
+      expect(tooltip).toBeInTheDocument();
+      const tooltipText = tooltip?.textContent || '';
+      expect(tooltipText).toMatch(/Roles:/i);
+      expect(tooltipText).toMatch(/Human/i);
+    });
+  });
+
 });
