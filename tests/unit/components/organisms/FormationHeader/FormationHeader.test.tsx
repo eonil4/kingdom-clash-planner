@@ -1,8 +1,19 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+
+vi.mock('../../../../../src/components/organisms/HelpOverlay/HelpOverlay', () => ({
+  default: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
+    open ? (
+      <div role="dialog" aria-label="Help dialog">
+        <span>Application Guide</span>
+        <button aria-label="Close help overlay" onClick={onClose}>Close</button>
+      </div>
+    ) : null,
+}));
+
 import FormationHeader from '../../../../../src/components/organisms/FormationHeader/FormationHeader';
 import unitReducer from '../../../../../src/store/reducers/unitSlice';
 import formationReducer from '../../../../../src/store/reducers/formationSlice';
@@ -384,7 +395,7 @@ describe('FormationHeader', () => {
     const helpButton = screen.getByLabelText('Open help overlay');
     await user.click(helpButton);
 
-    expect(screen.getByText('Application Guide')).toBeInTheDocument();
+    expect(await screen.findByText('Application Guide')).toBeInTheDocument();
 
     const closeButton = screen.getByLabelText('Close help overlay');
     await user.click(closeButton);

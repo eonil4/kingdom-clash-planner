@@ -153,13 +153,18 @@ function filterUnits(units: Unit[], searchTerm: string): Unit[] {
   if (!searchTerm.trim()) {
     return units;
   }
-  const term = searchTerm.toLowerCase().trim();
+  const searchWords = searchTerm.toLowerCase().trim().split(/\s+/).filter((word) => word.length > 0);
   return units.filter((unit) => {
-    if (unit.name.toLowerCase().includes(term)) return true;
-    if (unit.rarity.toLowerCase().includes(term)) return true;
+    const unitNameLower = unit.name.toLowerCase();
+    const unitRarityLower = unit.rarity.toLowerCase();
     const unitData = getUnitDataByName(unit.name);
-    if (unitData?.roles.some((role) => role.toLowerCase().includes(term))) return true;
-    return false;
+    const unitRolesLower = unitData?.roles.map((role) => role.toLowerCase()) || [];
+    return searchWords.every((word) => {
+      if (unitNameLower.includes(word)) return true;
+      if (unitRarityLower.includes(word)) return true;
+      if (unitRolesLower.some((role) => role.includes(word))) return true;
+      return false;
+    });
   });
 }
 

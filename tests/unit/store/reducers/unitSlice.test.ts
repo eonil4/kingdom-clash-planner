@@ -153,6 +153,69 @@ describe('unitSlice', () => {
       expect(state.filteredUnits.length).toBe(1);
       expect(state.filteredUnits[0].name).toBe('Paladin');
     });
+
+    it('should use AND logic for multiple search words', () => {
+      const axeThrowerUnit: Unit = {
+        id: 'unit-axe',
+        name: 'Axe Throwers',
+        level: 5,
+        rarity: UnitRarity.Rare,
+        power: 5000,
+      };
+      const stateWithUnits = unitReducer(
+        undefined,
+        setUnits([mockUnit1, mockUnit2, axeThrowerUnit])
+      );
+      const state = unitReducer(stateWithUnits, setSearchTerm('axe throwers'));
+      expect(state.filteredUnits.length).toBe(1);
+      expect(state.filteredUnits[0].name).toBe('Axe Throwers');
+    });
+
+    it('should require all words to match with AND logic', () => {
+      const axeThrowerUnit: Unit = {
+        id: 'unit-axe',
+        name: 'Axe Throwers',
+        level: 5,
+        rarity: UnitRarity.Rare,
+        power: 5000,
+      };
+      const stateWithUnits = unitReducer(
+        undefined,
+        setUnits([mockUnit1, mockUnit2, axeThrowerUnit])
+      );
+      const state = unitReducer(stateWithUnits, setSearchTerm('axe paladin'));
+      expect(state.filteredUnits.length).toBe(0);
+    });
+
+    it('should match words across name and rarity', () => {
+      const stateWithUnits = unitReducer(
+        undefined,
+        setUnits([mockUnit1, mockUnit2])
+      );
+      const state = unitReducer(stateWithUnits, setSearchTerm('paladin epic'));
+      expect(state.filteredUnits.length).toBe(1);
+      expect(state.filteredUnits[0].name).toBe('Paladin');
+    });
+
+    it('should match words across name and role', () => {
+      const stateWithUnits = unitReducer(
+        undefined,
+        setUnits([mockUnit1, mockUnit2, mockUnit3])
+      );
+      const state = unitReducer(stateWithUnits, setSearchTerm('paladin support'));
+      expect(state.filteredUnits.length).toBe(1);
+      expect(state.filteredUnits[0].name).toBe('Paladin');
+    });
+
+    it('should handle multiple spaces between search words', () => {
+      const stateWithUnits = unitReducer(
+        undefined,
+        setUnits([mockUnit1, mockUnit2])
+      );
+      const state = unitReducer(stateWithUnits, setSearchTerm('paladin   epic'));
+      expect(state.filteredUnits.length).toBe(1);
+      expect(state.filteredUnits[0].name).toBe('Paladin');
+    });
   });
 
   describe('removeUnit', () => {
