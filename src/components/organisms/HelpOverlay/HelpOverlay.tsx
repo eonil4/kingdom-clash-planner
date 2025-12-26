@@ -105,7 +105,7 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
                 • <strong>Sort Controls:</strong> Sort units by Level, Rarity, or Name (primary, secondary, and tertiary sorting).
               </Typography>
               <Typography variant="body2" className="mb-1">
-                • <strong>Search:</strong> Filter units by name or rarity.
+                • <strong>Search:</strong> Filter units by name, rarity (Common, Rare, Epic, Legendary), and role (Human, Mages, Ranger, Support, Tank, Trickster, Undead).
               </Typography>
               <Typography variant="body2" className="mb-1">
                 • <strong>Manage Units Button:</strong> Opens a modal to add, edit, or remove units from your roster.

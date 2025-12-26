@@ -143,6 +143,16 @@ describe('unitSlice', () => {
       const state = unitReducer(stateWithUnits, setSearchTerm(''));
       expect(state.filteredUnits.length).toBe(2);
     });
+
+    it('should filter by role', () => {
+      const stateWithUnits = unitReducer(
+        undefined,
+        setUnits([mockUnit1, mockUnit2, mockUnit3])
+      );
+      const state = unitReducer(stateWithUnits, setSearchTerm('Support'));
+      expect(state.filteredUnits.length).toBe(1);
+      expect(state.filteredUnits[0].name).toBe('Paladin');
+    });
   });
 
   describe('removeUnit', () => {

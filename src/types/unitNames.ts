@@ -3,8 +3,8 @@
  * All available unit names ordered alphabetically with numeric indices, rarity, and power calculation
  */
 
-import type { UnitRarity } from './index';
-import { UnitRarity as UnitRarityEnum } from './index';
+import type { UnitRarity, UnitRole } from './index';
+import { UnitRarity as UnitRarityEnum, UnitRole as UnitRoleEnum } from './index';
 import { calculateUnitPower } from '../utils/powerUtils';
 
 /**
@@ -14,6 +14,7 @@ export interface UnitData {
   name: string;
   index: number;
   rarity: UnitRarity;
+  roles: UnitRole[];
   /**
    * Image filename (without extension) matching the file in src/assets/units/
    */
@@ -31,15 +32,16 @@ export interface UnitData {
 function createUnitData(
   name: string,
   index: number,
-  rarity: UnitRarity
+  rarity: UnitRarity,
+  roles: UnitRole[]
 ): UnitData {
-  // Generate imageName from unit name: convert to lowercase, remove apostrophes, replace spaces with underscores
   const imageName = name.toLowerCase().replace(/'/g, '').replace(/\s+/g, '_');
   
   return {
     name,
     index,
     rarity,
+    roles,
     imageName,
     getPower: (level: number) => calculateUnitPower(rarity, level),
   };
@@ -49,44 +51,46 @@ function createUnitData(
  * Unit Names with their data (index, rarity, power calculation)
  * Ordered alphabetically
  */
+const R = UnitRoleEnum;
+
 export const UnitDataMap: Record<string, UnitData> = {
-  AIR_ELEMENTAL: createUnitData('Air Elemental', 0, UnitRarityEnum.Epic),
-  ALCHEMIST: createUnitData('Alchemist', 1, UnitRarityEnum.Epic),
-  ARCHERS: createUnitData('Archers', 2, UnitRarityEnum.Common),
-  ASSASSINS: createUnitData('Assassins', 3, UnitRarityEnum.Rare),
-  BATTLE_GOLEM: createUnitData('Battle Golem', 4, UnitRarityEnum.Common),
-  BOMBERS: createUnitData('Bombers', 5, UnitRarityEnum.Rare),
-  BONEBREAKER: createUnitData('Bonebreaker', 6, UnitRarityEnum.Legendary),
-  BONE_SPEARTHROWER: createUnitData('Bone Spearthrower', 7, UnitRarityEnum.Common),
-  BONE_WARRIOR: createUnitData('Bone Warrior', 8, UnitRarityEnum.Common),
-  BUTCHER: createUnitData('Butcher', 9, UnitRarityEnum.Rare),
-  CATAPULT: createUnitData('Catapult', 10, UnitRarityEnum.Common),
-  CURSED_CATAPULT: createUnitData('Cursed Catapult', 11, UnitRarityEnum.Rare),
-  EXPLOSIVE_SPIDER: createUnitData('Explosive Spider', 12, UnitRarityEnum.Rare),
-  GIANT_TOAD: createUnitData('Giant Toad', 13, UnitRarityEnum.Legendary),
-  GRAVEDIGGER: createUnitData('Gravedigger', 14, UnitRarityEnum.Rare),
-  HEADLESS: createUnitData('Headless', 15, UnitRarityEnum.Legendary),
-  HUNTRESS: createUnitData('Huntress', 16, UnitRarityEnum.Legendary),
-  IMP: createUnitData('Imp', 17, UnitRarityEnum.Rare),
-  IMMORTAL: createUnitData('Immortal', 18, UnitRarityEnum.Epic),
-  INFANTRY: createUnitData('Infantry', 19, UnitRarityEnum.Common),
-  IRON_GUARDS: createUnitData('Iron Guards', 20, UnitRarityEnum.Rare),
-  LANCER: createUnitData('Lancer', 21, UnitRarityEnum.Epic),
-  LAVA_GOLEM: createUnitData('Lava Golem', 22, UnitRarityEnum.Epic),
-  MAGIC_ARCHER: createUnitData('Magic Archer', 23, UnitRarityEnum.Epic),
-  MONK: createUnitData('Monk', 24, UnitRarityEnum.Epic),
-  NECROMANCER: createUnitData('Necromancer', 25, UnitRarityEnum.Epic),
-  NIGHT_HUNTER: createUnitData('Night Hunter', 26, UnitRarityEnum.Legendary),
-  PALADIN: createUnitData('Paladin', 27, UnitRarityEnum.Epic),
-  PHOENIX: createUnitData('Phoenix', 28, UnitRarityEnum.Legendary),
-  PYROTECHNICIAN: createUnitData('Pyrotechnician', 29, UnitRarityEnum.Epic),
-  ROYAL_GUARD: createUnitData('Royal Guard', 30, UnitRarityEnum.Epic),
-  SHAMAN: createUnitData('Shaman', 31, UnitRarityEnum.Legendary),
-  SORCERERS_APPRENTICES: createUnitData('Sorcerer\'s Apprentices', 32, UnitRarityEnum.Common),
-  STONE_GOLEM: createUnitData('Stone Golem', 33, UnitRarityEnum.Legendary),
-  STORM_MISTRESSES: createUnitData('Storm Mistresses', 34, UnitRarityEnum.Epic),
-  UNDEAD_MAGE: createUnitData('Undead Mage', 35, UnitRarityEnum.Rare),
-  AXE_THROWERS: createUnitData('Axe Throwers', 36, UnitRarityEnum.Legendary),
+  AIR_ELEMENTAL: createUnitData('Air Elemental', 0, UnitRarityEnum.Epic, [R.Mages, R.Trickster]),
+  ALCHEMIST: createUnitData('Alchemist', 1, UnitRarityEnum.Epic, [R.Human, R.Support]),
+  ARCHERS: createUnitData('Archers', 2, UnitRarityEnum.Common, [R.Human]),
+  ASSASSINS: createUnitData('Assassins', 3, UnitRarityEnum.Rare, [R.Human, R.Trickster]),
+  BATTLE_GOLEM: createUnitData('Battle Golem', 4, UnitRarityEnum.Common, [R.Mages]),
+  BOMBERS: createUnitData('Bombers', 5, UnitRarityEnum.Rare, [R.Human, R.Ranger]),
+  BONEBREAKER: createUnitData('Bonebreaker', 6, UnitRarityEnum.Legendary, [R.Human, R.Trickster, R.Tank]),
+  BONE_SPEARTHROWER: createUnitData('Bone Spearthrower', 7, UnitRarityEnum.Common, [R.Undead]),
+  BONE_WARRIOR: createUnitData('Bone Warrior', 8, UnitRarityEnum.Common, [R.Undead]),
+  BUTCHER: createUnitData('Butcher', 9, UnitRarityEnum.Rare, [R.Human, R.Tank]),
+  CATAPULT: createUnitData('Catapult', 10, UnitRarityEnum.Common, [R.Human]),
+  CURSED_CATAPULT: createUnitData('Cursed Catapult', 11, UnitRarityEnum.Rare, [R.Undead, R.Ranger]),
+  EXPLOSIVE_SPIDER: createUnitData('Explosive Spider', 12, UnitRarityEnum.Rare, [R.Undead]),
+  GIANT_TOAD: createUnitData('Giant Toad', 13, UnitRarityEnum.Legendary, [R.Mages, R.Trickster, R.Support]),
+  GRAVEDIGGER: createUnitData('Gravedigger', 14, UnitRarityEnum.Rare, [R.Undead, R.Trickster]),
+  HEADLESS: createUnitData('Headless', 15, UnitRarityEnum.Legendary, [R.Undead, R.Support, R.Tank]),
+  HUNTRESS: createUnitData('Huntress', 16, UnitRarityEnum.Legendary, [R.Human, R.Ranger, R.Support]),
+  IMP: createUnitData('Imp', 17, UnitRarityEnum.Rare, [R.Undead, R.Ranger]),
+  IMMORTAL: createUnitData('Immortal', 18, UnitRarityEnum.Epic, [R.Undead, R.Tank]),
+  INFANTRY: createUnitData('Infantry', 19, UnitRarityEnum.Common, [R.Human]),
+  IRON_GUARDS: createUnitData('Iron Guards', 20, UnitRarityEnum.Rare, [R.Human, R.Tank]),
+  LANCER: createUnitData('Lancer', 21, UnitRarityEnum.Epic, [R.Human, R.Trickster]),
+  LAVA_GOLEM: createUnitData('Lava Golem', 22, UnitRarityEnum.Epic, [R.Mages, R.Tank]),
+  MAGIC_ARCHER: createUnitData('Magic Archer', 23, UnitRarityEnum.Epic, [R.Mages, R.Ranger]),
+  MONK: createUnitData('Monk', 24, UnitRarityEnum.Epic, [R.Human, R.Tank]),
+  NECROMANCER: createUnitData('Necromancer', 25, UnitRarityEnum.Epic, [R.Undead, R.Support]),
+  NIGHT_HUNTER: createUnitData('Night Hunter', 26, UnitRarityEnum.Legendary, [R.Undead, R.Trickster, R.Support]),
+  PALADIN: createUnitData('Paladin', 27, UnitRarityEnum.Epic, [R.Human, R.Support]),
+  PHOENIX: createUnitData('Phoenix', 28, UnitRarityEnum.Legendary, [R.Mages, R.Ranger, R.Tank]),
+  PYROTECHNICIAN: createUnitData('Pyrotechnician', 29, UnitRarityEnum.Epic, [R.Human, R.Ranger]),
+  ROYAL_GUARD: createUnitData('Royal Guard', 30, UnitRarityEnum.Epic, [R.Human, R.Trickster]),
+  SHAMAN: createUnitData('Shaman', 31, UnitRarityEnum.Legendary, [R.Mages, R.Ranger, R.Support]),
+  SORCERERS_APPRENTICES: createUnitData('Sorcerer\'s Apprentices', 32, UnitRarityEnum.Common, [R.Mages]),
+  STONE_GOLEM: createUnitData('Stone Golem', 33, UnitRarityEnum.Legendary, [R.Mages, R.Support, R.Tank]),
+  STORM_MISTRESSES: createUnitData('Storm Mistresses', 34, UnitRarityEnum.Epic, [R.Mages, R.Trickster]),
+  UNDEAD_MAGE: createUnitData('Undead Mage', 35, UnitRarityEnum.Rare, [R.Undead, R.Ranger]),
+  AXE_THROWERS: createUnitData('Axe Throwers', 36, UnitRarityEnum.Legendary, [R.Human, R.Trickster, R.Ranger]),
 };
 
 /**

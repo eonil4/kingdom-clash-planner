@@ -132,6 +132,9 @@ export default function UnitTableRow({
           </span>
         )}
       </TableCell>
+      <TableCell className="text-white text-xs">
+        {getUnitDataByName(unit.name)?.roles?.join(', ') || '-'}
+      </TableCell>
       <TableCell className="text-white">
         {isEditing ? (
           <TextField

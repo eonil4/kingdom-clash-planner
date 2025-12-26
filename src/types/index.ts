@@ -7,6 +7,18 @@ export const UnitRarity = {
 
 export type UnitRarity = typeof UnitRarity[keyof typeof UnitRarity];
 
+export const UnitRole = {
+  Human: 'Human',
+  Mages: 'Mages',
+  Ranger: 'Ranger',
+  Support: 'Support',
+  Tank: 'Tank',
+  Trickster: 'Trickster',
+  Undead: 'Undead',
+} as const;
+
+export type UnitRole = typeof UnitRole[keyof typeof UnitRole];
+
 export interface Unit {
   id: string;
   name: string;

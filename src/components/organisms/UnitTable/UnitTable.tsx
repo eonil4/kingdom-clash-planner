@@ -75,6 +75,13 @@ export default function UnitTable({
                 onSort={onSort}
               />
               <SortableTableHeader
+                column={null}
+                label="Roles"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={() => {}}
+              />
+              <SortableTableHeader
                 column="count"
                 label="Count"
                 sortColumn={sortColumn}

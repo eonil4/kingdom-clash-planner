@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { Unit, SortOption } from '../../types';
 import { UnitRarity } from '../../types';
+import { getUnitDataByName } from '../../types/unitNames';
 import { normalizeUnitName } from '../../utils/unitNameUtils';
 import { calculateUnitPower } from '../../utils/powerUtils';
 
@@ -153,11 +154,13 @@ function filterUnits(units: Unit[], searchTerm: string): Unit[] {
     return units;
   }
   const term = searchTerm.toLowerCase().trim();
-  return units.filter(
-    (unit) =>
-      unit.name.toLowerCase().includes(term) ||
-      unit.rarity.toLowerCase().includes(term)
-  );
+  return units.filter((unit) => {
+    if (unit.name.toLowerCase().includes(term)) return true;
+    if (unit.rarity.toLowerCase().includes(term)) return true;
+    const unitData = getUnitDataByName(unit.name);
+    if (unitData?.roles.some((role) => role.toLowerCase().includes(term))) return true;
+    return false;
+  });
 }
 
 function getSortComparison(a: Unit, b: Unit, sortOption: SortOption): number {
