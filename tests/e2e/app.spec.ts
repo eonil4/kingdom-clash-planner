@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
 
 async function waitForAppLoad(page: Page) {
-  await page.waitForSelector('[aria-label="Formation grid"]', { timeout: 30000 });
+  await page.waitForSelector('[aria-label^="Formation grid"]', { timeout: 30000 });
 }
 
 async function selectUnitFromDropdown(page: Page, unitName: string) {
@@ -45,9 +45,9 @@ test.describe('App Loading', () => {
     await page.goto('/');
     await waitForAppLoad(page);
 
-    await expect(page.locator('[aria-label="Formation grid"]')).toBeVisible();
+    await expect(page.locator('[aria-label^="Formation grid"]')).toBeVisible();
     await expect(page.locator('header')).toBeVisible();
-    await expect(page.locator('[aria-label="Unit list"]')).toBeVisible();
+    await expect(page.locator('[aria-label^="Unit roster"]')).toBeVisible();
   });
 });
 
@@ -156,7 +156,7 @@ test.describe('Formation Header', () => {
     await page.goto('/');
     await waitForAppLoad(page);
 
-    await expect(page.getByText('👊')).toBeVisible();
+    await expect(page.getByText('⚔')).toBeVisible();
   });
 
   test('should allow editing formation name', async ({ page }) => {
@@ -205,7 +205,7 @@ test.describe('Formation Grid', () => {
     await page.goto('/');
     await waitForAppLoad(page);
 
-    const tiles = page.locator('[aria-label^="Formation tile"]');
+    const tiles = page.locator('[role="gridcell"]');
     await expect(tiles).toHaveCount(49);
   });
 
@@ -215,11 +215,11 @@ test.describe('Formation Grid', () => {
 
     await addUnitToRoster(page, 'Archers', [1]);
 
-    const archerCard = page.locator('[aria-label="Archers level 1"]').first();
+    const archerCard = page.locator('[aria-label^="1 Archers"]').first();
     await archerCard.dblclick();
 
-    const firstTile = page.locator('[aria-label="Formation tile row 1 column 1"]');
-    await expect(firstTile.locator('[aria-label="Archers level 1"]')).toBeVisible();
+    const firstTile = page.locator('[aria-label*="at row 1 column 1"]');
+    await expect(firstTile.locator('[aria-label^="1 Archers"]')).toBeVisible();
   });
 
   test('should remove unit from formation via double-click', async ({ page }) => {
@@ -228,26 +228,26 @@ test.describe('Formation Grid', () => {
 
     await addUnitToRoster(page, 'Archers', [1]);
 
-    const archerCard = page.locator('[aria-label="Archers level 1"]').first();
+    const archerCard = page.locator('[aria-label^="1 Archers"]').first();
     await archerCard.dblclick();
 
-    const firstTile = page.locator('[aria-label="Formation tile row 1 column 1"]');
-    await expect(firstTile.locator('[aria-label="Archers level 1"]')).toBeVisible();
+    const firstTile = page.locator('[aria-label*="at row 1 column 1"]');
+    await expect(firstTile.locator('[aria-label^="1 Archers"]')).toBeVisible();
 
-    await firstTile.locator('[aria-label="Archers level 1"]').dblclick();
-    await expect(firstTile.locator('[aria-label="Archers level 1"]')).not.toBeVisible();
+    await firstTile.locator('[aria-label^="1 Archers"]').dblclick();
+    await expect(firstTile.locator('[aria-label^="1 Archers"]')).not.toBeVisible();
   });
 
   test('should update formation power when placing unit', async ({ page }) => {
     await page.goto('/');
     await waitForAppLoad(page);
 
-    const powerBadge = page.locator('header').locator('text=👊').locator('..');
+    const powerBadge = page.locator('header').locator('text=⚔').locator('..');
     const initialPowerText = await powerBadge.textContent();
 
     await addUnitToRoster(page, 'Archers', [1]);
 
-    const archerCard = page.locator('[aria-label="Archers level 1"]').first();
+    const archerCard = page.locator('[aria-label^="1 Archers"]').first();
     await archerCard.dblclick();
 
     const updatedPowerText = await powerBadge.textContent();
@@ -261,7 +261,7 @@ test.describe('Available Units List', () => {
     await waitForAppLoad(page);
 
     // The unit list section contains sort controls and the available units grid
-    const unitListSection = page.locator('[aria-label="Unit list"]');
+    const unitListSection = page.locator('[aria-label^="Unit roster"]');
     await expect(unitListSection).toBeVisible();
     // Check that search and manage units controls are visible
     await expect(unitListSection.getByPlaceholder('Search units...')).toBeVisible();
@@ -287,8 +287,8 @@ test.describe('Available Units List', () => {
     const searchInput = page.getByPlaceholder('Search units...');
     await searchInput.fill('Archers');
 
-    await expect(page.locator('[aria-label="Archers level 1"]')).toBeVisible();
-    await expect(page.locator('[aria-label="Infantry level 1"]')).not.toBeVisible();
+    await expect(page.locator('[aria-label^="1 Archers"]')).toBeVisible();
+    await expect(page.locator('[aria-label^="1 Infantry"]')).not.toBeVisible();
   });
 
   test('should clear search', async ({ page }) => {
@@ -303,8 +303,8 @@ test.describe('Available Units List', () => {
 
     await page.click('[aria-label="Clear search"]');
 
-    await expect(page.locator('[aria-label="Archers level 1"]')).toBeVisible();
-    await expect(page.locator('[aria-label="Infantry level 1"]')).toBeVisible();
+    await expect(page.locator('[aria-label^="1 Archers"]')).toBeVisible();
+    await expect(page.locator('[aria-label^="1 Infantry"]')).toBeVisible();
   });
 
   test('should sort units by level', async ({ page }) => {
@@ -316,7 +316,7 @@ test.describe('Available Units List', () => {
     await page.locator('[aria-label="Sort units by (primary)"]').click();
     await page.getByRole('option', { name: 'Level' }).click();
 
-    const units = page.locator('[aria-label^="Archers level"]');
+    const units = page.locator('[aria-label*="Archers"]');
     await expect(units).toHaveCount(2);
   });
 
@@ -326,23 +326,23 @@ test.describe('Available Units List', () => {
 
     await addUnitToRoster(page, 'Archers', [1, 2]);
 
-    const unit1 = page.locator('[aria-label="Archers level 1"]').first();
+    const unit1 = page.locator('[aria-label^="1 Archers"]').first();
     await unit1.dblclick();
-    const unit2 = page.locator('[aria-label="Archers level 2"]').first();
+    const unit2 = page.locator('[aria-label^="2 Archers"]').first();
     await unit2.dblclick();
 
-    const tile1 = page.locator('[aria-label="Formation tile row 1 column 1"]');
-    const tile2 = page.locator('[aria-label="Formation tile row 1 column 2"]');
-    await expect(tile1.locator('[aria-label="Archers level 1"]')).toBeVisible();
-    await expect(tile2.locator('[aria-label="Archers level 2"]')).toBeVisible();
+    const tile1 = page.locator('[aria-label*="at row 1 column 1"]');
+    const tile2 = page.locator('[aria-label*="at row 1 column 2"]');
+    await expect(tile1.locator('[aria-label^="1 Archers"]')).toBeVisible();
+    await expect(tile2.locator('[aria-label^="2 Archers"]')).toBeVisible();
 
     await page.getByRole('button', { name: /^Withdraw( All)?$/i }).click();
 
-    await expect(tile1.locator('[aria-label="Archers level 1"]')).not.toBeVisible();
-    await expect(tile2.locator('[aria-label="Archers level 2"]')).not.toBeVisible();
+    await expect(tile1.locator('[aria-label^="1 Archers"]')).not.toBeVisible();
+    await expect(tile2.locator('[aria-label^="2 Archers"]')).not.toBeVisible();
     // Units should be back in the available units list
-    const unitList = page.locator('[aria-label="Unit list"]');
-    await expect(unitList.locator('[aria-label="Archers level 1"]')).toBeVisible();
+    const unitList = page.locator('[aria-label^="Unit roster"]');
+    await expect(unitList.locator('[aria-label^="1 Archers"]')).toBeVisible();
   });
 });
 
@@ -521,7 +521,7 @@ test.describe('Unit Card Interactions', () => {
 
     await addUnitToRoster(page, 'Archers', [1]);
 
-    const unitCard = page.locator('[aria-label="Archers level 1"]').first();
+    const unitCard = page.locator('[aria-label^="1 Archers"]').first();
     await unitCard.click();
 
     await expect(page.getByRole('tooltip')).toBeVisible();
@@ -533,7 +533,7 @@ test.describe('Unit Card Interactions', () => {
 
     await addUnitToRoster(page, 'Archers', [1]);
 
-    const unitCard = page.locator('[aria-label="Archers level 1"]').first();
+    const unitCard = page.locator('[aria-label^="1 Archers"]').first();
     await expect(unitCard).toBeVisible();
   });
 });
@@ -562,7 +562,7 @@ test.describe('URL Sync', () => {
     await page.waitForTimeout(300);
     const urlBeforePlacement = page.url();
 
-    const archerCard = page.locator('[aria-label="Archers level 1"]').first();
+    const archerCard = page.locator('[aria-label^="1 Archers"]').first();
     await archerCard.dblclick();
 
     await page.waitForTimeout(500);
@@ -599,8 +599,8 @@ test.describe('URL Sync', () => {
     await waitForAppLoad(page);
 
     await expect(page.getByText('MyTestFormation')).toBeVisible();
-    const firstTile = page.locator('[aria-label="Formation tile row 1 column 1"]');
-    await expect(firstTile.locator('[aria-label="Archers level 1"]')).toBeVisible();
+    const firstTile = page.locator('[aria-label*="at row 1 column 1"]');
+    await expect(firstTile.locator('[aria-label^="1 Archers"]')).toBeVisible();
   });
 
   test('should load units from URL', async ({ page }) => {
@@ -611,8 +611,8 @@ test.describe('URL Sync', () => {
     await page.goto(`/?units=${unitsData}`);
     await waitForAppLoad(page);
 
-    await expect(page.locator('[aria-label="Iron Guards level 2"]')).toBeVisible();
-    await expect(page.locator('[aria-label="Monk level 3"]')).toBeVisible();
+    await expect(page.locator('[aria-label^="2 Iron Guards"]')).toBeVisible();
+    await expect(page.locator('[aria-label^="3 Monk"]')).toBeVisible();
   });
 });
 
@@ -625,12 +625,12 @@ test.describe('Drag and Drop', () => {
 
     await addUnitToRoster(page, 'Archers', [1]);
 
-    const unitCard = page.locator('[aria-label="Archers level 1"]').first();
-    const targetTile = page.locator('[aria-label="Formation tile row 2 column 3"]');
+    const unitCard = page.locator('[aria-label^="1 Archers"]').first();
+    const targetTile = page.locator('[aria-label*="at row 2 column 3"]');
 
     await unitCard.dragTo(targetTile);
 
-    await expect(targetTile.locator('[aria-label="Archers level 1"]')).toBeVisible();
+    await expect(targetTile.locator('[aria-label^="1 Archers"]')).toBeVisible();
   });
 
   test.skip('should drag unit from formation back to roster', async ({ page }) => {
@@ -641,19 +641,19 @@ test.describe('Drag and Drop', () => {
 
     await addUnitToRoster(page, 'Archers', [1]);
 
-    const unitCard = page.locator('[aria-label="Archers level 1"]').first();
+    const unitCard = page.locator('[aria-label^="1 Archers"]').first();
     await unitCard.dblclick();
 
-    const firstTile = page.locator('[aria-label="Formation tile row 1 column 1"]');
-    await expect(firstTile.locator('[aria-label="Archers level 1"]')).toBeVisible();
+    const firstTile = page.locator('[aria-label*="at row 1 column 1"]');
+    await expect(firstTile.locator('[aria-label^="1 Archers"]')).toBeVisible();
 
-    const formationUnit = firstTile.locator('[aria-label="Archers level 1"]');
-    const rosterArea = page.locator('[aria-label="Available units"]');
+    const formationUnit = firstTile.locator('[aria-label^="1 Archers"]');
+    const rosterArea = page.locator('[aria-label^="Available units"]');
 
     await formationUnit.dragTo(rosterArea);
 
-    await expect(firstTile.locator('[aria-label="Archers level 1"]')).not.toBeVisible();
-    await expect(page.locator('[aria-label="Available units"]').locator('[aria-label="Archers level 1"]')).toBeVisible();
+    await expect(firstTile.locator('[aria-label^="1 Archers"]')).not.toBeVisible();
+    await expect(page.locator('[aria-label^="Available units"]').locator('[aria-label^="1 Archers"]')).toBeVisible();
   });
 
   test.skip('should swap units in formation via drag', async ({ page }) => {
@@ -665,22 +665,22 @@ test.describe('Drag and Drop', () => {
     await addUnitToRoster(page, 'Archers', [1]);
     await addUnitToRoster(page, 'Infantry', [2]);
 
-    const archer = page.locator('[aria-label="Archers level 1"]').first();
+    const archer = page.locator('[aria-label^="1 Archers"]').first();
     await archer.dblclick();
-    const infantry = page.locator('[aria-label="Infantry level 2"]').first();
+    const infantry = page.locator('[aria-label^="2 Infantry"]').first();
     await infantry.dblclick();
 
-    const tile1 = page.locator('[aria-label="Formation tile row 1 column 1"]');
-    const tile2 = page.locator('[aria-label="Formation tile row 1 column 2"]');
+    const tile1 = page.locator('[aria-label*="at row 1 column 1"]');
+    const tile2 = page.locator('[aria-label*="at row 1 column 2"]');
 
-    await expect(tile1.locator('[aria-label="Archers level 1"]')).toBeVisible();
-    await expect(tile2.locator('[aria-label="Infantry level 2"]')).toBeVisible();
+    await expect(tile1.locator('[aria-label^="1 Archers"]')).toBeVisible();
+    await expect(tile2.locator('[aria-label^="2 Infantry"]')).toBeVisible();
 
-    const archerInFormation = tile1.locator('[aria-label="Archers level 1"]');
+    const archerInFormation = tile1.locator('[aria-label^="1 Archers"]');
     await archerInFormation.dragTo(tile2);
 
-    await expect(tile1.locator('[aria-label="Infantry level 2"]')).toBeVisible();
-    await expect(tile2.locator('[aria-label="Archers level 1"]')).toBeVisible();
+    await expect(tile1.locator('[aria-label^="2 Infantry"]')).toBeVisible();
+    await expect(tile2.locator('[aria-label^="1 Archers"]')).toBeVisible();
   });
 });
 
@@ -691,7 +691,7 @@ test.describe('Keyboard Navigation', () => {
 
     await addUnitToRoster(page, 'Archers', [1]);
 
-    const unitCard = page.locator('[aria-label="Archers level 1"]').first();
+    const unitCard = page.locator('[aria-label^="1 Archers"]').first();
     await unitCard.focus();
     await page.keyboard.press('Enter');
 
@@ -704,7 +704,7 @@ test.describe('Keyboard Navigation', () => {
 
     await addUnitToRoster(page, 'Archers', [1]);
 
-    const unitCard = page.locator('[aria-label="Archers level 1"]').first();
+    const unitCard = page.locator('[aria-label^="1 Archers"]').first();
     await unitCard.click();
     await expect(page.getByRole('tooltip')).toBeVisible();
 
@@ -720,7 +720,7 @@ test.describe('Unit Count Badge', () => {
 
     await addUnitToRoster(page, 'Archers', [1]);
 
-    const unitList = page.locator('[aria-label="Unit list"]');
+    const unitList = page.locator('[aria-label^="Unit roster"]');
     await expect(unitList).toBeVisible();
   });
 
@@ -730,10 +730,10 @@ test.describe('Unit Count Badge', () => {
 
     await addUnitToRoster(page, 'Archers', [1, 2]);
 
-    const availableUnits = page.locator('[aria-label="Available units"]');
+    const availableUnits = page.locator('[aria-label^="Available units"]');
     const initialCount = await availableUnits.locator('[role="button"]').count();
 
-    const archer = page.locator('[aria-label="Archers level 1"]').first();
+    const archer = page.locator('[aria-label^="1 Archers"]').first();
     await archer.dblclick();
 
     const newCount = await availableUnits.locator('[role="button"]').count();
