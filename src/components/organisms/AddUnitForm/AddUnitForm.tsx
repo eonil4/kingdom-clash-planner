@@ -13,6 +13,7 @@ import { normalizeUnitName } from '../../../utils/unitNameUtils';
 import { getUnitImagePath } from '../../../utils/imageUtils';
 import { formatNumber } from '../../../utils/powerUtils';
 import { UnitCard } from '../../molecules';
+import { MAX_UNITS_PER_LEVEL } from '../../../constants';
 import { TextField, Select } from '../../atoms';
 
 interface AddUnitFormProps {
@@ -164,7 +165,7 @@ export default function AddUnitForm({
                         />
                         <Box className="text-right">
                             <Typography variant="caption" className="text-gray-400 text-xs block">
-                                Max: 49 per level
+                                Max: {MAX_UNITS_PER_LEVEL} per level
                             </Typography>
                             <Typography variant="caption" className="text-gray-400 text-xs block">
                                 Total: {formatNumber(totalUnitCount)} / 1 000 (Roster: {formatNumber(units.length)}, Formation: {formatNumber(formationUnitCount)})
@@ -184,7 +185,7 @@ export default function AddUnitForm({
                                 const existingCount = normalizedName ? units.filter(
                                     (u) => normalizeUnitName(u.name) === normalizedName && u.level === level
                                 ).length : 0;
-                                const isMaxReached = existingCount >= 49;
+                                const isMaxReached = existingCount >= MAX_UNITS_PER_LEVEL;
 
                                 return (
                                     <Box

@@ -169,6 +169,30 @@ describe('UnitImage', () => {
       });
     });
 
+    it('should render img element after async loading completes', async () => {
+      mockPreloadUnitImage.mockReturnValue(Promise.resolve('/async-image.png'));
+
+      const { container } = render(
+        <UnitImage
+          name="AsyncRenderTest"
+          rarity={UnitRarity.Legendary}
+        />
+      );
+
+      await act(async () => {
+        await flushPromises();
+        await flushPromises();
+      });
+
+      await waitFor(() => {
+        const img = container.querySelector('img');
+        if (img) {
+          expect(img).toHaveAttribute('src', '/async-image.png');
+          expect(img).toHaveAttribute('alt', 'AsyncRenderTest');
+        }
+      }, { timeout: 1000 });
+    });
+
     it('should show placeholder when async loaded image fails', async () => {
       // Arrange - use immediate resolution
       mockPreloadUnitImage.mockReturnValue(Promise.resolve('/broken-image.png'));

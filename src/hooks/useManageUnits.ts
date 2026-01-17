@@ -6,6 +6,7 @@ import { UnitRarity } from '../types';
 import { normalizeUnitName } from '../utils/unitNameUtils';
 import { calculateUnitPower } from '../utils/powerUtils';
 import { getUnitDataByName } from '../types/unitNames';
+import { MAX_TOTAL_UNITS, MAX_UNITS_PER_LEVEL } from '../constants';
 
 
 export type SortColumn = 'name' | 'level' | 'rarity' | 'count' | null;
@@ -178,7 +179,7 @@ export const useManageUnits = () => {
 
         const editData = rowEditData[editingRowId];
         const normalizedName = normalizeUnitName(editData.name.trim());
-        const maxUnitsPerLevel = 49;
+        const maxUnitsPerLevel = MAX_UNITS_PER_LEVEL;
         const count = Math.max(1, Math.min(maxUnitsPerLevel, editData.count));
 
         const unitData = getUnitDataByName(normalizedName);
@@ -210,7 +211,7 @@ export const useManageUnits = () => {
 
         if (count > matchingUnits.length) {
             const toAdd = count - matchingUnits.length;
-            const maxTotalUnits = 1000;
+            const maxTotalUnits = MAX_TOTAL_UNITS;
 
             const totalSpace = maxTotalUnits - totalUnitCount;
             if (totalSpace <= 0) {
@@ -260,7 +261,7 @@ export const useManageUnits = () => {
         const getPower = unitData ? unitData.getPower : (level: number) => calculateUnitPower(finalRarity, level);
 
         const maxTotalUnits = 1000;
-        const maxUnitsPerLevel = 49;
+        const maxUnitsPerLevel = MAX_UNITS_PER_LEVEL;
 
         let totalToAdd = 0;
         for (const level of selectedLevels) {

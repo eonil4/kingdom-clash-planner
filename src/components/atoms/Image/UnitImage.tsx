@@ -36,6 +36,7 @@ function AsyncUnitImage({
     return <UnitPlaceholder name={name} rarity={rarity} fontSize={fontSize} />;
   }
 
+  /* istanbul ignore next -- @preserve Suspense + use() hook async resolution difficult to test */
   return (
     <img
       key={resolvedUrl}

@@ -1,11 +1,116 @@
 # Page snapshot
 
 ```yaml
-- generic [ref=e6]:
-  - heading "This site can’t be reached" [level=1] [ref=e7]
-  - paragraph [ref=e8]:
-    - text: The web page at
-    - strong [ref=e9]: http://localhost:3000/
-    - text: might be temporarily down or it may have moved permanently to a new web address.
-  - generic [ref=e10]: ERR_INSUFFICIENT_RESOURCES
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - main [ref=e4]:
+    - generic [ref=e5]:
+      - generic "Auto-fill 49 empty tiles with roster units" [ref=e7]:
+        - button "Auto-fill formation with available units" [disabled]:
+          - img
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - button "Open help overlay" [ref=e11] [cursor=pointer]:
+            - img [ref=e12]
+          - heading "Formation 1" [level=1] [ref=e14]
+          - button "Edit formation name" [ref=e15] [cursor=pointer]:
+            - img [ref=e16]
+        - generic [ref=e18]:
+          - generic [ref=e19]: ⚔
+          - paragraph [ref=e20]: "0"
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - img [ref=e24]
+          - slider "Grid size" [ref=e30]: "80"
+          - img [ref=e31]
+          - generic [ref=e34]: 80%
+        - grid "Formation grid. Drag units here to place them. Double-click to remove." [ref=e38]:
+          - gridcell "Empty tile at row 1 column 1. Drag a unit here to place it." [ref=e41]
+          - gridcell "Empty tile at row 1 column 2. Drag a unit here to place it." [ref=e45]
+          - gridcell "Empty tile at row 1 column 3. Drag a unit here to place it." [ref=e49]
+          - gridcell "Empty tile at row 1 column 4. Drag a unit here to place it." [ref=e53]
+          - gridcell "Empty tile at row 1 column 5. Drag a unit here to place it." [ref=e57]
+          - gridcell "Empty tile at row 1 column 6. Drag a unit here to place it." [ref=e61]
+          - gridcell "Empty tile at row 1 column 7. Drag a unit here to place it." [ref=e65]
+          - gridcell "Empty tile at row 2 column 1. Drag a unit here to place it." [ref=e69]
+          - gridcell "Empty tile at row 2 column 2. Drag a unit here to place it." [ref=e73]
+          - gridcell "Empty tile at row 2 column 3. Drag a unit here to place it." [ref=e77]
+          - gridcell "Empty tile at row 2 column 4. Drag a unit here to place it." [ref=e81]
+          - gridcell "Empty tile at row 2 column 5. Drag a unit here to place it." [ref=e85]
+          - gridcell "Empty tile at row 2 column 6. Drag a unit here to place it." [ref=e89]
+          - gridcell "Empty tile at row 2 column 7. Drag a unit here to place it." [ref=e93]
+          - gridcell "Empty tile at row 3 column 1. Drag a unit here to place it." [ref=e97]
+          - gridcell "Empty tile at row 3 column 2. Drag a unit here to place it." [ref=e101]
+          - gridcell "Empty tile at row 3 column 3. Drag a unit here to place it." [ref=e105]
+          - gridcell "Empty tile at row 3 column 4. Drag a unit here to place it." [ref=e109]
+          - gridcell "Empty tile at row 3 column 5. Drag a unit here to place it." [ref=e113]
+          - gridcell "Empty tile at row 3 column 6. Drag a unit here to place it." [ref=e117]
+          - gridcell "Empty tile at row 3 column 7. Drag a unit here to place it." [ref=e121]
+          - gridcell "Empty tile at row 4 column 1. Drag a unit here to place it." [ref=e125]
+          - gridcell "Empty tile at row 4 column 2. Drag a unit here to place it." [ref=e129]
+          - gridcell "Empty tile at row 4 column 3. Drag a unit here to place it." [ref=e133]
+          - gridcell "Empty tile at row 4 column 4. Drag a unit here to place it." [ref=e137]
+          - gridcell "Empty tile at row 4 column 5. Drag a unit here to place it." [ref=e141]
+          - gridcell "Empty tile at row 4 column 6. Drag a unit here to place it." [ref=e145]
+          - gridcell "Empty tile at row 4 column 7. Drag a unit here to place it." [ref=e149]
+          - gridcell "Empty tile at row 5 column 1. Drag a unit here to place it." [ref=e153]
+          - gridcell "Empty tile at row 5 column 2. Drag a unit here to place it." [ref=e157]
+          - gridcell "Empty tile at row 5 column 3. Drag a unit here to place it." [ref=e161]
+          - gridcell "Empty tile at row 5 column 4. Drag a unit here to place it." [ref=e165]
+          - gridcell "Empty tile at row 5 column 5. Drag a unit here to place it." [ref=e169]
+          - gridcell "Empty tile at row 5 column 6. Drag a unit here to place it." [ref=e173]
+          - gridcell "Empty tile at row 5 column 7. Drag a unit here to place it." [ref=e177]
+          - gridcell "Empty tile at row 6 column 1. Drag a unit here to place it." [ref=e181]
+          - gridcell "Empty tile at row 6 column 2. Drag a unit here to place it." [ref=e185]
+          - gridcell "Empty tile at row 6 column 3. Drag a unit here to place it." [ref=e189]
+          - gridcell "Empty tile at row 6 column 4. Drag a unit here to place it." [ref=e193]
+          - gridcell "Empty tile at row 6 column 5. Drag a unit here to place it." [ref=e197]
+          - gridcell "Empty tile at row 6 column 6. Drag a unit here to place it." [ref=e201]
+          - gridcell "Empty tile at row 6 column 7. Drag a unit here to place it." [ref=e205]
+          - gridcell "Empty tile at row 7 column 1. Drag a unit here to place it." [ref=e209]
+          - gridcell "Empty tile at row 7 column 2. Drag a unit here to place it." [ref=e213]
+          - gridcell "Empty tile at row 7 column 3. Drag a unit here to place it." [ref=e217]
+          - gridcell "Empty tile at row 7 column 4. Drag a unit here to place it." [ref=e221]
+          - gridcell "Empty tile at row 7 column 5. Drag a unit here to place it." [ref=e225]
+          - gridcell "Empty tile at row 7 column 6. Drag a unit here to place it." [ref=e229]
+          - gridcell "Empty tile at row 7 column 7. Drag a unit here to place it." [ref=e233]
+      - region "Unit roster. Double-click units to add to formation." [ref=e236]:
+        - generic [ref=e237]:
+          - generic [ref=e238]:
+            - generic [ref=e239]:
+              - generic "Sort units by (primary)" [ref=e241]:
+                - combobox [ref=e242] [cursor=pointer]: By Rarity
+                - textbox: rarity
+                - img
+                - group
+              - generic "Sort units by (secondary)" [ref=e244]:
+                - combobox [ref=e245] [cursor=pointer]: By Level
+                - textbox: level
+                - img
+                - group
+              - generic "Sort units by (tertiary)" [ref=e247]:
+                - combobox [ref=e248] [cursor=pointer]: By Name
+                - textbox: name
+                - img
+                - group
+              - paragraph [ref=e250]: "0"
+            - generic [ref=e251]:
+              - button "Manage Units" [ref=e252] [cursor=pointer]:
+                - img [ref=e254]
+                - generic [ref=e256]: Manage Units
+              - button "Withdraw All" [ref=e257] [cursor=pointer]:
+                - img [ref=e259]
+                - generic [ref=e261]: Withdraw All
+          - generic [ref=e263]:
+            - img [ref=e265]
+            - textbox "Search units..." [ref=e267]
+            - group
+        - generic [ref=e269]:
+          - generic [ref=e270]: 📦
+          - generic [ref=e271]:
+            - text: No units available.
+            - text: Add units via "Manage Units" or withdraw from formation.
+        - generic [ref=e272]: 💡 Double-click to add to formation • Drag to specific tile • Hover for actions
 ```

@@ -15,6 +15,7 @@ import { useInitializeData } from '../hooks/useInitializeData';
 import { useUrlSync } from '../hooks/useUrlSync';
 import { getDndBackend, getDndBackendOptions } from '../utils/deviceUtils';
 import type { Unit } from '../types';
+import { MAX_TOTAL_UNITS, GRID_SIZE_RANGE } from '../constants';
 
 const UnitList = lazy(() => import('../components/organisms/UnitList/UnitList'));
 
@@ -53,7 +54,7 @@ function FormationPlannerContent() {
           if (u) formationUnitCount++;
         }
       }
-      const maxTotalUnits = 1000;
+      const maxTotalUnits = MAX_TOTAL_UNITS;
       const totalUnitCount = units.length + formationUnitCount;
       
       if (totalUnitCount >= maxTotalUnits) {
@@ -169,8 +170,8 @@ function FormationPlannerContent() {
             <Slider
               value={gridScale}
               onChange={handleGridScaleChange}
-              min={10}
-              max={100}
+              min={GRID_SIZE_RANGE.MIN}
+              max={GRID_SIZE_RANGE.MAX}
               orientation="vertical"
               aria-label="Grid size"
               sx={{
@@ -194,8 +195,8 @@ function FormationPlannerContent() {
             <Slider
               value={gridScale}
               onChange={handleGridScaleChange}
-              min={10}
-              max={100}
+              min={GRID_SIZE_RANGE.MIN}
+              max={GRID_SIZE_RANGE.MAX}
               aria-label="Grid size"
               sx={{
                 color: '#60a5fa',

@@ -5,6 +5,7 @@ import { UnitRarity } from '../../types';
 import { getUnitDataByName } from '../../types/unitNames';
 import { normalizeUnitName } from '../../utils/unitNameUtils';
 import { calculateUnitPower } from '../../utils/powerUtils';
+import { MAX_TOTAL_UNITS, MAX_UNITS_PER_LEVEL } from '../../constants';
 
 interface UnitState {
   units: Unit[];
@@ -95,9 +96,8 @@ const unitSlice = createSlice({
     },
     addUnit: (state, action: PayloadAction<Unit>) => {
       // Check maximum roster size
-      // Note: Combined limit (roster + formation = 1000) is enforced at component level
-      const maxRosterSize = 1000;
-      if (state.units.length >= maxRosterSize) {
+      // Note: Combined limit (roster + formation = MAX_TOTAL_UNITS) is enforced at component level
+      if (state.units.length >= MAX_TOTAL_UNITS) {
         return; // Don't add if roster is at capacity
       }
       
@@ -108,13 +108,12 @@ const unitSlice = createSlice({
         power: action.payload.power || calculateUnitPower(action.payload.rarity, action.payload.level),
       };
       
-      // Check maximum count per unit per level (49)
-      const maxUnitsPerLevel = 49;
+      // Check maximum count per unit per level
       const matchingUnits = state.units.filter(
         (u) => u.name === normalizedUnit.name && u.level === normalizedUnit.level
       );
-      
-      if (matchingUnits.length >= maxUnitsPerLevel) {
+
+      if (matchingUnits.length >= MAX_UNITS_PER_LEVEL) {
         return; // Don't add if this unit+level combination is at capacity
       }
       

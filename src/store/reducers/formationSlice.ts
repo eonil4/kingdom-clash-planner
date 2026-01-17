@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { Formation, Unit } from '../../types';
+import { FORMATION_GRID_SIZE, DEFAULT_FORMATION_NAME } from '../../constants';
 
 interface FormationState {
   currentFormation: Formation | null;
@@ -9,10 +10,10 @@ interface FormationState {
 const initialState: FormationState = {
   currentFormation: {
     id: '1',
-    name: 'Formation 1',
-    tiles: Array(7)
+    name: DEFAULT_FORMATION_NAME,
+    tiles: Array(FORMATION_GRID_SIZE)
       .fill(null)
-      .map(() => Array(7).fill(null)),
+      .map(() => Array(FORMATION_GRID_SIZE).fill(null)),
     power: 0,
   },
 };

@@ -4,6 +4,7 @@ import { useAppDispatch } from '../store/hooks';
 import { setUnits } from '../store/reducers/unitSlice';
 import { setCurrentFormation } from '../store/reducers/formationSlice';
 import { deserializeUnits, deserializeFormation } from '../utils/urlSerialization';
+import { FORMATION_GRID_SIZE, DEFAULT_FORMATION_NAME } from '../constants';
 
 export function useInitializeData() {
   const dispatch = useAppDispatch();
@@ -39,8 +40,8 @@ export function useInitializeData() {
     if (formationParam && formationParam.trim()) {
       try {
         const { name, tiles } = deserializeFormation(formationParam);
-        // Validate that we got a proper 7x7 grid
-        if (tiles && tiles.length === 7 && tiles.every(row => row.length === 7)) {
+        // Validate that we got a proper FORMATION_GRID_SIZE x FORMATION_GRID_SIZE grid
+        if (tiles && tiles.length === FORMATION_GRID_SIZE && tiles.every(row => row.length === FORMATION_GRID_SIZE)) {
           // Calculate power using the same logic as the reducer
           let power = 0;
           for (const row of tiles) {
@@ -61,10 +62,10 @@ export function useInitializeData() {
           // Invalid formation, use default empty formation
           const defaultFormation = {
             id: '1',
-            name: 'Formation 1',
-            tiles: Array(7)
+            name: DEFAULT_FORMATION_NAME,
+            tiles: Array(FORMATION_GRID_SIZE)
               .fill(null)
-              .map(() => Array(7).fill(null)),
+              .map(() => Array(FORMATION_GRID_SIZE).fill(null)),
             power: 0,
           };
           dispatch(setCurrentFormation(defaultFormation));
@@ -74,10 +75,10 @@ export function useInitializeData() {
         // Use default empty formation on error
         const defaultFormation = {
           id: '1',
-          name: 'Formation 1',
-          tiles: Array(7)
+          name: DEFAULT_FORMATION_NAME,
+          tiles: Array(FORMATION_GRID_SIZE)
             .fill(null)
-            .map(() => Array(7).fill(null)),
+            .map(() => Array(FORMATION_GRID_SIZE).fill(null)),
           power: 0,
         };
         dispatch(setCurrentFormation(defaultFormation));
@@ -86,14 +87,13 @@ export function useInitializeData() {
       // No formation in URL, use default empty formation
       const defaultFormation = {
         id: '1',
-        name: 'Formation 1',
-        tiles: Array(7)
+        name: DEFAULT_FORMATION_NAME,
+        tiles: Array(FORMATION_GRID_SIZE)
           .fill(null)
-          .map(() => Array(7).fill(null)),
+          .map(() => Array(FORMATION_GRID_SIZE).fill(null)),
         power: 0,
       };
       dispatch(setCurrentFormation(defaultFormation));
     }
   }, [dispatch, searchParams]);
 }
-

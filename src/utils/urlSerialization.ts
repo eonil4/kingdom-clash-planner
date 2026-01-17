@@ -3,6 +3,7 @@ import { UnitRarity } from '../types';
 import { getUnitDataByName, UnitDataMap } from '../types/unitNames';
 import { calculateUnitPower } from './powerUtils';
 import { getUnitImagePath } from './imageUtils';
+import { FORMATION_GRID_SIZE, FORMATION_TOTAL_CELLS, MAX_TOTAL_UNITS, MAX_UNITS_PER_LEVEL } from '../constants';
 
 /**
  * Sort units for URL serialization:
@@ -74,11 +75,11 @@ export function serializeUnits(units: Unit[]): string {
  */
 export function deserializeUnits(unitsString: string): Unit[] {
   if (!unitsString) return [];
-  
+
   const units: Unit[] = [];
   const entries = unitsString.split(';');
-  const maxRosterSize = 1000; // Maximum roster size (component enforces combined limit)
-  const maxUnitsPerLevel = 49; // Maximum count per unit per level
+  const maxRosterSize = MAX_TOTAL_UNITS; // Maximum roster size (component enforces combined limit)
+  const maxUnitsPerLevel = MAX_UNITS_PER_LEVEL; // Maximum count per unit per level
   
   for (const entry of entries) {
     // Check total roster size limit
@@ -174,9 +175,9 @@ export function serializeFormation(formation: Formation | null): string {
  * Uses ";" as separator instead of "#" to avoid URL fragment issues
  */
 export function deserializeFormation(formationString: string): { name: string; tiles: (Unit | null)[][] } {
-  const tiles: (Unit | null)[][] = Array(7)
+  const tiles: (Unit | null)[][] = Array(FORMATION_GRID_SIZE)
     .fill(null)
-    .map(() => Array(7).fill(null));
+    .map(() => Array(FORMATION_GRID_SIZE).fill(null));
   
   let formationName = 'Formation 1'; // Default name
   
@@ -192,8 +193,8 @@ export function deserializeFormation(formationString: string): { name: string; t
   }
   
   // Grid data starts from index 1 (after the name and first ; separator)
-  // We have 49 cells (7x7 grid), so we need 49 parts after the name
-  for (let i = 1; i < Math.min(parts.length, 50); i++) { // 1 + 49 = 50 max
+  // We have FORMATION_TOTAL_CELLS cells, so we need that many parts after the name
+  for (let i = 1; i < Math.min(parts.length, FORMATION_TOTAL_CELLS + 1); i++) { // 1 + FORMATION_TOTAL_CELLS max
     const cellIndex = i - 1; // Convert to 0-based cell index
     const row = Math.floor(cellIndex / 7);
     const col = cellIndex % 7;
@@ -249,4 +250,3 @@ export function deserializeFormation(formationString: string): { name: string; t
   
   return { name: formationName, tiles };
 }
-
