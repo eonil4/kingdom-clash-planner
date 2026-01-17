@@ -4,6 +4,8 @@
   "version": "0.10.0",
   "type": "module",
   "scripts": {
+    "audit": "pnpm audit",
+    "audit:fix": "pnpm audit --fix",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:ci": "pnpm lint && pnpm build && pnpm test:unit:coverage",
@@ -14,9 +16,11 @@
     "preview": "vite preview",
     "test:unit": "vitest run",
     "test:unit:coverage": "vitest run --coverage",
-    "test:unit:watch": "vitest",
     "test:unit:coverage:ui:watch": "vitest --coverage --ui --watch",
+    "test:unit:watch": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:integration:coverage": "vitest run --config vitest.integration.config.ts --coverage",
+    "test:integration:coverage:ui:watch": "vitest run --config vitest.integration.config.ts --coverage --ui --watch",
     "test:integration:watch": "vitest --config vitest.integration.config.ts",
     "test:e2e": "playwright test --reporter=line",
     "test:e2e:html": "playwright test --reporter=html",
@@ -57,6 +61,7 @@
     "@vitest/coverage-v8": "^4.0.13",
     "@vitest/ui": "^4.0.13",
     "autoprefixer": "^10.4.22",
+    "baseline-browser-mapping": "^2.9.15",
     "chokidar-cli": "^3.0.0",
     "eslint": "^9.33.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
@@ -75,7 +80,12 @@
   "pnpm": {
     "overrides": {
       "glob": ">=10.5.0",
-      "js-yaml": ">=4.1.1"
+      "js-yaml": ">=4.1.1",
+      "cookie@<0.7.0": ">=0.7.0",
+      "tmp@<=0.2.3": ">=0.2.4",
+      "qs@<6.14.1": ">=6.14.1",
+      "react-router@>=7.0.0 <=7.11.0": ">=7.12.0",
+      "react-router@>=7.0.0 <7.12.0": ">=7.12.0"
     }
   }
 }
