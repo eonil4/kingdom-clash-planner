@@ -6,6 +6,7 @@ import { useManageUnits } from '../../../src/hooks/useManageUnits';
 import { UnitRarity } from '../../../src/types';
 import type { Unit } from '../../../src/types';
 import formationReducer from '../../../src/store/reducers/formationSlice';
+import { ToastProvider } from '../../../src/contexts/ToastContext';
 
 vi.mock('../../../src/store/reducers/unitSlice', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../../src/store/reducers/unitSlice')>();
@@ -25,6 +26,20 @@ vi.mock('../../../src/utils/unitNameUtils', () => ({
 
 vi.mock('../../../src/utils/powerUtils', () => ({
   calculateUnitPower: vi.fn((rarity, level) => level * 100),
+}));
+
+const mockShowError = vi.fn();
+const mockShowSuccess = vi.fn();
+const mockShowWarning = vi.fn();
+const mockShowInfo = vi.fn();
+
+vi.mock('../../../src/hooks/useToast', () => ({
+  useToast: () => ({
+    showError: mockShowError,
+    showSuccess: mockShowSuccess,
+    showWarning: mockShowWarning,
+    showInfo: mockShowInfo,
+  }),
 }));
 
 vi.mock('../../../src/types/unitNames', () => ({
@@ -81,7 +96,11 @@ const wrapper = (units: Unit[] = [], formation = {
 }) => {
   const store = createMockStore(units, formation);
   return ({ children }: { children: React.ReactNode }) => (
-    <Provider store={store}>{children}</Provider>
+    <Provider store={store}>
+      <ToastProvider>
+        {children}
+      </ToastProvider>
+    </Provider>
   );
 };
 
@@ -341,7 +360,7 @@ describe('useManageUnits', () => {
   it('should handle row save', () => {
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -378,7 +397,7 @@ describe('useManageUnits', () => {
     window.confirm = vi.fn(() => true);
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -395,7 +414,7 @@ describe('useManageUnits', () => {
     window.confirm = vi.fn(() => true);
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -412,7 +431,7 @@ describe('useManageUnits', () => {
     window.confirm = vi.fn(() => false);
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -428,7 +447,7 @@ describe('useManageUnits', () => {
   it('should handle save with selected levels', () => {
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -457,7 +476,7 @@ describe('useManageUnits', () => {
   it('should not save without unit name', () => {
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
     const initialCount = store.getState().unit.units.length;
@@ -475,7 +494,7 @@ describe('useManageUnits', () => {
   it('should not save without selected levels', () => {
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
     const initialCount = store.getState().unit.units.length;
@@ -598,7 +617,7 @@ describe('useManageUnits', () => {
         }),
     });
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
 
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
@@ -626,7 +645,7 @@ describe('useManageUnits', () => {
   it('should handle row save when no editingRowId', () => {
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -641,7 +660,7 @@ describe('useManageUnits', () => {
     window.confirm = vi.fn(() => false);
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -662,7 +681,7 @@ describe('useManageUnits', () => {
     ];
     const store = createMockStore(unitsWithDuplicates, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -683,7 +702,7 @@ describe('useManageUnits', () => {
   it('should handle save with editing id', () => {
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -704,7 +723,7 @@ describe('useManageUnits', () => {
   it('should handle row save with updating existing units', () => {
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -890,7 +909,7 @@ describe('useManageUnits', () => {
   it('should handle adding units to existing when count increases', () => {
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -916,7 +935,7 @@ describe('useManageUnits', () => {
     ];
     const store = createMockStore(unitsWithSameNameLevel, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1096,7 +1115,7 @@ describe('useManageUnits', () => {
     ];
     const store = createMockStore(manyUnitsOfSameType, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1118,7 +1137,7 @@ describe('useManageUnits', () => {
   it('should update existing units when count equals matching units', () => {
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1139,7 +1158,7 @@ describe('useManageUnits', () => {
   it('should handle save with existing editing id', () => {
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1199,7 +1218,7 @@ describe('useManageUnits', () => {
   });
 
   it('should show alert when row save would exceed total limit', () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    mockShowError.mockClear();
     const manyUnits: Unit[] = Array(995).fill(null).map((_, i) => ({
       id: `unit-${i}`,
       name: `Unit${i}`,
@@ -1209,7 +1228,7 @@ describe('useManageUnits', () => {
     }));
     const store = createMockStore(manyUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1224,8 +1243,8 @@ describe('useManageUnits', () => {
       result.current.handleRowSave();
     });
 
-    expect(alertSpy).toHaveBeenCalled();
-    alertSpy.mockRestore();
+    expect(mockShowError).toHaveBeenCalled();
+    
   });
 
   it('should handle row save with units at per-level limit', () => {
@@ -1238,7 +1257,7 @@ describe('useManageUnits', () => {
     }));
     const store = createMockStore(manyUnitsOfSameLevel, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1257,7 +1276,7 @@ describe('useManageUnits', () => {
   });
 
   it('should show alert when save would exceed total limit', () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    mockShowError.mockClear();
     const manyUnits: Unit[] = Array(1000).fill(null).map((_, i) => ({
       id: `unit-${i}`,
       name: `Unit${i}`,
@@ -1267,7 +1286,11 @@ describe('useManageUnits', () => {
     }));
     const store = createMockStore(manyUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}>
+        <ToastProvider>
+          {children}
+        </ToastProvider>
+      </Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1281,8 +1304,7 @@ describe('useManageUnits', () => {
       result.current.handleSave();
     });
 
-    expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('Maximum total units'));
-    alertSpy.mockRestore();
+    expect(mockShowError).toHaveBeenCalledWith(expect.stringContaining('Maximum total units'));
   });
 
   it('should handle save with many units in roster', () => {
@@ -1295,7 +1317,7 @@ describe('useManageUnits', () => {
     }));
     const store = createMockStore(manyUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1324,7 +1346,7 @@ describe('useManageUnits', () => {
     }));
     const store = createMockStore(manyUnitsOfSameLevel, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1350,7 +1372,7 @@ describe('useManageUnits', () => {
     ];
     const store = createMockStore(fewUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1370,7 +1392,7 @@ describe('useManageUnits', () => {
   });
 
   it('should handle row save showing alert when unitsToAdd < toAdd due to totalSpace', () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    mockShowError.mockClear();
     const manyUnits: Unit[] = Array(998).fill(null).map((_, i) => ({
       id: `unit-${i}`,
       name: i < 2 ? 'TestUnit' : `Unit${i}`,
@@ -1380,7 +1402,7 @@ describe('useManageUnits', () => {
     }));
     const store = createMockStore(manyUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1395,12 +1417,12 @@ describe('useManageUnits', () => {
       result.current.handleRowSave();
     });
 
-    expect(alertSpy).toHaveBeenCalled();
-    alertSpy.mockRestore();
+    expect(mockShowError).toHaveBeenCalled();
+    
   });
 
   it('should handle row save showing alert when totalSpace is depleted', () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    mockShowError.mockClear();
     const fullRoster: Unit[] = Array(1000).fill(null).map((_, i) => ({
       id: `unit-${i}`,
       name: i < 3 ? 'TestUnit' : `Unit${i}`,
@@ -1410,7 +1432,7 @@ describe('useManageUnits', () => {
     }));
     const store = createMockStore(fullRoster, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1425,8 +1447,8 @@ describe('useManageUnits', () => {
       result.current.handleRowSave();
     });
 
-    expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('Maximum total units'));
-    alertSpy.mockRestore();
+    expect(mockShowError).toHaveBeenCalledWith(expect.stringContaining('Maximum total units'));
+    
   });
 
   it('should handle row save when available units at level limit', () => {
@@ -1439,7 +1461,7 @@ describe('useManageUnits', () => {
     }));
     const store = createMockStore(fullLevelUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1458,7 +1480,7 @@ describe('useManageUnits', () => {
   });
 
   it('should show total limit alert when save would exceed total units', () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    mockShowError.mockClear();
     const manyUnits: Unit[] = Array(998).fill(null).map((_, i) => ({
       id: `unit-${i}`,
       name: `Unit${i}`,
@@ -1468,7 +1490,7 @@ describe('useManageUnits', () => {
     }));
     const store = createMockStore(manyUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1487,12 +1509,12 @@ describe('useManageUnits', () => {
       result.current.handleSave();
     });
 
-    expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('Maximum total units'));
-    alertSpy.mockRestore();
+    expect(mockShowError).toHaveBeenCalledWith(expect.stringContaining('Maximum total units'));
+    
   });
 
   it('should show per-level limit alert in handleSave when level count exceeds available', () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    mockShowError.mockClear();
     const unitsNearLimit: Unit[] = Array(46).fill(null).map((_, i) => ({
       id: `unit-${i}`,
       name: 'TestUnit',
@@ -1502,7 +1524,7 @@ describe('useManageUnits', () => {
     }));
     const store = createMockStore(unitsNearLimit, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1532,12 +1554,12 @@ describe('useManageUnits', () => {
       result.current.handleSave();
     });
 
-    expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('Maximum count'));
-    alertSpy.mockRestore();
+    expect(mockShowError).toHaveBeenCalledWith(expect.stringContaining('Maximum count'));
+    
   });
 
   it('should show singular unit message when only 1 unit can be added', () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    mockShowError.mockClear();
     const unitsNearLimit: Unit[] = Array(48).fill(null).map((_, i) => ({
       id: `unit-${i}`,
       name: 'TestUnit',
@@ -1547,7 +1569,7 @@ describe('useManageUnits', () => {
     }));
     const store = createMockStore(unitsNearLimit, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1571,12 +1593,12 @@ describe('useManageUnits', () => {
       result.current.handleSave();
     });
 
-    expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('You can add 1 more unit.'));
-    alertSpy.mockRestore();
+    expect(mockShowError).toHaveBeenCalledWith(expect.stringContaining('You can add 1 more unit.'));
+    
   });
 
   it('should show singular unit message for total limit when only 1 space available', () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    mockShowError.mockClear();
     const manyUnits: Unit[] = Array(999).fill(null).map((_, i) => ({
       id: `unit-${i}`,
       name: `Unit${i}`,
@@ -1586,7 +1608,7 @@ describe('useManageUnits', () => {
     }));
     const store = createMockStore(manyUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1618,14 +1640,14 @@ describe('useManageUnits', () => {
       result.current.handleSave();
     });
 
-    expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('You can add 1 more unit.'));
-    alertSpy.mockRestore();
+    expect(mockShowError).toHaveBeenCalledWith(expect.stringContaining('You can add 1 more unit.'));
+    
   });
 
   it('should successfully add units when within limits', () => {
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
     const initialCount = store.getState().unit.units.length;
@@ -1665,7 +1687,7 @@ describe('useManageUnits', () => {
   it('should use default count of 1 when level is toggled without setting count', () => {
     const store = createMockStore(mockUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
     const initialCount = store.getState().unit.units.length;
@@ -1691,7 +1713,7 @@ describe('useManageUnits', () => {
   });
 
   it('should show singular message in handleRowSave when only 1 space available', () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    mockShowError.mockClear();
     const targetUnit: Unit = {
       id: 'target-unit',
       name: 'TargetUnit',
@@ -1709,7 +1731,7 @@ describe('useManageUnits', () => {
     manyUnits.push(targetUnit);
     const store = createMockStore(manyUnits, mockFormation);
     const wrapperWithStore = ({ children }: { children: React.ReactNode }) => (
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}><ToastProvider>{children}</ToastProvider></Provider>
     );
     const { result } = renderHook(() => useManageUnits(), { wrapper: wrapperWithStore });
 
@@ -1725,8 +1747,8 @@ describe('useManageUnits', () => {
       result.current.handleRowSave();
     });
 
-    expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('You can add 1 more unit.'));
-    alertSpy.mockRestore();
+    expect(mockShowError).toHaveBeenCalledWith(expect.stringContaining('You can add 1 more unit.'));
+    
   });
 });
 

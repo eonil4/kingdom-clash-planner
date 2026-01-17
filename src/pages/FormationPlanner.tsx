@@ -13,6 +13,7 @@ import FormationHeader from '../components/organisms/FormationHeader/FormationHe
 import FormationGrid from '../components/organisms/FormationGrid/FormationGrid';
 import { useInitializeData } from '../hooks/useInitializeData';
 import { useUrlSync } from '../hooks/useUrlSync';
+import { useToast } from '../hooks/useToast';
 import { getDndBackend, getDndBackendOptions } from '../utils/deviceUtils';
 import type { Unit } from '../types';
 import { MAX_TOTAL_UNITS, GRID_SIZE_RANGE } from '../constants';
@@ -25,6 +26,7 @@ function FormationPlannerContent() {
   const dispatch = useAppDispatch();
   const currentFormation = useAppSelector((state) => state.formation.currentFormation);
   const { units } = useAppSelector((state) => state.unit);
+  const { showError } = useToast();
   
   // Grid size state (percentage of max size)
   const [gridScale, setGridScale] = useState(80);
@@ -58,13 +60,13 @@ function FormationPlannerContent() {
       const totalUnitCount = units.length + formationUnitCount;
       
       if (totalUnitCount >= maxTotalUnits) {
-        alert(`Cannot place unit. Maximum total units (roster + formation) is ${maxTotalUnits}.`);
+        showError(`Cannot place unit. Maximum total units (roster + formation) is ${maxTotalUnits}.`);
         return;
       }
     }
     
     dispatch(placeUnit({ row, col, unit }));
-  }, [dispatch, currentFormation, units]);
+  }, [dispatch, currentFormation, units, showError]);
 
   const handleRemoveUnit = useCallback((row: number, col: number, unit: Unit | null) => {
     dispatch(removeUnit({ row, col, unit: unit || null }));

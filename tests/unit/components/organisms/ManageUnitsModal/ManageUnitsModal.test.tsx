@@ -45,6 +45,15 @@ vi.mock('../../../../../src/utils/powerUtils', () => ({
   formatNumber: vi.fn((value: number) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')),
 }));
 
+vi.mock('../../../../../src/hooks/useToast', () => ({
+  useToast: () => ({
+    showError: vi.fn(),
+    showSuccess: vi.fn(),
+    showWarning: vi.fn(),
+    showInfo: vi.fn(),
+  }),
+}));
+
 vi.mock('../../../../../src/types/unitNames', () => ({
   UNIT_NAMES_ARRAY: ['TestUnit'],
   getUnitDataByName: vi.fn(() => ({

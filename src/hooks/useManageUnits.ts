@@ -7,6 +7,7 @@ import { normalizeUnitName } from '../utils/unitNameUtils';
 import { calculateUnitPower } from '../utils/powerUtils';
 import { getUnitDataByName } from '../types/unitNames';
 import { MAX_TOTAL_UNITS, MAX_UNITS_PER_LEVEL } from '../constants';
+import { useToast } from './useToast';
 
 
 export type SortColumn = 'name' | 'level' | 'rarity' | 'count' | null;
@@ -26,6 +27,7 @@ export const useManageUnits = () => {
     const dispatch = useAppDispatch();
     const { units } = useAppSelector((state) => state.unit);
     const currentFormation = useAppSelector((state) => state.formation.currentFormation);
+    const { showError } = useToast();
 
     // State
     const [isAdding, setIsAdding] = useState(false);
@@ -215,13 +217,13 @@ export const useManageUnits = () => {
 
             const totalSpace = maxTotalUnits - totalUnitCount;
             if (totalSpace <= 0) {
-                alert(`Cannot add more units. Maximum total units (roster + formation) is ${maxTotalUnits}.`);
+                showError(`Cannot add more units. Maximum total units (roster + formation) is ${maxTotalUnits}.`);
                 return;
             }
 
             const unitsToAdd = Math.min(toAdd, totalSpace);
             if (unitsToAdd < toAdd) {
-                alert(`Cannot add ${toAdd} units. Maximum total units (roster + formation) is ${maxTotalUnits}. You can add ${totalSpace} more unit${totalSpace !== 1 ? 's' : ''}.`);
+                showError(`Cannot add ${toAdd} units. Maximum total units (roster + formation) is ${maxTotalUnits}. You can add ${totalSpace} more unit${totalSpace !== 1 ? 's' : ''}.`);
             }
 
             for (let i = 0; i < unitsToAdd; i++) {
@@ -270,12 +272,12 @@ export const useManageUnits = () => {
 
         const totalSpace = maxTotalUnits - totalUnitCount;
         if (totalSpace <= 0) {
-            alert(`Cannot add more units. Maximum total units (roster + formation) is ${maxTotalUnits}.`);
+            showError(`Cannot add more units. Maximum total units (roster + formation) is ${maxTotalUnits}.`);
             return;
         }
 
         if (totalToAdd > totalSpace) {
-            alert(`Cannot add ${totalToAdd} units. Maximum total units (roster + formation) is ${maxTotalUnits}. You can add ${totalSpace} more unit${totalSpace !== 1 ? 's' : ''}.`);
+            showError(`Cannot add ${totalToAdd} units. Maximum total units (roster + formation) is ${maxTotalUnits}. You can add ${totalSpace} more unit${totalSpace !== 1 ? 's' : ''}.`);
             return;
         }
 
@@ -287,7 +289,7 @@ export const useManageUnits = () => {
             const available = maxUnitsPerLevel - existingCount;
 
             if (levelCount > available) {
-                alert(`Cannot add ${levelCount} units. Maximum count for ${normalizedName} level ${level} is ${maxUnitsPerLevel}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
+                showError(`Cannot add ${levelCount} units. Maximum count for ${normalizedName} level ${level} is ${maxUnitsPerLevel}. You can add ${available} more unit${available !== 1 ? 's' : ''}.`);
                 return;
             }
         }

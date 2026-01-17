@@ -4,6 +4,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { HelpOverlay } from '../../../../../src/components/organisms';
 
+vi.stubGlobal('import.meta', { env: { VITE_APP_VERSION: '0.11.0' } });
+
 vi.mock('../../../../../src/components/atoms', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../../../../src/components/atoms')>();
   return {

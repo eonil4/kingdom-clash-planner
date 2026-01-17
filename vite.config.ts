@@ -15,7 +15,9 @@ export default defineConfig({
   define: {
     // Map the package version to a Vite-accessible environment variable
     'import.meta.env.VITE_APP_VERSION': JSON.stringify(process.env.npm_package_version),
-  },  build: {
+  },
+  build: {
+    target: 'es2020',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -31,10 +33,15 @@ export default defineConfig({
           // Split Redux into separate chunk
           'redux-vendor': ['@reduxjs/toolkit', 'react-redux', 'redux-saga'],
           // Split react-dnd into separate chunk
-          'dnd-vendor': ['react-dnd', 'react-dnd-html5-backend'],
+          'dnd-vendor': ['react-dnd', 'react-dnd-html5-backend', 'react-dnd-touch-backend'],
         },
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
+    cssCodeSplit: true,
+    sourcemap: false,
     // Increase chunk size warning limit to 1000kb (default is 500kb)
     // This is reasonable for a game planner app with many assets
     chunkSizeWarningLimit: 1000,
@@ -44,8 +51,8 @@ export default defineConfig({
     environment: 'jsdom',
     passWithNoTests: true,
     setupFiles: ['./tests/setup.ts'],
-    include: ['tests/unit/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    exclude: ['node_modules', 'dist', 'tests/e2e/**', 'tests/integration/**'],
+    include: ['tests/{unit,integration}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    exclude: ['node_modules', 'dist', 'tests/e2e/**'],
     // Enable test file isolation to prevent mock leakage between files
     isolate: true,
     // Increase concurrency for better parallelization
@@ -58,10 +65,10 @@ export default defineConfig({
     sequence: {
       shuffle: false,
     },
-    // Test timeout
-    testTimeout: 10000,
+    // Test timeout (increased for integration tests)
+    testTimeout: 30000,
     // Hook timeout
-    hookTimeout: 10000,
+    hookTimeout: 30000,
     // Optimize JSDOM environment
     environmentOptions: {
       jsdom: {

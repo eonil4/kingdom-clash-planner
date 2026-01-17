@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ErrorBoundary } from './components/organisms';
+import { ToastProvider } from './contexts/ToastContext';
 import { store } from './store';
 import { router } from './router';
 
@@ -24,8 +25,10 @@ function App() {
     <ErrorBoundary>
       <Provider store={store}>
         <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <RouterProvider router={router} />
+          <ToastProvider>
+            <CssBaseline />
+            <RouterProvider router={router} />
+          </ToastProvider>
         </ThemeProvider>
       </Provider>
     </ErrorBoundary>

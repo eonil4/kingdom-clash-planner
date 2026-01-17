@@ -43,6 +43,20 @@ vi.mock('../../../src/hooks/useUrlSync', () => ({
   useUrlSync: () => {},
 }));
 
+const mockShowError = vi.fn();
+const mockShowSuccess = vi.fn();
+const mockShowWarning = vi.fn();
+const mockShowInfo = vi.fn();
+
+vi.mock('../../../src/hooks/useToast', () => ({
+  useToast: () => ({
+    showError: mockShowError,
+    showSuccess: mockShowSuccess,
+    showWarning: mockShowWarning,
+    showInfo: mockShowInfo,
+  }),
+}));
+
 vi.mock('../../../src/components/molecules', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../../src/components/molecules')>();
   return actual;
@@ -261,7 +275,7 @@ describe('FormationPlanner', () => {
   });
 
   it('should prevent placing unit when total limit is reached', () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    mockShowError.mockClear();
     const manyUnits = Array(1000).fill(null).map((_, i) => ({
       id: `unit-${i}`,
       name: `Unit${i}`,
@@ -287,11 +301,11 @@ describe('FormationPlanner', () => {
     const placeButton = screen.getByTestId('place-unit');
     placeButton.click();
 
-    expect(alertSpy).toHaveBeenCalledWith(
+    expect(mockShowError).toHaveBeenCalledWith(
       expect.stringContaining('Maximum total units (roster + formation) is 1000')
     );
 
-    alertSpy.mockRestore();
+    
   });
 
   it('should not process drop if nested drop target already handled it (didDrop check)', async () => {
@@ -413,7 +427,7 @@ describe('FormationPlanner', () => {
   });
 
   it('should count formation units correctly when tiles have units', () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    mockShowError.mockClear();
     const formationWithUnits = {
       ...mockFormation,
       tiles: [
@@ -449,10 +463,10 @@ describe('FormationPlanner', () => {
     const placeButton = screen.getByTestId('place-unit');
     placeButton.click();
 
-    expect(alertSpy).toHaveBeenCalledWith(
+    expect(mockShowError).toHaveBeenCalledWith(
       expect.stringContaining('Maximum total units')
     );
-    alertSpy.mockRestore();
+    
   });
 
   it('should handle placing unit when replacing existing unit', async () => {
@@ -490,7 +504,7 @@ describe('FormationPlanner', () => {
   });
 
   it('should not show alert when drop is from roster unit not at limit', () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    mockShowError.mockClear();
     const unitInRoster = { id: '1', name: 'Test', level: 1, rarity: UnitRarity.Common };
     
     mockUseAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
@@ -511,8 +525,8 @@ describe('FormationPlanner', () => {
     const placeButton = screen.getByTestId('place-unit');
     placeButton.click();
 
-    expect(alertSpy).not.toHaveBeenCalled();
-    alertSpy.mockRestore();
+    expect(mockShowError).not.toHaveBeenCalled();
+    
   });
 
   it('should skip drop handler when unit is not in formation', () => {
@@ -576,3 +590,4 @@ describe('FormationPlanner', () => {
     expect(screen.getByTestId('formation-grid')).toBeInTheDocument();
   });
 });
+

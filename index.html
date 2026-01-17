@@ -6,15 +6,20 @@
     <meta name="description" content="Plan and optimize your Kingdom Clash formations with this interactive formation planner tool." />
     <meta name="theme-color" content="#111827" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="manifest" href="/manifest.json" />
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="KC Planner" />
     <title>Kingdom Clash Planner</title>
     <style>
       /* Critical CSS - inline to prevent render blocking */
       *,*::before,*::after{box-sizing:border-box}
-      body{margin:0;background-color:#111827;font-family:system-ui,-apple-system,sans-serif}
-      #root{min-height:100vh;contain:layout style}
+      body{margin:0;background-color:#111827;font-family:system-ui,-apple-system,sans-serif;font-display:swap}
+      #root{min-height:100vh;contain:layout style paint}
       .loading-skeleton{display:flex;flex-direction:column;min-height:100vh;background-color:#111827;color:#e5e5e5;align-items:center;justify-content:center}
-      .loading-spinner{width:40px;height:40px;border:3px solid #374151;border-top-color:#3b82f6;border-radius:50%;animation:spin 1s linear infinite}
+      .loading-spinner{width:40px;height:40px;border:3px solid #374151;border-top-color:#3b82f6;border-radius:50%;animation:spin 1s linear infinite;will-change:transform}
       @keyframes spin{to{transform:rotate(360deg)}}
       /* Skip link for keyboard navigation */
       .skip-link{position:absolute;top:-40px;left:0;background:#3b82f6;color:#fff;padding:8px 16px;z-index:10000;text-decoration:none;font-weight:600;border-radius:0 0 4px 0}

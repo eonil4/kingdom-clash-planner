@@ -6,6 +6,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import type { ReactElement, ReactNode } from 'react';
 import { createTestStore, type TestStore } from './testStore';
 import type { RootState } from '../../../src/store';
+import { ToastProvider } from '../../../src/contexts/ToastContext';
 
 interface WrapperProps {
   children: ReactNode;
@@ -36,7 +37,9 @@ export function renderWithStore(
     const content = (
       <Provider store={store}>
         <MemoryRouter {...routerProps}>
-          {children}
+          <ToastProvider>
+            {children}
+          </ToastProvider>
         </MemoryRouter>
       </Provider>
     );
@@ -68,9 +71,11 @@ export function createWrapper(
     return (
       <Provider store={store}>
         <MemoryRouter {...routerProps}>
-          <DndProvider backend={HTML5Backend}>
-            {children}
-          </DndProvider>
+          <ToastProvider>
+            <DndProvider backend={HTML5Backend}>
+              {children}
+            </DndProvider>
+          </ToastProvider>
         </MemoryRouter>
       </Provider>
     );
