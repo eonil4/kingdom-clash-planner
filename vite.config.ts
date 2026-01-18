@@ -55,11 +55,11 @@ export default defineConfig({
     exclude: ['node_modules', 'dist', 'tests/e2e/**'],
     // Enable test file isolation to prevent mock leakage between files
     isolate: true,
-    // Increase concurrency for better parallelization
-    maxConcurrency: 8,
-    // Use threads pool (default in Vitest 4.0)
+    // Reduce concurrency to prevent memory exhaustion on Windows
+    maxConcurrency: 2,
+    // Use threads pool (faster than forks)
     pool: 'threads',
-    // Run more files in parallel
+    // Limit parallel files to prevent memory exhaustion
     fileParallelism: true,
     // Disable test shuffling to avoid overhead
     sequence: {
@@ -69,12 +69,6 @@ export default defineConfig({
     testTimeout: 30000,
     // Hook timeout
     hookTimeout: 30000,
-    // Optimize JSDOM environment
-    environmentOptions: {
-      jsdom: {
-        resources: 'usable',
-      },
-    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
