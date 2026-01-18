@@ -1,8 +1,9 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useCallback, type ReactNode } from 'react';
 import { ToastNotification } from '../components/organisms';
 import type { ToastSeverity } from '../components/organisms/ToastNotification/ToastNotification';
 
-interface ToastContextType {
+export interface ToastContextType {
   showToast: (message: string, severity?: ToastSeverity) => void;
   showSuccess: (message: string) => void;
   showError: (message: string) => void;
@@ -10,7 +11,7 @@ interface ToastContextType {
   showInfo: (message: string) => void;
 }
 
-const ToastContext = createContext<ToastContextType | undefined>(undefined);
+export const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -43,12 +44,4 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       />
     </ToastContext.Provider>
   );
-}
-
-export function useToastContext() {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToastContext must be used within ToastProvider');
-  }
-  return context;
 }

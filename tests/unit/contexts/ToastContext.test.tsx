@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ToastProvider, useToastContext } from '../../../src/contexts/ToastContext';
+import { ToastProvider } from '../../../src/contexts/ToastContext';
+import { useToastContext } from '../../../src/contexts/useToastContext';
 
 function TestComponent() {
   const { showToast, showSuccess, showError, showWarning, showInfo } = useToastContext();

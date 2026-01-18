@@ -39,11 +39,8 @@ describe('Drag and Drop Integration Tests', () => {
         store.dispatch(addUnit(unit));
       });
 
-      // Act
-      await waitFor(() => {
-        expect(screen.getByLabelText(/5 Archers/i)).toBeInTheDocument();
-      });
-      const unitCard = screen.getByLabelText(/5 Archers/i);
+      // Act - use findByLabelText for built-in retry logic
+      const unitCard = await screen.findByLabelText(/5 Archers/i, {}, { timeout: 5000 });
       await user.dblClick(unitCard);
 
       // Assert
@@ -52,7 +49,7 @@ describe('Drag and Drop Integration Tests', () => {
         const tile00 = state.formation.currentFormation?.tiles[0][0];
         expect(tile00?.name).toBe('Archers');
         expect(tile00?.level).toBe(5);
-      });
+      }, { timeout: 5000 });
     });
 
     it('should place units sequentially when double-clicking multiple', async () => {
@@ -66,24 +63,14 @@ describe('Drag and Drop Integration Tests', () => {
         store.dispatch(addUnit(createMockUnit({ id: '3', name: 'Monk', level: 3, rarity: UnitRarity.Legendary })));
       });
 
-      // Act
-      await waitFor(() => {
-        expect(screen.getByLabelText(/1 Archers/i)).toBeInTheDocument();
-      });
-      
-      const archer = screen.getByLabelText(/1 Archers/i);
+      // Act - use findByLabelText for built-in retry logic
+      const archer = await screen.findByLabelText(/1 Archers/i, {}, { timeout: 5000 });
       await user.dblClick(archer);
       
-      await waitFor(() => {
-        expect(screen.getByLabelText(/2 Infantry/i)).toBeInTheDocument();
-      });
-      const infantry = screen.getByLabelText(/2 Infantry/i);
+      const infantry = await screen.findByLabelText(/2 Infantry/i, {}, { timeout: 5000 });
       await user.dblClick(infantry);
       
-      await waitFor(() => {
-        expect(screen.getByLabelText(/3 Monk/i)).toBeInTheDocument();
-      });
-      const monk = screen.getByLabelText(/3 Monk/i);
+      const monk = await screen.findByLabelText(/3 Monk/i, {}, { timeout: 5000 });
       await user.dblClick(monk);
 
       // Assert
@@ -92,7 +79,7 @@ describe('Drag and Drop Integration Tests', () => {
         expect(state.formation.currentFormation?.tiles[0][0]?.name).toBe('Archers');
         expect(state.formation.currentFormation?.tiles[0][1]?.name).toBe('Infantry');
         expect(state.formation.currentFormation?.tiles[0][2]?.name).toBe('Monk');
-      });
+      }, { timeout: 5000 });
     });
   });
 
@@ -107,18 +94,16 @@ describe('Drag and Drop Integration Tests', () => {
         store.dispatch(addUnit(unit));
       });
 
-      await waitFor(() => {
-        expect(screen.getByLabelText(/5 Archers/i)).toBeInTheDocument();
-      });
-      await user.dblClick(screen.getByLabelText(/5 Archers/i));
+      const unitCard = await screen.findByLabelText(/5 Archers/i, {}, { timeout: 5000 });
+      await user.dblClick(unitCard);
 
       await waitFor(() => {
         const state = store.getState();
         expect(state.formation.currentFormation?.tiles[0][0]).not.toBeNull();
-      });
+      }, { timeout: 5000 });
 
       // Act - find the unit card in the formation tile and double-click it
-      const tile = screen.getByLabelText(/at row 1 column 1/i);
+      const tile = await screen.findByLabelText(/at row 1 column 1/i, {}, { timeout: 5000 });
       const unitInTile = tile.querySelector('[role="button"]');
       if (unitInTile) {
         await user.dblClick(unitInTile);
@@ -129,7 +114,7 @@ describe('Drag and Drop Integration Tests', () => {
         const state = store.getState();
         expect(state.formation.currentFormation?.tiles[0][0]).toBeNull();
         expect(state.unit.units.find(u => u.id === 'remove-dblclick')).toBeDefined();
-      });
+      }, { timeout: 5000 });
     });
   });
 
@@ -145,16 +130,14 @@ describe('Drag and Drop Integration Tests', () => {
       });
 
       // Act
-      await waitFor(() => {
-        expect(screen.getByLabelText(/5 Archers/i)).toBeInTheDocument();
-      });
-      await user.dblClick(screen.getByLabelText(/5 Archers/i));
+      const unitCard = await screen.findByLabelText(/5 Archers/i, {}, { timeout: 5000 });
+      await user.dblClick(unitCard);
 
       // Assert
       await waitFor(() => {
         const state = store.getState();
         expect(state.formation.currentFormation?.power).toBe(150);
-      });
+      }, { timeout: 5000 });
     });
 
     it('should decrease formation power when unit is removed', async () => {
@@ -167,18 +150,16 @@ describe('Drag and Drop Integration Tests', () => {
         store.dispatch(addUnit(unit));
       });
 
-      await waitFor(() => {
-        expect(screen.getByLabelText(/5 Archers/i)).toBeInTheDocument();
-      });
-      await user.dblClick(screen.getByLabelText(/5 Archers/i));
+      const unitCard = await screen.findByLabelText(/5 Archers/i, {}, { timeout: 5000 });
+      await user.dblClick(unitCard);
 
       await waitFor(() => {
         const state = store.getState();
         expect(state.formation.currentFormation?.power).toBe(150);
-      });
+      }, { timeout: 5000 });
 
       // Act - find the unit card in the formation tile and double-click it
-      const tile = screen.getByLabelText(/at row 1 column 1/i);
+      const tile = await screen.findByLabelText(/at row 1 column 1/i, {}, { timeout: 5000 });
       const unitInTile = tile.querySelector('[role="button"]');
       if (unitInTile) {
         await user.dblClick(unitInTile);
@@ -188,7 +169,7 @@ describe('Drag and Drop Integration Tests', () => {
       await waitFor(() => {
         const state = store.getState();
         expect(state.formation.currentFormation?.power).toBe(0);
-      });
+      }, { timeout: 5000 });
     });
   });
 
@@ -208,17 +189,15 @@ describe('Drag and Drop Integration Tests', () => {
       expect(state.unit.units.find(u => u.id === 'saga-transfer')).toBeDefined();
 
       // Act
-      await waitFor(() => {
-        expect(screen.getByLabelText(/3 Infantry/i)).toBeInTheDocument();
-      });
-      await user.dblClick(screen.getByLabelText(/3 Infantry/i));
+      const unitCard = await screen.findByLabelText(/3 Infantry/i, {}, { timeout: 5000 });
+      await user.dblClick(unitCard);
 
       // Assert - unit should be removed from roster (via saga) and in formation
       await waitFor(() => {
         state = store.getState();
         expect(state.unit.units.find(u => u.id === 'saga-transfer')).toBeUndefined();
         expect(state.formation.currentFormation?.tiles[0][0]?.id).toBe('saga-transfer');
-      });
+      }, { timeout: 5000 });
     });
 
     it('should transfer unit from formation back to roster via saga', async () => {
@@ -231,18 +210,16 @@ describe('Drag and Drop Integration Tests', () => {
         store.dispatch(addUnit(unit));
       });
 
-      await waitFor(() => {
-        expect(screen.getByLabelText(/3 Infantry/i)).toBeInTheDocument();
-      });
-      await user.dblClick(screen.getByLabelText(/3 Infantry/i));
+      const unitCard = await screen.findByLabelText(/3 Infantry/i, {}, { timeout: 5000 });
+      await user.dblClick(unitCard);
 
       await waitFor(() => {
         const state = store.getState();
         expect(state.formation.currentFormation?.tiles[0][0]?.id).toBe('saga-back');
-      });
+      }, { timeout: 5000 });
 
       // Act - find the unit card in the formation tile and double-click it
-      const tile = screen.getByLabelText(/at row 1 column 1/i);
+      const tile = await screen.findByLabelText(/at row 1 column 1/i, {}, { timeout: 5000 });
       const unitInTile = tile.querySelector('[role="button"]');
       if (unitInTile) {
         await user.dblClick(unitInTile);
@@ -253,7 +230,7 @@ describe('Drag and Drop Integration Tests', () => {
         const state = store.getState();
         expect(state.unit.units.find(u => u.id === 'saga-back')).toBeDefined();
         expect(state.formation.currentFormation?.tiles[0][0]).toBeNull();
-      });
+      }, { timeout: 5000 });
     });
   });
 
@@ -266,7 +243,7 @@ describe('Drag and Drop Integration Tests', () => {
       await waitFor(() => {
         const tiles = screen.getAllByRole('gridcell');
         expect(tiles).toHaveLength(49);
-      });
+      }, { timeout: 5000 });
     });
 
     it('should show unit in correct tile after placement', async () => {
@@ -280,16 +257,14 @@ describe('Drag and Drop Integration Tests', () => {
       });
 
       // Act
-      await waitFor(() => {
-        expect(screen.getByLabelText(/7 Archers/i)).toBeInTheDocument();
-      });
-      await user.dblClick(screen.getByLabelText(/7 Archers/i));
+      const unitCard = await screen.findByLabelText(/7 Archers/i, {}, { timeout: 5000 });
+      await user.dblClick(unitCard);
 
       // Assert
       await waitFor(() => {
         const tile = screen.getByLabelText(/at row 1 column 1/i);
         expect(tile.querySelector('[role="button"]')).toBeInTheDocument();
-      });
+      }, { timeout: 5000 });
     });
   });
 
@@ -309,12 +284,10 @@ describe('Drag and Drop Integration Tests', () => {
         }
       });
 
-      // Act
+      // Act - use findByLabelText for robust element finding
       for (let i = 1; i <= 5; i++) {
-        await waitFor(() => {
-          expect(screen.getByLabelText(new RegExp(`${i} Archers`, 'i'))).toBeInTheDocument();
-        });
-        await user.dblClick(screen.getByLabelText(new RegExp(`${i} Archers`, 'i')));
+        const unitCard = await screen.findByLabelText(new RegExp(`${i} Archers`, 'i'), {}, { timeout: 5000 });
+        await user.dblClick(unitCard);
         await new Promise(resolve => setTimeout(resolve, 50));
       }
 
@@ -326,7 +299,7 @@ describe('Drag and Drop Integration Tests', () => {
           .filter(t => t !== null) || [];
         expect(unitsInFormation.length).toBe(5);
         expect(state.unit.units.length).toBe(0);
-      });
+      }, { timeout: 5000 });
     });
   });
 });
