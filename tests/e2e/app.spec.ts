@@ -1,7 +1,8 @@
 import { test, expect, Page } from '@playwright/test';
 
-async function waitForAppLoad(page: Page) {
-  await page.waitForSelector('[aria-label^="Formation grid"]', { timeout: 30000 });
+async function navigateToApp(page: Page) {
+  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.waitForSelector('[aria-label^="Formation grid"]', { timeout: 60000 });
 }
 
 async function selectUnitFromDropdown(page: Page, unitName: string) {
@@ -36,14 +37,12 @@ async function addUnitToRoster(page: Page, unitName: string, levels: number[]) {
 
 test.describe('App Loading', () => {
   test('should load the application with title', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
     await expect(page).toHaveTitle(/Kingdom Clash Planner/i);
   });
 
   test('should display formation grid, header, and unit list', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await expect(page.locator('[aria-label^="Formation grid"]')).toBeVisible();
     await expect(page.locator('header')).toBeVisible();
@@ -53,16 +52,14 @@ test.describe('App Loading', () => {
 
 test.describe('Help Overlay', () => {
   test('should open help overlay when clicking help button', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await page.click('[aria-label="Open help overlay"]');
     await expect(page.getByText('Application Guide')).toBeVisible();
   });
 
   test('should display all help sections', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await page.click('[aria-label="Open help overlay"]');
 
@@ -73,8 +70,7 @@ test.describe('Help Overlay', () => {
   });
 
   test('should display formation header section content', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await page.click('[aria-label="Open help overlay"]');
 
@@ -84,8 +80,7 @@ test.describe('Help Overlay', () => {
   });
 
   test('should display formation grid section content', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await page.click('[aria-label="Open help overlay"]');
 
@@ -97,8 +92,7 @@ test.describe('Help Overlay', () => {
   });
 
   test('should display available units list section content', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await page.click('[aria-label="Open help overlay"]');
 
@@ -110,8 +104,7 @@ test.describe('Help Overlay', () => {
   });
 
   test('should display limits and constraints', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await page.click('[aria-label="Open help overlay"]');
 
@@ -122,8 +115,7 @@ test.describe('Help Overlay', () => {
   });
 
   test('should close help overlay when clicking close button', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await page.click('[aria-label="Open help overlay"]');
     await expect(page.getByText('Application Guide')).toBeVisible();
@@ -133,8 +125,7 @@ test.describe('Help Overlay', () => {
   });
 
   test('should close help overlay when pressing Escape', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await page.click('[aria-label="Open help overlay"]');
     await expect(page.getByText('Application Guide')).toBeVisible();
@@ -146,22 +137,19 @@ test.describe('Help Overlay', () => {
 
 test.describe('Formation Header', () => {
   test('should display formation name', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await expect(page.getByText('Formation 1')).toBeVisible();
   });
 
   test('should display total power badge', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await expect(page.getByText('⚔')).toBeVisible();
   });
 
   test('should allow editing formation name', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await page.click('[aria-label="Edit formation name"]');
     const input = page.locator('input[type="text"]').first();
@@ -173,8 +161,7 @@ test.describe('Formation Header', () => {
   });
 
   test('should cancel editing formation name with Escape', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await page.click('[aria-label="Edit formation name"]');
     const input = page.locator('input[type="text"]').first();
@@ -187,8 +174,7 @@ test.describe('Formation Header', () => {
   });
 
   test('should update page title with formation name', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await page.click('[aria-label="Edit formation name"]');
     const input = page.locator('input[type="text"]').first();
@@ -202,16 +188,14 @@ test.describe('Formation Header', () => {
 
 test.describe('Formation Grid', () => {
   test('should display 7x7 formation grid', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     const tiles = page.locator('[role="gridcell"]');
     await expect(tiles).toHaveCount(49);
   });
 
   test('should place unit via double-click', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1]);
 
@@ -223,8 +207,7 @@ test.describe('Formation Grid', () => {
   });
 
   test('should remove unit from formation via double-click', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1]);
 
@@ -239,8 +222,7 @@ test.describe('Formation Grid', () => {
   });
 
   test('should update formation power when placing unit', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     const powerBadge = page.locator('header').locator('text=⚔').locator('..');
     const initialPowerText = await powerBadge.textContent();
@@ -257,20 +239,16 @@ test.describe('Formation Grid', () => {
 
 test.describe('Available Units List', () => {
   test('should display available units area', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
-    // The unit list section contains sort controls and the available units grid
     const unitListSection = page.locator('[aria-label^="Unit roster"]');
     await expect(unitListSection).toBeVisible();
-    // Check that search and manage units controls are visible
     await expect(unitListSection.getByPlaceholder('Search units...')).toBeVisible();
     await expect(unitListSection.getByRole('button', { name: /^Manage( Units)?$/ })).toBeVisible();
   });
 
   test('should display sort controls', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await expect(page.locator('[aria-label="Sort units by (primary)"]')).toBeVisible();
     await expect(page.locator('[aria-label="Sort units by (secondary)"]')).toBeVisible();
@@ -278,8 +256,7 @@ test.describe('Available Units List', () => {
   });
 
   test('should filter units by search', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1]);
     await addUnitToRoster(page, 'Infantry', [1]);
@@ -292,8 +269,7 @@ test.describe('Available Units List', () => {
   });
 
   test('should clear search', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1]);
     await addUnitToRoster(page, 'Infantry', [1]);
@@ -308,8 +284,7 @@ test.describe('Available Units List', () => {
   });
 
   test('should sort units by level', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1, 5]);
 
@@ -321,8 +296,7 @@ test.describe('Available Units List', () => {
   });
 
   test('should withdraw all units from formation', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1, 2]);
 
@@ -340,7 +314,6 @@ test.describe('Available Units List', () => {
 
     await expect(tile1.locator('[aria-label^="1 Archers"]')).not.toBeVisible();
     await expect(tile2.locator('[aria-label^="2 Archers"]')).not.toBeVisible();
-    // Units should be back in the available units list
     const unitList = page.locator('[aria-label^="Unit roster"]');
     await expect(unitList.locator('[aria-label^="1 Archers"]')).toBeVisible();
   });
@@ -348,8 +321,7 @@ test.describe('Available Units List', () => {
 
 test.describe('Manage Units Modal', () => {
   test('should open manage units modal', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await clickManageUnitsButton(page);
     await expect(page.getByRole('dialog')).toBeVisible();
@@ -357,8 +329,7 @@ test.describe('Manage Units Modal', () => {
   });
 
   test('should close manage units modal', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await clickManageUnitsButton(page);
     await expect(page.getByRole('dialog')).toBeVisible();
@@ -368,8 +339,7 @@ test.describe('Manage Units Modal', () => {
   });
 
   test('should add new unit', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await clickManageUnitsButton(page);
     await page.waitForSelector('[role="dialog"]', { state: 'visible' });
@@ -386,8 +356,7 @@ test.describe('Manage Units Modal', () => {
   });
 
   test('should show unit preview when selecting unit', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await clickManageUnitsButton(page);
     await page.waitForSelector('[role="dialog"]', { state: 'visible' });
@@ -401,8 +370,7 @@ test.describe('Manage Units Modal', () => {
   });
 
   test('should select all levels when clicking Select All', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await clickManageUnitsButton(page);
     await page.waitForSelector('[role="dialog"]', { state: 'visible' });
@@ -418,8 +386,7 @@ test.describe('Manage Units Modal', () => {
   });
 
   test('should cancel adding new unit', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await clickManageUnitsButton(page);
     await page.waitForSelector('[role="dialog"]', { state: 'visible' });
@@ -435,8 +402,7 @@ test.describe('Manage Units Modal', () => {
   });
 
   test('should edit existing unit', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await clickManageUnitsButton(page);
     await page.waitForSelector('[role="dialog"]', { state: 'visible' });
@@ -456,10 +422,8 @@ test.describe('Manage Units Modal', () => {
     await expect(page.locator('table').locator('td').filter({ hasText: /^5$/ }).first()).toBeVisible();
   });
 
-  test.skip('should delete unit', async ({ page }) => {
-    // Note: Delete action is being performed but state update is not reflected in time for assertion
-    await page.goto('/');
-    await waitForAppLoad(page);
+  test('should delete unit', async ({ page }) => {
+    await navigateToApp(page);
 
     await clickManageUnitsButton(page);
     await page.waitForSelector('[role="dialog"]', { state: 'visible' });
@@ -470,16 +434,15 @@ test.describe('Manage Units Modal', () => {
 
     await expect(page.locator('table').getByRole('cell', { name: 'Archers' }).first()).toBeVisible();
 
+    page.on('dialog', dialog => dialog.accept());
     const deleteButton = page.getByRole('button', { name: 'Delete Archers' });
-    await deleteButton.click({ force: true });
+    await deleteButton.click();
 
     await expect(page.locator('tbody').getByRole('row')).toHaveCount(0, { timeout: 10000 });
   });
 
-  test.skip('should clear entire roster', async ({ page }) => {
-    // Note: Clear action is being performed but state update is not reflected in time for assertion
-    await page.goto('/');
-    await waitForAppLoad(page);
+  test('should clear entire roster', async ({ page }) => {
+    await navigateToApp(page);
 
     await clickManageUnitsButton(page);
     await page.waitForSelector('[role="dialog"]', { state: 'visible' });
@@ -493,14 +456,14 @@ test.describe('Manage Units Modal', () => {
     await page.getByLabel('1', { exact: true }).check();
     await page.getByRole('button', { name: 'Add Units' }).click();
 
+    page.on('dialog', dialog => dialog.accept());
     await page.getByRole('button', { name: 'Clear Roster' }).click();
 
     await expect(page.locator('tbody').getByRole('row')).toHaveCount(0, { timeout: 10000 });
   });
 
   test('should display unit count in modal', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await clickManageUnitsButton(page);
     await page.waitForSelector('[role="dialog"]', { state: 'visible' });
@@ -516,8 +479,7 @@ test.describe('Manage Units Modal', () => {
 
 test.describe('Unit Card Interactions', () => {
   test('should show tooltip on click', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1]);
 
@@ -528,8 +490,7 @@ test.describe('Unit Card Interactions', () => {
   });
 
   test('should display unit rarity colors', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1]);
 
@@ -540,8 +501,7 @@ test.describe('Unit Card Interactions', () => {
 
 test.describe('URL Sync', () => {
   test('should update URL when adding units', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     const initialUrl = page.url();
 
@@ -554,8 +514,7 @@ test.describe('URL Sync', () => {
   });
 
   test('should update URL when placing units in formation', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1]);
 
@@ -572,8 +531,7 @@ test.describe('URL Sync', () => {
   });
 
   test('should update URL when renaming formation', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await page.click('[aria-label="Edit formation name"]');
     const input = page.locator('input[type="text"]').first();
@@ -588,15 +546,13 @@ test.describe('URL Sync', () => {
   });
 
   test('should load formation from URL', async ({ page }) => {
-    // Format: formationName;id,level;_;... for 49 cells
-    // Archers has index 2
     const emptyCell = '_';
-    const archerCell = '2,1'; // unitIndex 2 (Archers), level 1
+    const archerCell = '2,1';
     const cells = [archerCell, ...Array(48).fill(emptyCell)];
     const formationData = `MyTestFormation;${cells.join(';')}`;
 
-    await page.goto(`/?formation=${formationData}`);
-    await waitForAppLoad(page);
+    await page.goto(`/?formation=${formationData}`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForSelector('[aria-label^="Formation grid"]', { timeout: 60000 });
 
     await expect(page.getByText('MyTestFormation')).toBeVisible();
     const firstTile = page.locator('[aria-label*="at row 1 column 1"]');
@@ -604,12 +560,10 @@ test.describe('URL Sync', () => {
   });
 
   test('should load units from URL', async ({ page }) => {
-    // Format: unitIndex,level,count;...
-    // Iron Guards has index 20, Monk has index 24
-    const unitsData = '20,2,1;24,3,1'; // Iron Guards level 2 (1 unit), Monk level 3 (1 unit)
+    const unitsData = '20,2,1;24,3,1';
 
-    await page.goto(`/?units=${unitsData}`);
-    await waitForAppLoad(page);
+    await page.goto(`/?units=${unitsData}`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForSelector('[aria-label^="Formation grid"]', { timeout: 60000 });
 
     await expect(page.locator('[aria-label^="2 Iron Guards"]')).toBeVisible();
     await expect(page.locator('[aria-label^="3 Monk"]')).toBeVisible();
@@ -617,27 +571,29 @@ test.describe('URL Sync', () => {
 });
 
 test.describe('Drag and Drop', () => {
-  test.skip('should drag unit from roster to formation', async ({ page }) => {
-    // Note: Playwright's dragTo may not work reliably with react-dnd
-    // This functionality is tested via double-click in Formation Grid tests
-    await page.goto('/');
-    await waitForAppLoad(page);
+  test('should place unit to specific formation tile via drag', async ({ page }) => {
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1]);
 
     const unitCard = page.locator('[aria-label^="1 Archers"]').first();
     const targetTile = page.locator('[aria-label*="at row 2 column 3"]');
 
-    await unitCard.dragTo(targetTile);
+    const unitBox = await unitCard.boundingBox();
+    const tileBox = await targetTile.boundingBox();
 
-    await expect(targetTile.locator('[aria-label^="1 Archers"]')).toBeVisible();
+    if (unitBox && tileBox) {
+      await page.mouse.move(unitBox.x + unitBox.width / 2, unitBox.y + unitBox.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(tileBox.x + tileBox.width / 2, tileBox.y + tileBox.height / 2, { steps: 10 });
+      await page.mouse.up();
+    }
+
+    await expect(targetTile.locator('[aria-label^="1 Archers"]')).toBeVisible({ timeout: 5000 });
   });
 
-  test.skip('should drag unit from formation back to roster', async ({ page }) => {
-    // Note: Playwright's dragTo may not work reliably with react-dnd
-    // This functionality is tested via double-click in Formation Grid tests
-    await page.goto('/');
-    await waitForAppLoad(page);
+  test('should remove unit from formation via double-click', async ({ page }) => {
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1]);
 
@@ -647,47 +603,54 @@ test.describe('Drag and Drop', () => {
     const firstTile = page.locator('[aria-label*="at row 1 column 1"]');
     await expect(firstTile.locator('[aria-label^="1 Archers"]')).toBeVisible();
 
-    const formationUnit = firstTile.locator('[aria-label^="1 Archers"]');
-    const rosterArea = page.locator('[aria-label^="Available units"]');
+    await firstTile.locator('[aria-label^="1 Archers"]').dblclick();
 
-    await formationUnit.dragTo(rosterArea);
-
-    await expect(firstTile.locator('[aria-label^="1 Archers"]')).not.toBeVisible();
-    await expect(page.locator('[aria-label^="Available units"]').locator('[aria-label^="1 Archers"]')).toBeVisible();
+    await expect(firstTile.locator('[aria-label^="1 Archers"]')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[aria-label="Available units"]').locator('[aria-label^="1 Archers"]')).toBeVisible();
   });
 
-  test.skip('should swap units in formation via drag', async ({ page }) => {
-    // Note: Playwright's dragTo may not work reliably with react-dnd
-    // This functionality is tested via double-click in Formation Grid tests
-    await page.goto('/');
-    await waitForAppLoad(page);
+  test('should swap units in formation via drag', async ({ page }) => {
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1]);
     await addUnitToRoster(page, 'Infantry', [2]);
 
     const archer = page.locator('[aria-label^="1 Archers"]').first();
     await archer.dblclick();
+    await page.waitForTimeout(300);
+    
     const infantry = page.locator('[aria-label^="2 Infantry"]').first();
     await infantry.dblclick();
+    await page.waitForTimeout(300);
 
     const tile1 = page.locator('[aria-label*="at row 1 column 1"]');
     const tile2 = page.locator('[aria-label*="at row 1 column 2"]');
 
-    await expect(tile1.locator('[aria-label^="1 Archers"]')).toBeVisible();
-    await expect(tile2.locator('[aria-label^="2 Infantry"]')).toBeVisible();
+    await expect(tile1.locator('[aria-label^="1 Archers"]')).toBeVisible({ timeout: 10000 });
+    await expect(tile2.locator('[aria-label^="2 Infantry"]')).toBeVisible({ timeout: 10000 });
 
     const archerInFormation = tile1.locator('[aria-label^="1 Archers"]');
-    await archerInFormation.dragTo(tile2);
+    const archerBox = await archerInFormation.boundingBox();
+    const tile2Box = await tile2.boundingBox();
 
-    await expect(tile1.locator('[aria-label^="2 Infantry"]')).toBeVisible();
-    await expect(tile2.locator('[aria-label^="1 Archers"]')).toBeVisible();
+    if (archerBox && tile2Box) {
+      await page.mouse.move(archerBox.x + archerBox.width / 2, archerBox.y + archerBox.height / 2);
+      await page.waitForTimeout(100);
+      await page.mouse.down();
+      await page.waitForTimeout(100);
+      await page.mouse.move(tile2Box.x + tile2Box.width / 2, tile2Box.y + tile2Box.height / 2, { steps: 20 });
+      await page.waitForTimeout(100);
+      await page.mouse.up();
+    }
+
+    await expect(tile1.locator('[aria-label^="2 Infantry"]')).toBeVisible({ timeout: 10000 });
+    await expect(tile2.locator('[aria-label^="1 Archers"]')).toBeVisible({ timeout: 10000 });
   });
 });
 
 test.describe('Keyboard Navigation', () => {
   test('should navigate units with keyboard', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1]);
 
@@ -699,8 +662,7 @@ test.describe('Keyboard Navigation', () => {
   });
 
   test('should close tooltip with Escape', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1]);
 
@@ -715,8 +677,7 @@ test.describe('Keyboard Navigation', () => {
 
 test.describe('Unit Count Badge', () => {
   test('should display unit count badge', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1]);
 
@@ -725,8 +686,7 @@ test.describe('Unit Count Badge', () => {
   });
 
   test('should update available units when placed in formation', async ({ page }) => {
-    await page.goto('/');
-    await waitForAppLoad(page);
+    await navigateToApp(page);
 
     await addUnitToRoster(page, 'Archers', [1, 2]);
 

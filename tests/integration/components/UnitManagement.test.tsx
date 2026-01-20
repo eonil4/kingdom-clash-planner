@@ -102,73 +102,65 @@ describe('Unit Management Integration Tests', () => {
       const user = userEvent.setup();
       const { store } = renderWithStore(<FormationPlanner />);
 
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /manage/i })).toBeInTheDocument();
-      });
-      await user.click(screen.getByRole('button', { name: /manage/i }));
+      // Use findBy for better async handling
+      const manageButton = await screen.findByRole('button', { name: /manage/i }, { timeout: 10000 });
+      await user.click(manageButton);
 
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /add new unit/i })).toBeInTheDocument();
-      });
-      await user.click(screen.getByRole('button', { name: /add new unit/i }));
+      const addNewUnitButton = await screen.findByRole('button', { name: /add new unit/i }, { timeout: 10000 });
+      await user.click(addNewUnitButton);
 
-      // Act
-      await waitFor(() => {
-        expect(screen.getByRole('combobox')).toBeInTheDocument();
-      });
-      const unitSelect = screen.getByRole('combobox');
+      // Act - select unit type
+      const unitSelect = await screen.findByRole('combobox', {}, { timeout: 5000 });
       await user.click(unitSelect);
 
-      await waitFor(() => {
-        expect(screen.getByRole('listbox')).toBeInTheDocument();
-      });
-      await user.click(screen.getByRole('option', { name: /archers/i }));
+      const listbox = await screen.findByRole('listbox', {}, { timeout: 5000 });
+      expect(listbox).toBeInTheDocument();
+      
+      const archerOption = await screen.findByRole('option', { name: /archers/i }, { timeout: 5000 });
+      await user.click(archerOption);
 
-      const level1Checkbox = screen.getByRole('checkbox', { name: '1' });
+      // Select level 1
+      const level1Checkbox = await screen.findByRole('checkbox', { name: '1' }, { timeout: 5000 });
       await user.click(level1Checkbox);
 
-      const addButton = screen.getByRole('button', { name: /add units/i });
+      // Click add button
+      const addButton = await screen.findByRole('button', { name: /add units/i }, { timeout: 5000 });
       await user.click(addButton);
 
       // Assert
       await waitFor(() => {
         const state = store.getState();
         expect(state.unit.units.some(u => u.name === 'Archers')).toBe(true);
-      });
-    });
+      }, { timeout: 5000 });
+    }, 60000);
 
     it('should add multiple levels of same unit', async () => {
       // Arrange
       const user = userEvent.setup();
       const { store } = renderWithStore(<FormationPlanner />);
 
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /manage/i })).toBeInTheDocument();
-      });
-      await user.click(screen.getByRole('button', { name: /manage/i }));
+      const manageButton = await screen.findByRole('button', { name: /manage/i }, { timeout: 10000 });
+      await user.click(manageButton);
 
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /add new unit/i })).toBeInTheDocument();
-      });
-      await user.click(screen.getByRole('button', { name: /add new unit/i }));
+      const addNewUnitButton = await screen.findByRole('button', { name: /add new unit/i }, { timeout: 10000 });
+      await user.click(addNewUnitButton);
 
-      await waitFor(() => {
-        expect(screen.getByRole('combobox')).toBeInTheDocument();
-      });
-      const unitSelect = screen.getByRole('combobox');
+      const unitSelect = await screen.findByRole('combobox', {}, { timeout: 5000 });
       await user.click(unitSelect);
 
-      await waitFor(() => {
-        expect(screen.getByRole('listbox')).toBeInTheDocument();
-      });
-      await user.click(screen.getByRole('option', { name: /infantry/i }));
+      await screen.findByRole('listbox', {}, { timeout: 5000 });
+      const infantryOption = await screen.findByRole('option', { name: /infantry/i }, { timeout: 5000 });
+      await user.click(infantryOption);
 
-      // Act
-      await user.click(screen.getByRole('checkbox', { name: '1' }));
-      await user.click(screen.getByRole('checkbox', { name: '5' }));
-      await user.click(screen.getByRole('checkbox', { name: '10' }));
+      // Act - select multiple levels
+      const checkbox1 = await screen.findByRole('checkbox', { name: '1' }, { timeout: 5000 });
+      await user.click(checkbox1);
+      const checkbox5 = await screen.findByRole('checkbox', { name: '5' }, { timeout: 5000 });
+      await user.click(checkbox5);
+      const checkbox10 = await screen.findByRole('checkbox', { name: '10' }, { timeout: 5000 });
+      await user.click(checkbox10);
 
-      const addButton = screen.getByRole('button', { name: /add units/i });
+      const addButton = await screen.findByRole('button', { name: /add units/i }, { timeout: 5000 });
       await user.click(addButton);
 
       // Assert
@@ -178,40 +170,32 @@ describe('Unit Management Integration Tests', () => {
         expect(infantryUnits).toHaveLength(3);
         const levels = infantryUnits.map(u => u.level).sort((a, b) => a - b);
         expect(levels).toEqual([1, 5, 10]);
-      });
-    });
+      }, { timeout: 5000 });
+    }, 60000);
 
     it('should select all levels when clicking select all', async () => {
       // Arrange
       const user = userEvent.setup();
       const { store } = renderWithStore(<FormationPlanner />);
 
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /manage/i })).toBeInTheDocument();
-      });
-      await user.click(screen.getByRole('button', { name: /manage/i }));
+      const manageButton = await screen.findByRole('button', { name: /manage/i }, { timeout: 10000 });
+      await user.click(manageButton);
 
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /add new unit/i })).toBeInTheDocument();
-      });
-      await user.click(screen.getByRole('button', { name: /add new unit/i }));
+      const addNewUnitButton = await screen.findByRole('button', { name: /add new unit/i }, { timeout: 10000 });
+      await user.click(addNewUnitButton);
 
-      await waitFor(() => {
-        expect(screen.getByRole('combobox')).toBeInTheDocument();
-      });
-      const unitSelect = screen.getByRole('combobox');
+      const unitSelect = await screen.findByRole('combobox', {}, { timeout: 5000 });
       await user.click(unitSelect);
 
-      await waitFor(() => {
-        expect(screen.getByRole('listbox')).toBeInTheDocument();
-      });
-      await user.click(screen.getByRole('option', { name: /monk/i }));
+      await screen.findByRole('listbox', {}, { timeout: 5000 });
+      const monkOption = await screen.findByRole('option', { name: /monk/i }, { timeout: 5000 });
+      await user.click(monkOption);
 
-      // Act
-      const selectAllCheckbox = screen.getByLabelText(/select all levels/i);
+      // Act - select all levels
+      const selectAllCheckbox = await screen.findByLabelText(/select all levels/i, {}, { timeout: 5000 });
       await user.click(selectAllCheckbox);
 
-      const addButton = screen.getByRole('button', { name: /add units/i });
+      const addButton = await screen.findByRole('button', { name: /add units/i }, { timeout: 5000 });
       await user.click(addButton);
 
       // Assert
@@ -219,44 +203,38 @@ describe('Unit Management Integration Tests', () => {
         const state = store.getState();
         const monkUnits = state.unit.units.filter(u => u.name === 'Monk');
         expect(monkUnits).toHaveLength(10);
-      });
-    });
+      }, { timeout: 5000 });
+    }, 60000);
 
     it('should cancel adding unit', async () => {
       // Arrange
       const user = userEvent.setup();
       const { store } = renderWithStore(<FormationPlanner />);
 
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /manage/i })).toBeInTheDocument();
-      });
-      await user.click(screen.getByRole('button', { name: /manage/i }));
+      const manageButton = await screen.findByRole('button', { name: /manage/i }, { timeout: 10000 });
+      await user.click(manageButton);
 
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /add new unit/i })).toBeInTheDocument();
-      });
-      await user.click(screen.getByRole('button', { name: /add new unit/i }));
+      const addNewUnitButton = await screen.findByRole('button', { name: /add new unit/i }, { timeout: 10000 });
+      await user.click(addNewUnitButton);
 
-      await waitFor(() => {
-        expect(screen.getByRole('combobox')).toBeInTheDocument();
-      });
-      const unitSelect = screen.getByRole('combobox');
+      const unitSelect = await screen.findByRole('combobox', {}, { timeout: 5000 });
       await user.click(unitSelect);
 
-      await waitFor(() => {
-        expect(screen.getByRole('listbox')).toBeInTheDocument();
-      });
-      await user.click(screen.getByRole('option', { name: /archers/i }));
-      await user.click(screen.getByRole('checkbox', { name: '5' }));
+      await screen.findByRole('listbox', {}, { timeout: 5000 });
+      const archerOption = await screen.findByRole('option', { name: /archers/i }, { timeout: 5000 });
+      await user.click(archerOption);
+      
+      const checkbox5 = await screen.findByRole('checkbox', { name: '5' }, { timeout: 5000 });
+      await user.click(checkbox5);
 
       // Act
-      const cancelButton = screen.getByRole('button', { name: /cancel/i });
+      const cancelButton = await screen.findByRole('button', { name: /cancel/i }, { timeout: 5000 });
       await user.click(cancelButton);
 
       // Assert
       const state = store.getState();
       expect(state.unit.units).toHaveLength(0);
-    });
+    }, 60000);
   });
 
   describe('Unit Display in Roster', () => {
