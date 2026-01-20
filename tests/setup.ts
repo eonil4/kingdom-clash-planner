@@ -12,9 +12,27 @@ afterEach(() => {
   vi.clearAllTimers();
 });
 
-// Mock ResizeObserver
+// Mock ResizeObserver with callback invocation
 globalThis.ResizeObserver = class ResizeObserver {
-  observe() {}
+  private callback: ResizeObserverCallback;
+  
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback;
+  }
+  
+  observe(target: Element) {
+    // Immediately invoke callback with mock entries
+    this.callback([
+      {
+        target,
+        contentRect: { width: 500, height: 400 } as DOMRectReadOnly,
+        borderBoxSize: [{ inlineSize: 500, blockSize: 400 }] as ResizeObserverSize[],
+        contentBoxSize: [{ inlineSize: 500, blockSize: 400 }] as ResizeObserverSize[],
+        devicePixelContentBoxSize: [{ inlineSize: 500, blockSize: 400 }] as ResizeObserverSize[],
+      } as ResizeObserverEntry,
+    ], this);
+  }
+  
   unobserve() {}
   disconnect() {}
 };

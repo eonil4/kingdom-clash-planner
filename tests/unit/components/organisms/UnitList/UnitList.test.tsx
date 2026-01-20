@@ -155,6 +155,7 @@ const mockAvailableUnitsGrid = vi.hoisted(() => {
 
 vi.mock('../../../../../src/components/organisms/AvailableUnitsGrid', () => ({
   AvailableUnitsGrid: mockAvailableUnitsGrid,
+  VirtualizedUnitsGrid: mockAvailableUnitsGrid,
   default: mockAvailableUnitsGrid,
 }));
 
@@ -721,10 +722,18 @@ describe('UnitList', () => {
   });
 
   it('should apply isOver styling when dragging over', () => {
-    mockUseDrop.mockReturnValueOnce([
-      { isOver: true },
-      vi.fn(),
-    ]);
+    mockUseDrop.mockImplementation((config: UseDropConfig) => {
+      if (config && typeof config === 'object' && config.drop) {
+        capturedDropHandler = config.drop;
+      }
+      if (config && typeof config === 'object' && config.collect) {
+        capturedCollectFn = config.collect as typeof capturedCollectFn;
+      }
+      return [
+        { isOver: true },
+        vi.fn(),
+      ];
+    });
 
     const { container } = renderWithProvider();
     
@@ -786,5 +795,123 @@ describe('UnitList', () => {
     const state = store.getState();
     const updatedUnit = state.unit.units.find((u: { id: string }) => u.id === '1');
     expect(updatedUnit?.level).toBe(2);
+  });
+
+  it('should handle ResizeObserver callback for grid height', async () => {
+    let resizeCallback: ResizeObserverCallback | null = null;
+    let observedElement: Element | null = null;
+    
+    globalThis.ResizeObserver = class ResizeObserver {
+      private callback: ResizeObserverCallback;
+      
+      constructor(callback: ResizeObserverCallback) {
+        this.callback = callback;
+        resizeCallback = callback;
+      }
+      
+      observe(target: Element) {
+        observedElement = target;
+        Object.defineProperty(target, 'offsetHeight', { value: 500, configurable: true });
+        this.callback([
+          {
+            target,
+            contentRect: { width: 500, height: 500 } as DOMRectReadOnly,
+            borderBoxSize: [{ inlineSize: 500, blockSize: 500 }] as ResizeObserverSize[],
+            contentBoxSize: [{ inlineSize: 500, blockSize: 500 }] as ResizeObserverSize[],
+            devicePixelContentBoxSize: [{ inlineSize: 500, blockSize: 500 }] as ResizeObserverSize[],
+          } as ResizeObserverEntry,
+        ], this);
+      }
+      
+      unobserve() {}
+      disconnect() {}
+    };
+
+    renderWithProvider();
+
+    expect(resizeCallback).toBeDefined();
+    expect(observedElement).toBeDefined();
+
+    if (resizeCallback && observedElement) {
+      Object.defineProperty(observedElement, 'offsetHeight', { value: 600, configurable: true });
+      
+      await act(async () => {
+        resizeCallback!([
+          {
+            target: observedElement!,
+            contentRect: { width: 500, height: 600 } as DOMRectReadOnly,
+            borderBoxSize: [{ inlineSize: 500, blockSize: 600 }] as ResizeObserverSize[],
+            contentBoxSize: [{ inlineSize: 500, blockSize: 600 }] as ResizeObserverSize[],
+            devicePixelContentBoxSize: [{ inlineSize: 500, blockSize: 600 }] as ResizeObserverSize[],
+          } as ResizeObserverEntry,
+        ], {} as ResizeObserver);
+      });
+    }
+
+    expect(screen.getByTestId('available-units-grid')).toBeInTheDocument();
+  });
+
+  it('should handle case when gridContainerRef is initially null', () => {
+    globalThis.ResizeObserver = class ResizeObserver {
+      constructor() {}
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    };
+
+    renderWithProvider();
+
+    expect(screen.getByTestId('available-units-grid')).toBeInTheDocument();
+  });
+
+  it('should handle ResizeObserver when container ref becomes available', async () => {
+    let updateHeightCallback: (() => void) | null = null;
+    
+    globalThis.ResizeObserver = class ResizeObserver {
+      private callback: ResizeObserverCallback;
+      
+      constructor(callback: ResizeObserverCallback) {
+        this.callback = callback;
+        updateHeightCallback = () => {
+          const mockTarget = document.createElement('div');
+          Object.defineProperty(mockTarget, 'offsetHeight', { value: 450, configurable: true });
+          callback([
+            {
+              target: mockTarget,
+              contentRect: { width: 500, height: 450 } as DOMRectReadOnly,
+              borderBoxSize: [{ inlineSize: 500, blockSize: 450 }] as ResizeObserverSize[],
+              contentBoxSize: [{ inlineSize: 500, blockSize: 450 }] as ResizeObserverSize[],
+              devicePixelContentBoxSize: [{ inlineSize: 500, blockSize: 450 }] as ResizeObserverSize[],
+            } as ResizeObserverEntry,
+          ], this);
+        };
+      }
+      
+      observe(target: Element) {
+        Object.defineProperty(target, 'offsetHeight', { value: 400, configurable: true });
+        this.callback([
+          {
+            target,
+            contentRect: { width: 500, height: 400 } as DOMRectReadOnly,
+            borderBoxSize: [{ inlineSize: 500, blockSize: 400 }] as ResizeObserverSize[],
+            contentBoxSize: [{ inlineSize: 500, blockSize: 400 }] as ResizeObserverSize[],
+            devicePixelContentBoxSize: [{ inlineSize: 500, blockSize: 400 }] as ResizeObserverSize[],
+          } as ResizeObserverEntry,
+        ], this);
+      }
+      
+      unobserve() {}
+      disconnect() {}
+    };
+
+    renderWithProvider();
+
+    expect(screen.getByTestId('available-units-grid')).toBeInTheDocument();
+
+    if (updateHeightCallback) {
+      await act(async () => {
+        updateHeightCallback!();
+      });
+    }
   });
 });

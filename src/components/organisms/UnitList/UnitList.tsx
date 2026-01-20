@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import Box from '@mui/material/Box';
 import type { SelectChangeEvent } from '@mui/material/Select';
@@ -8,7 +8,7 @@ import { removeUnit as removeUnitFromFormation, placeUnit } from '../../../store
 import { removeUnit } from '../../../store/reducers/formationSlice';
 import type { SortOption, Unit } from '../../../types';
 import { SearchInput, SortControls, UnitListActions } from '../../molecules';
-import { AvailableUnitsGrid } from '../AvailableUnitsGrid';
+import { VirtualizedUnitsGrid } from '../AvailableUnitsGrid';
 import { UnitCountBadge } from '../../atoms';
 
 const ManageUnitsModal = lazy(() => import('../ManageUnitsModal/ManageUnitsModal'));
@@ -21,6 +21,27 @@ export default function UnitList() {
   const localSortOption2 = sortOption2;
   const localSortOption3 = sortOption3;
   const [isManageUnitsOpen, setIsManageUnitsOpen] = useState(false);
+  const gridContainerRef = useRef<HTMLDivElement>(null);
+  const [gridHeight, setGridHeight] = useState(300);
+
+  useEffect(() => {
+    const container = gridContainerRef.current;
+    /* istanbul ignore if -- @preserve defensive null check for ref */
+    if (!container) return;
+    
+    const updateHeight = () => {
+      setGridHeight(container.offsetHeight);
+    };
+
+    updateHeight();
+
+    const resizeObserver = new ResizeObserver(updateHeight);
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   const unitsInFormation = useMemo(() => new Set(
     currentFormation?.tiles
@@ -141,7 +162,8 @@ export default function UnitList() {
       
       {/* Scrollable unit grid area */}
       <Box 
-        className="flex-1 overflow-auto min-h-0 rounded-lg"
+        ref={gridContainerRef}
+        className="flex-1 overflow-hidden min-h-0 rounded-lg"
         sx={{
           '&::-webkit-scrollbar': {
             width: '8px',
@@ -169,10 +191,11 @@ export default function UnitList() {
             </Box>
           </Box>
         ) : (
-          <AvailableUnitsGrid
+          <VirtualizedUnitsGrid
             units={availableUnits}
             onUnitDoubleClick={handleUnitDoubleClick}
             onUnitEdit={handleUnitEdit}
+            height={gridHeight}
           />
         )}
       </Box>

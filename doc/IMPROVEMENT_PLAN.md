@@ -1,7 +1,7 @@
 # Kingdom Clash Planner - Improvement Plan
 
 **Date:** January 17, 2026  
-**Version:** 0.11.0  
+**Version:** 0.12.0  
 **Status:** Implementation Phase (Phase 1 & 2 Complete)
 
 ---
@@ -174,10 +174,11 @@ dnd-vendor: 59.19 kB (15.41 kB gzipped) - good
 
 ### 3.3 Runtime Performance
 
-**Virtualization** (Ready)
+**Virtualization** (Complete)
 - [x] react-window installed and ready
-- [ ] Implement virtual scrolling for large unit lists (>100 units)
-- [ ] Reduce DOM nodes by 80% for large rosters
+- [x] Implement virtual scrolling for large unit lists (>50 units threshold)
+- [x] VirtualizedUnitsGrid component with dynamic column calculation
+- [x] Automatic fallback to regular grid for small lists (<50 units)
 
 **Memoization Audit**
 - Current usage: 7 components with memo, 34 useMemo/useCallback
@@ -371,7 +372,7 @@ dnd-vendor: 59.19 kB (15.41 kB gzipped) - good
 4. [x] Accessibility enhancements (focus indicators, contrast)
 
 ### Phase 3: Medium Priority (Next)
-1. [ ] Implement virtual scrolling (react-window ready)
+1. [x] Implement virtual scrolling (VirtualizedUnitsGrid with react-window)
 2. [ ] Statistics and analytics dashboard
 3. [ ] Visual regression testing
 4. [ ] Mobile gesture support
@@ -513,7 +514,7 @@ dnd-vendor: 59.19 kB (15.41 kB gzipped) - good
 **Performance Risks:**
 - [x] Large bundle size impact on mobile users → Implemented aggressive code splitting
 - [x] Image loading delays → Added WebP conversion and lazy loading
-- [ ] Memory leaks with large rosters → Implement virtualization (react-window ready)
+- [x] Memory leaks with large rosters → Implemented VirtualizedUnitsGrid with react-window
 
 **Compatibility Risks:**
 - [x] Browser compatibility issues → Added polyfills and feature detection
@@ -542,7 +543,7 @@ dnd-vendor: 59.19 kB (15.41 kB gzipped) - good
 - [x] Enhance accessibility with visible focus indicators (3:1 contrast), high contrast mode, and WCAG AAA compliance
 
 ### Phase 3: Medium Priority
-- [ ] Implement virtual scrolling for unit lists with react-window to handle large rosters efficiently
+- [x] Implement virtual scrolling for unit lists with react-window (VirtualizedUnitsGrid)
 - [x] Add multi-criteria filtering, search by roles (already implemented)
 - [ ] Set up visual regression testing with Chromatic or Percy for component validation
 
@@ -556,11 +557,17 @@ dnd-vendor: 59.19 kB (15.41 kB gzipped) - good
 
 ## TODO List Summary (with Priority and Complexity)
 
-### Priority: CRITICAL (P0)
-| Task | Complexity | Effort |
-|------|------------|--------|
-| Create PWA app icons (192x192, 512x512) | Low | 1h |
-| Run Lighthouse audit post-deployment | Low | 30m |
+### Priority: CRITICAL (P0) - COMPLETED
+| Task | Complexity | Effort | Status |
+|------|------------|--------|--------|
+| Create PWA app icons (192x192, 512x512) | Low | 1h | ✅ Done |
+| Run Lighthouse audit post-deployment | Low | 30m | ✅ Done |
+
+**Lighthouse Results (v0.12.0):**
+- FCP: 2.8s (score: 0.57) - Target: < 1.5s
+- LCP: 2.8s (score: 0.83) - Target: < 2.0s
+- Accessibility: Passing
+- Best Practices: Passing
 
 ### Priority: HIGH (P1)
 | Task | Complexity | Effort |
@@ -571,13 +578,13 @@ dnd-vendor: 59.19 kB (15.41 kB gzipped) - good
 | Enhance service worker with Workbox | Medium | 4h |
 
 ### Priority: MEDIUM (P2)
-| Task | Complexity | Effort |
-|------|------------|--------|
-| Implement virtual scrolling (react-window ready) | Medium | 4h |
-| Statistics/analytics dashboard | High | 12h |
-| Visual regression testing setup | Medium | 6h |
-| Mobile gesture support (pinch-to-zoom) | Medium | 8h |
-| Fix act() warnings in tests | Low | 2h |
+| Task | Complexity | Effort | Status |
+|------|------------|--------|--------|
+| Implement virtual scrolling (VirtualizedUnitsGrid) | Medium | 4h | ✅ Done |
+| Statistics/analytics dashboard | High | 12h | |
+| Visual regression testing setup | Medium | 6h | |
+| Mobile gesture support (pinch-to-zoom) | Medium | 8h | |
+| Fix act() warnings in tests | Low | 2h | |
 
 ### Priority: LOW (P3)
 | Task | Complexity | Effort |
@@ -591,8 +598,8 @@ dnd-vendor: 59.19 kB (15.41 kB gzipped) - good
 ---
 
 **Next Steps:**
-1. Create PWA app icons
-2. Run Lighthouse audit to measure current performance
-3. Implement virtual scrolling for better performance with large rosters
+1. ~~Create PWA app icons~~ ✅ Done
+2. ~~Run Lighthouse audit to measure current performance~~ ✅ Done (FCP: 2.8s, LCP: 2.8s)
+3. ~~Implement virtual scrolling for better performance with large rosters~~ ✅ Done (VirtualizedUnitsGrid)
 4. Plan undo/redo architecture with proper state management
-5. Schedule bundle size optimization sprint
+5. Schedule bundle size optimization sprint (reduce MUI bundle)

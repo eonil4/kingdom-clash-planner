@@ -1,14 +1,14 @@
 {
   "name": "kingdom-clash-planner",
   "private": true,
-  "version": "0.11.0",
+  "version": "0.12.0",
   "type": "module",
   "scripts": {
     "audit": "pnpm audit",
     "audit:fix": "pnpm audit --fix",
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:ci": "pnpm lint && pnpm build && pnpm test:coverage",
+    "build:ci": "pnpm audit:fix && pnpm lint:fix && pnpm build && pnpm test:coverage && pnpm test:e2e",
     "build:watch": "chokidar \"src/**/*.{ts,tsx,json}\" \"tsconfig*.json\" \"vite.config.ts\" -c \"pnpm run build\" --initial",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -30,6 +30,7 @@
     "test:e2e:show-report": "playwright show-report",
     "extract:unit-images": "node scripts/extract-unit-images/extract-unit-images.js",
     "convert:images-to-webp": "node scripts/convert-to-webp.js",
+    "generate:pwa-icons": "node scripts/generate-pwa-icons.js",
     "lighthouse": "lhci autorun",
     "lighthouse:ci": "pnpm build && pnpm lighthouse"
   },
