@@ -19,6 +19,7 @@ This release focuses on **test infrastructure stability**, **e2e test coverage**
 - Responsive sizing (mobile: 62px, tablet: 66px, desktop: 70px)
 - Automatic fallback to CSS grid for small lists (<50 units)
 - ~80% DOM node reduction for large rosters (100+ units)
+- Proper overflow handling for scrolling in both modes
 
 ### PWA App Icons
 - Created 192x192 and 512x512 PNG icons for PWA installation

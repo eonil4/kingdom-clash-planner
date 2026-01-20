@@ -179,6 +179,8 @@ dnd-vendor: 59.19 kB (15.41 kB gzipped) - good
 - [x] Implement virtual scrolling for large unit lists (>50 units threshold)
 - [x] VirtualizedUnitsGrid component with dynamic column calculation
 - [x] Automatic fallback to regular grid for small lists (<50 units)
+- [x] Proper overflow handling for both virtualized and non-virtualized modes
+- [x] Responsive item sizing (mobile: 62px, tablet: 66px, desktop: 70px)
 
 **Memoization Audit**
 - Current usage: 7 components with memo, 34 useMemo/useCallback

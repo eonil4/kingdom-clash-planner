@@ -115,6 +115,9 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
               <Typography variant="body2" className="mb-1">
                 • <strong>Withdraw All Button:</strong> Removes all units from the formation and returns them to the available units list.
               </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Large Rosters:</strong> Optimized for smooth scrolling with hundreds of units.
+              </Typography>
             </Box>
           </Box>
 
@@ -236,6 +239,24 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
               </Typography>
               <Typography variant="body2" className="mb-1">
                 • The URL parameters are: <code className="bg-gray-700 px-1 rounded">formation</code> and <code className="bg-gray-700 px-1 rounded">units</code>.
+              </Typography>
+            </Box>
+
+            <Box className="mb-4">
+              <Typography variant="h6" className="text-blue-400 font-semibold mb-2">
+                Install as App (PWA)
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • This app can be installed on your device for offline use.
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Desktop:</strong> Click the install icon in your browser's address bar.
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Mobile:</strong> Use "Add to Home Screen" from your browser menu.
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • Once installed, the app works offline and launches like a native app.
               </Typography>
             </Box>
           </Box>

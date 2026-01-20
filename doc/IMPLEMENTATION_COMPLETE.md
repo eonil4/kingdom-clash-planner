@@ -95,17 +95,20 @@ Savings: 1,118 KB (89.6% reduction)
 - Responsive item sizing (mobile: 62px, tablet: 66px, desktop: 70px)
 - Automatic fallback to regular CSS grid for small lists (<50 units)
 - ResizeObserver for dynamic container size updates
+- Proper overflow handling (`overflowY: auto`) for both modes
 
 **Technical Details:**
 - Virtualization threshold: 50 units
 - Only renders visible items + 2 overscan rows
 - Reduces DOM nodes by ~80% for large rosters (100+ units)
+- Non-virtualized grid uses `maxHeight` with scroll support
 
 **Impact:**
 - Smooth scrolling with 100+ units
 - Reduced memory usage for large rosters
 - Better performance on mobile devices
 - No visual change for typical use cases (<50 units)
+- Units never clipped regardless of list size
 
 ### Phase 2: High Priority Improvements
 

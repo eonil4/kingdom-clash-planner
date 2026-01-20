@@ -139,6 +139,9 @@ function VirtualizedUnitsGridComponent({
           '@media (min-width: 1024px)': {
             gridTemplateColumns: 'repeat(auto-fill, minmax(64px, 1fr))',
           },
+          maxHeight: height,
+          overflowY: 'auto',
+          overflowX: 'hidden',
         }}
         role="list"
         aria-label="Available units"
@@ -171,7 +174,7 @@ function VirtualizedUnitsGridComponent({
           columnWidth={itemSize}
           rowCount={rowCount}
           rowHeight={itemSize}
-          style={{ height, width: containerWidth, overflowX: 'hidden' }}
+          style={{ height, width: containerWidth, overflowX: 'hidden', overflowY: 'auto' }}
         />
       )}
     </Box>
