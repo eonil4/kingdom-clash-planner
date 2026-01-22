@@ -1,7 +1,7 @@
 # Undo/Redo Architecture Plan
 
 **Date:** January 17, 2026  
-**Version:** 0.13.0  
+**Version:** 0.13.0 (Implemented)  
 **Status:** IMPLEMENTATION COMPLETE
 
 ---

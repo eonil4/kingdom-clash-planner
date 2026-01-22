@@ -1,7 +1,7 @@
 # Kingdom Clash Planner - Improvement Plan
 
 **Date:** January 17, 2026  
-**Version:** 0.13.0  
+**Version:** 0.14.0  
 **Status:** Implementation Phase (Phase 1 & 2 Complete)
 
 ---
@@ -572,12 +572,12 @@ dnd-vendor: 59.19 kB (15.41 kB gzipped) - good
 - Best Practices: Passing
 
 ### Priority: HIGH (P1)
-| Task | Complexity | Effort |
-|------|------------|--------|
-| Bundle size reduction (MUI tree-shaking) | Medium | 4h |
-| Implement undo/redo system | High | 16h |
-| Formation templates system | High | 12h |
-| Enhance service worker with Workbox | Medium | 4h |
+| Task | Complexity | Effort | Status |
+|------|------------|--------|--------|
+| Bundle size reduction (MUI tree-shaking) | Medium | 4h | |
+| Implement undo/redo system | High | 16h | ✅ Done (v0.13.0) |
+| Formation templates system | High | 12h | |
+| Enhance service worker with Workbox | Medium | 4h | |
 
 ### Priority: MEDIUM (P2)
 | Task | Complexity | Effort | Status |
@@ -600,9 +600,12 @@ dnd-vendor: 59.19 kB (15.41 kB gzipped) - good
 
 ---
 
-**Next Steps:**
-1. ~~Create PWA app icons~~ ✅ Done
-2. ~~Run Lighthouse audit to measure current performance~~ ✅ Done (FCP: 2.8s, LCP: 2.8s)
-3. ~~Implement virtual scrolling for better performance with large rosters~~ ✅ Done (VirtualizedUnitsGrid)
-4. ~~Plan undo/redo architecture with proper state management~~ ✅ Done (see `doc/architecture/undo-redo-architecture.md`)
-5. Schedule bundle size optimization sprint (reduce MUI bundle)
+**Next Steps (v0.14.0):**
+1. ~~Create PWA app icons~~ ✅ Done (v0.12.0)
+2. ~~Run Lighthouse audit to measure current performance~~ ✅ Done (v0.12.0 - FCP: 2.8s, LCP: 2.8s)
+3. ~~Implement virtual scrolling for better performance with large rosters~~ ✅ Done (v0.12.0 - VirtualizedUnitsGrid)
+4. ~~Plan undo/redo architecture with proper state management~~ ✅ Done (v0.12.1)
+5. ~~Implement undo/redo system~~ ✅ Done (v0.13.0)
+6. Schedule bundle size optimization sprint (reduce MUI bundle)
+7. Plan formation templates system architecture
+8. Enhance service worker with Workbox
