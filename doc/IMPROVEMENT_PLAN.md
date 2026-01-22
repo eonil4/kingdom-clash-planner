@@ -596,6 +596,7 @@ dnd-vendor: 59.19 kB (15.41 kB gzipped) - good
 | Social sharing features | Medium | 8h |
 | Backend integration for cloud sync | Very High | 40h+ |
 | Add tests for deviceUtils.ts | Low | 2h |
+| Review and optimize Istanbul ignore comments (`/* istanbul ignore */`) | Low | 2h |
 
 ---
 
