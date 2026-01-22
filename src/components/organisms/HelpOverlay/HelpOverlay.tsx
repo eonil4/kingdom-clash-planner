@@ -70,6 +70,12 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
               <Typography variant="body2" className="mb-1">
                 • <strong>Power Display:</strong> Shows the total power of all units currently placed in the formation.
               </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Undo/Redo:</strong> Use the undo and redo buttons to reverse or reapply formation changes. Buttons are disabled when no history is available.
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Auto-Fill:</strong> Click the <span className="text-green-400">✨</span> button to automatically fill empty tiles with available roster units.
+              </Typography>
             </Box>
 
             <Box className="mb-4">
@@ -175,6 +181,24 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
 
             <Box className="mb-4">
               <Typography variant="h6" className="text-blue-400 font-semibold mb-2">
+                Undo and Redo
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Undo:</strong> Click the undo button or press <code className="bg-gray-700 px-1 rounded">Ctrl+Z</code> (Windows/Linux) or <code className="bg-gray-700 px-1 rounded">Cmd+Z</code> (Mac) to reverse your last formation change.
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Redo:</strong> Click the redo button or press <code className="bg-gray-700 px-1 rounded">Ctrl+Shift+Z</code> (Windows/Linux) or <code className="bg-gray-700 px-1 rounded">Cmd+Shift+Z</code> (Mac) to reapply a previously undone change.
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>History Limit:</strong> The system tracks up to 50 recent actions. New actions clear the redo history.
+              </Typography>
+              <Typography variant="body2" className="mb-1">
+                • <strong>Tracked Actions:</strong> Undo/redo works for placing units, removing units, swapping units, editing units in formation, and renaming formations.
+              </Typography>
+            </Box>
+
+            <Box className="mb-4">
+              <Typography variant="h6" className="text-blue-400 font-semibold mb-2">
                 Managing Your Roster
               </Typography>
               <Typography variant="body2" className="mb-1">
@@ -266,6 +290,12 @@ export default function HelpOverlay({ open, onClose }: HelpOverlayProps) {
           <Box>
             <Typography variant="h5" className="text-yellow-400 font-bold mb-3">
               Keyboard Shortcuts
+            </Typography>
+            <Typography variant="body2" className="mb-1">
+              • <strong>Ctrl+Z / Cmd+Z:</strong> Undo last formation change.
+            </Typography>
+            <Typography variant="body2" className="mb-1">
+              • <strong>Ctrl+Shift+Z / Cmd+Shift+Z:</strong> Redo last undone change.
             </Typography>
             <Typography variant="body2" className="mb-1">
               • <strong>Enter:</strong> Save formation name when editing.

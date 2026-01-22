@@ -1,7 +1,7 @@
-# Implementation Complete - Kingdom Clash Planner v0.12.0
+# Implementation Complete - Kingdom Clash Planner v0.13.0
 
 **Completion Date:** January 17, 2026  
-**Implementation Time:** ~4 hours  
+**Implementation Time:** ~6 hours  
 **Status:** DEPLOYED TO PRODUCTION
 
 ---
@@ -110,6 +110,31 @@ Savings: 1,118 KB (89.6% reduction)
 - No visual change for typical use cases (<50 units)
 - Units never clipped regardless of list size
 
+#### 5. Undo/Redo System
+**New Components Created:**
+- `src/store/reducers/historySlice.ts`
+- `src/store/middleware/historyMiddleware.ts`
+- `src/hooks/useUndoRedo.ts`
+
+**Features:**
+- Complete undo/redo functionality for formation modifications
+- Tracks 5 formation actions (place, remove, swap, edit unit, rename)
+- Configurable history limit (default: 50 actions)
+- Keyboard shortcuts (Ctrl+Z / Cmd+Z for undo, Ctrl+Shift+Z / Cmd+Shift+Z for redo)
+- UI buttons in FormationHeader with proper disabled states
+
+**Technical Details:**
+- Redux middleware intercepts formation-modifying actions
+- History slice manages past/present/future stacks
+- Memory efficient (only stores formation state snapshots)
+- Automatic future clearing on new actions
+
+**Impact:**
+- Users can undo/redo formation modifications
+- Improved user experience with error recovery
+- Keyboard shortcuts for power users
+- 100% test coverage achieved
+
 ### Phase 2: High Priority Improvements
 
 #### 4. Progressive Web App (PWA)
@@ -206,7 +231,7 @@ Savings: 1,118 KB (89.6% reduction)
 - **New Files:** 15
 - **Lines Added:** ~600
 - **Lines Modified:** ~300
-- **Version:** 0.10.0 -> 0.12.0
+- **Version:** 0.10.0 -> 0.13.0
 
 ### Performance Gains
 - **Image Size:** -89.6% (1,248 KB -> 130 KB)

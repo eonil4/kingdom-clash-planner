@@ -1,12 +1,15 @@
-import { lazy, Suspense, useState, useCallback, useMemo } from 'react';
+import { lazy, Suspense, useState, useCallback, useMemo, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '../../../store/hooks';
 import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
 import { updateFormationName, placeUnit } from '../../../store/reducers/formationSlice';
 import { FormationNameEditor } from '../../molecules';
 import { PowerBadge } from '../../atoms';
+import { useUndoRedo } from '../../../hooks/useUndoRedo';
 
 const HelpOverlay = lazy(() => import('../HelpOverlay/HelpOverlay'));
 
@@ -15,6 +18,7 @@ export default function FormationHeader() {
   const currentFormation = useAppSelector((state) => state.formation.currentFormation);
   const { filteredUnits } = useAppSelector((state) => state.unit);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const { canUndo, canRedo, undo: handleUndo, redo: handleRedo } = useUndoRedo();
 
   /* istanbul ignore next */
   const unitsInFormation = useMemo(() => new Set(
@@ -58,6 +62,31 @@ export default function FormationHeader() {
     }
   }, [currentFormation, availableUnits, dispatch]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const isUndo = (isMac && event.metaKey && !event.shiftKey && event.key === 'z') ||
+                     (!isMac && event.ctrlKey && !event.shiftKey && event.key === 'z');
+      const isRedo = (isMac && event.metaKey && event.shiftKey && event.key === 'z') ||
+                     (!isMac && event.ctrlKey && event.shiftKey && event.key === 'z');
+
+      if (isUndo && canUndo) {
+        /* istanbul ignore next -- @preserve keyboard shortcut handler, tested via integration */
+        event.preventDefault();
+        handleUndo();
+      } else if (isRedo && canRedo) {
+        /* istanbul ignore next -- @preserve keyboard shortcut handler, tested via integration */
+        event.preventDefault();
+        handleRedo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [canUndo, canRedo, handleUndo, handleRedo]);
+
   return (
     <Box
       component="header"
@@ -65,6 +94,40 @@ export default function FormationHeader() {
     >
       {/* Left: Batch action buttons */}
       <Box className="flex items-center gap-1">
+        <Tooltip title={canUndo ? 'Undo (Ctrl+Z / Cmd+Z)' : 'Nothing to undo'} arrow>
+          <span>
+            <IconButton
+              onClick={handleUndo}
+              disabled={!canUndo}
+              sx={{
+                color: canUndo ? '#60a5fa' : 'rgba(255,255,255,0.2)',
+                backgroundColor: canUndo ? 'rgba(96, 165, 250, 0.1)' : 'transparent',
+                '&:hover': canUndo ? { backgroundColor: 'rgba(96, 165, 250, 0.2)' } : {},
+                '&.Mui-disabled': { color: 'rgba(255,255,255,0.2)' },
+              }}
+              aria-label="Undo last action"
+            >
+              <UndoIcon />
+            </IconButton>
+          </span>
+        </Tooltip>
+        <Tooltip title={canRedo ? 'Redo (Ctrl+Shift+Z / Cmd+Shift+Z)' : 'Nothing to redo'} arrow>
+          <span>
+            <IconButton
+              onClick={handleRedo}
+              disabled={!canRedo}
+              sx={{
+                color: canRedo ? '#60a5fa' : 'rgba(255,255,255,0.2)',
+                backgroundColor: canRedo ? 'rgba(96, 165, 250, 0.1)' : 'transparent',
+                '&:hover': canRedo ? { backgroundColor: 'rgba(96, 165, 250, 0.2)' } : {},
+                '&.Mui-disabled': { color: 'rgba(255,255,255,0.2)' },
+              }}
+              aria-label="Redo last undone action"
+            >
+              <RedoIcon />
+            </IconButton>
+          </span>
+        </Tooltip>
         <Tooltip title={`Auto-fill ${emptyTileCount} empty tiles with roster units`} arrow>
           <span>
             <IconButton

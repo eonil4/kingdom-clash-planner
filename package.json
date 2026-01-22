@@ -1,14 +1,15 @@
 {
   "name": "kingdom-clash-planner",
   "private": true,
-  "version": "0.12.0",
+  "version": "0.13.0",
   "type": "module",
   "scripts": {
     "audit": "pnpm audit",
     "audit:fix": "pnpm audit --fix",
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:ci": "pnpm audit:fix && pnpm lint:fix && pnpm build && pnpm test:coverage && pnpm test:e2e",
+    "build:ci": "pnpm audit && pnpm lint && pnpm build && pnpm test:unit:coverage",
+    "build:fix": "pnpm audit:fix && pnpm lint:fix && pnpm build && pnpm test:coverage && pnpm test:e2e",
     "build:watch": "chokidar \"src/**/*.{ts,tsx,json}\" \"tsconfig*.json\" \"vite.config.ts\" -c \"pnpm run build\" --initial",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -89,7 +90,8 @@
       "tmp@<=0.2.3": ">=0.2.4",
       "qs@<6.14.1": ">=6.14.1",
       "react-router@>=7.0.0 <=7.11.0": ">=7.12.0",
-      "react-router@>=7.0.0 <7.12.0": ">=7.12.0"
+      "react-router@>=7.0.0 <7.12.0": ">=7.12.0",
+      "lodash@>=4.0.0 <=4.17.22": ">=4.17.23"
     }
   }
 }

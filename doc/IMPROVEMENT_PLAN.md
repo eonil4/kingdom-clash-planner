@@ -1,7 +1,7 @@
 # Kingdom Clash Planner - Improvement Plan
 
 **Date:** January 17, 2026  
-**Version:** 0.12.0  
+**Version:** 0.13.0  
 **Status:** Implementation Phase (Phase 1 & 2 Complete)
 
 ---
@@ -604,5 +604,5 @@ dnd-vendor: 59.19 kB (15.41 kB gzipped) - good
 1. ~~Create PWA app icons~~ ✅ Done
 2. ~~Run Lighthouse audit to measure current performance~~ ✅ Done (FCP: 2.8s, LCP: 2.8s)
 3. ~~Implement virtual scrolling for better performance with large rosters~~ ✅ Done (VirtualizedUnitsGrid)
-4. Plan undo/redo architecture with proper state management
+4. ~~Plan undo/redo architecture with proper state management~~ ✅ Done (see `doc/architecture/undo-redo-architecture.md`)
 5. Schedule bundle size optimization sprint (reduce MUI bundle)

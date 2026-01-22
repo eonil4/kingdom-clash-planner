@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -17,6 +17,7 @@ vi.mock('../../../../../src/components/organisms/HelpOverlay/HelpOverlay', () =>
 import FormationHeader from '../../../../../src/components/organisms/FormationHeader/FormationHeader';
 import unitReducer from '../../../../../src/store/reducers/unitSlice';
 import formationReducer from '../../../../../src/store/reducers/formationSlice';
+import historyReducer from '../../../../../src/store/reducers/historySlice';
 
 const createMockStore = (currentFormation: {
   id: string;
@@ -28,6 +29,7 @@ const createMockStore = (currentFormation: {
     reducer: {
       unit: unitReducer,
       formation: formationReducer,
+      history: historyReducer,
     },
     preloadedState: {
       unit: {
@@ -45,6 +47,12 @@ const createMockStore = (currentFormation: {
           tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
           power: 0,
         },
+      },
+      history: {
+        past: [],
+        present: null,
+        future: [],
+        maxHistorySize: 50,
       },
     },
     middleware: (getDefaultMiddleware) =>
@@ -76,6 +84,7 @@ describe('FormationHeader', () => {
       reducer: {
         unit: unitReducer,
         formation: formationReducer,
+        history: historyReducer,
       },
       preloadedState: {
         unit: {
@@ -88,6 +97,12 @@ describe('FormationHeader', () => {
         },
         formation: {
           currentFormation: null,
+        },
+        history: {
+          past: [],
+          present: null,
+          future: [],
+          maxHistorySize: 50,
         },
       },
       middleware: (getDefaultMiddleware) =>
@@ -452,6 +467,7 @@ describe('FormationHeader', () => {
       reducer: {
         unit: unitReducer,
         formation: formationReducer,
+        history: historyReducer,
       },
       preloadedState: {
         unit: {
@@ -464,6 +480,12 @@ describe('FormationHeader', () => {
         },
         formation: {
           currentFormation: mockFormation,
+        },
+        history: {
+          past: [],
+          present: null,
+          future: [],
+          maxHistorySize: 50,
         },
       },
       middleware: (getDefaultMiddleware) =>
@@ -503,6 +525,7 @@ describe('FormationHeader', () => {
       reducer: {
         unit: unitReducer,
         formation: formationReducer,
+        history: historyReducer,
       },
       preloadedState: {
         unit: {
@@ -515,6 +538,12 @@ describe('FormationHeader', () => {
         },
         formation: {
           currentFormation: mockFormation,
+        },
+        history: {
+          past: [],
+          present: null,
+          future: [],
+          maxHistorySize: 50,
         },
       },
       middleware: (getDefaultMiddleware) =>
@@ -553,6 +582,7 @@ describe('FormationHeader', () => {
       reducer: {
         unit: unitReducer,
         formation: formationReducer,
+        history: historyReducer,
       },
       preloadedState: {
         unit: {
@@ -565,6 +595,12 @@ describe('FormationHeader', () => {
         },
         formation: {
           currentFormation: mockFormation,
+        },
+        history: {
+          past: [],
+          present: null,
+          future: [],
+          maxHistorySize: 50,
         },
       },
       middleware: (getDefaultMiddleware) =>
@@ -604,6 +640,7 @@ describe('FormationHeader', () => {
       reducer: {
         unit: unitReducer,
         formation: formationReducer,
+        history: historyReducer,
       },
       preloadedState: {
         unit: {
@@ -616,6 +653,12 @@ describe('FormationHeader', () => {
         },
         formation: {
           currentFormation: mockFormation,
+        },
+        history: {
+          past: [],
+          present: null,
+          future: [],
+          maxHistorySize: 50,
         },
       },
       middleware: (getDefaultMiddleware) =>
@@ -658,6 +701,7 @@ describe('FormationHeader', () => {
       reducer: {
         unit: unitReducer,
         formation: formationReducer,
+        history: historyReducer,
       },
       preloadedState: {
         unit: {
@@ -670,6 +714,12 @@ describe('FormationHeader', () => {
         },
         formation: {
           currentFormation: mockFormation,
+        },
+        history: {
+          past: [],
+          present: null,
+          future: [],
+          maxHistorySize: 50,
         },
       },
       middleware: (getDefaultMiddleware) =>
@@ -687,5 +737,237 @@ describe('FormationHeader', () => {
 
     const autoFillButton = screen.getByLabelText('Auto-fill formation with available units');
     expect(autoFillButton).toBeDisabled();
+  });
+
+  it('should handle undo keyboard shortcut (Ctrl+Z)', async () => {
+    const mockFormation1 = {
+      id: '1',
+      name: 'Formation 1',
+      power: 100,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+    const mockFormation2 = {
+      id: '2',
+      name: 'Formation 2',
+      power: 200,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+
+    const store = createMockStore(mockFormation1);
+    
+    store.dispatch({
+      type: 'history/addToHistory',
+      payload: mockFormation1,
+    });
+    store.dispatch({
+      type: 'history/addToHistory',
+      payload: mockFormation2,
+    });
+
+    render(
+      <Provider store={store}>
+        <FormationHeader />
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Undo last action')).toBeInTheDocument();
+    });
+
+    const preventDefaultSpy = vi.fn();
+    const event = new KeyboardEvent('keydown', {
+      key: 'z',
+      ctrlKey: true,
+      shiftKey: false,
+      bubbles: true,
+    });
+    Object.defineProperty(event, 'preventDefault', { value: preventDefaultSpy });
+
+    await act(async () => {
+      window.dispatchEvent(event);
+    });
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+  });
+
+  it('should handle redo keyboard shortcut (Ctrl+Shift+Z)', async () => {
+    const mockFormation1 = {
+      id: '1',
+      name: 'Formation 1',
+      power: 100,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+    const mockFormation2 = {
+      id: '2',
+      name: 'Formation 2',
+      power: 200,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+
+    const store = createMockStore(mockFormation1);
+    
+    store.dispatch({
+      type: 'history/addToHistory',
+      payload: mockFormation1,
+    });
+    store.dispatch({
+      type: 'history/addToHistory',
+      payload: mockFormation2,
+    });
+    store.dispatch({
+      type: 'history/undo',
+    });
+
+    render(
+      <Provider store={store}>
+        <FormationHeader />
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Redo last undone action')).toBeInTheDocument();
+    });
+
+    const preventDefaultSpy = vi.fn();
+    const event = new KeyboardEvent('keydown', {
+      key: 'z',
+      ctrlKey: true,
+      shiftKey: true,
+      bubbles: true,
+    });
+    Object.defineProperty(event, 'preventDefault', { value: preventDefaultSpy });
+
+    await act(async () => {
+      window.dispatchEvent(event);
+    });
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+  });
+
+  it('should handle Mac undo keyboard shortcut (Cmd+Z)', async () => {
+    const originalPlatform = navigator.platform;
+    Object.defineProperty(navigator, 'platform', {
+      value: 'MacIntel',
+      configurable: true,
+    });
+
+    const mockFormation1 = {
+      id: '1',
+      name: 'Formation 1',
+      power: 100,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+    const mockFormation2 = {
+      id: '2',
+      name: 'Formation 2',
+      power: 200,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+
+    const store = createMockStore(mockFormation1);
+    
+    store.dispatch({
+      type: 'history/addToHistory',
+      payload: mockFormation1,
+    });
+    store.dispatch({
+      type: 'history/addToHistory',
+      payload: mockFormation2,
+    });
+
+    render(
+      <Provider store={store}>
+        <FormationHeader />
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Undo last action')).toBeInTheDocument();
+    });
+
+    const preventDefaultSpy = vi.fn();
+    const event = new KeyboardEvent('keydown', {
+      key: 'z',
+      metaKey: true,
+      shiftKey: false,
+      bubbles: true,
+    });
+    Object.defineProperty(event, 'preventDefault', { value: preventDefaultSpy });
+
+    await act(async () => {
+      window.dispatchEvent(event);
+    });
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+
+    Object.defineProperty(navigator, 'platform', {
+      value: originalPlatform,
+      configurable: true,
+    });
+  });
+
+  it('should handle Mac redo keyboard shortcut (Cmd+Shift+Z)', async () => {
+    const originalPlatform = navigator.platform;
+    Object.defineProperty(navigator, 'platform', {
+      value: 'MacIntel',
+      configurable: true,
+    });
+
+    const mockFormation1 = {
+      id: '1',
+      name: 'Formation 1',
+      power: 100,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+    const mockFormation2 = {
+      id: '2',
+      name: 'Formation 2',
+      power: 200,
+      tiles: Array(7).fill(null).map(() => Array(7).fill(null)),
+    };
+
+    const store = createMockStore(mockFormation1);
+    
+    store.dispatch({
+      type: 'history/addToHistory',
+      payload: mockFormation1,
+    });
+    store.dispatch({
+      type: 'history/addToHistory',
+      payload: mockFormation2,
+    });
+    store.dispatch({
+      type: 'history/undo',
+    });
+
+    render(
+      <Provider store={store}>
+        <FormationHeader />
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Redo last undone action')).toBeInTheDocument();
+    });
+
+    const preventDefaultSpy = vi.fn();
+    const event = new KeyboardEvent('keydown', {
+      key: 'z',
+      metaKey: true,
+      shiftKey: true,
+      bubbles: true,
+    });
+    Object.defineProperty(event, 'preventDefault', { value: preventDefaultSpy });
+
+    await act(async () => {
+      window.dispatchEvent(event);
+    });
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+
+    Object.defineProperty(navigator, 'platform', {
+      value: originalPlatform,
+      configurable: true,
+    });
   });
 });
